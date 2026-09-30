@@ -5,7 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-function isSafeInternalPath(value: string | null) {
+function isSafeInternalPath(value: string | null): value is string {
   return Boolean(value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\"));
 }
 
@@ -72,7 +72,7 @@ export default function LoginPage() {
               <input id="password" name="password" type="password" autoComplete="current-password" placeholder="กรอกรหัสผ่าน" required />
             </div>
 
-              {error && <p className="auth-status is-error" role="alert">{error}</p>}
+            {error && <p className="auth-status is-error" role="alert">{error}</p>}
 
             <button className="auth-submit" type="submit" disabled={loading}>
               {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
