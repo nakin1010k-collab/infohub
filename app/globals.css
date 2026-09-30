@@ -17,3 +17,30 @@ footer{margin-top:40px;padding:28px 0;border-top:1px solid var(--line)}.footer-i
 @media(max-width:640px){.container{width:min(100% - 28px,1120px)}.header-inner{min-height:64px}.brand{font-size:19px}.brand-mark{width:34px;height:34px}.login-link{padding:9px 13px}.hero-copy{text-align:left}.hero-text{font-size:15px}.hero-mascot{min-height:340px;border-radius:30px}.cat-3d{transform:scale(.86) rotate(-3deg)}.floating-card{font-size:11px;padding:10px 12px}.card-one{top:28px;right:4px}.card-two{bottom:30px;left:4px}.category-navigation{padding-top:0}.category-heading h2{font-size:23px}.category-strip{margin-right:-14px;padding-right:14px}.category-preview-card{min-height:84px;padding:15px 16px}.section-heading{align-items:flex-start;flex-direction:column;margin-bottom:16px}.section-heading h2,.info-panel h2{font-size:27px}.section-heading>a{align-self:flex-start}.info-panel,.data-panel{padding:24px}.data-panel{grid-template-columns:1fr 1fr}.latest-item{grid-template-columns:54px 1fr 18px;gap:9px;padding:16px 2px}.latest-copy b{font-size:15px}.latest-copy p{font-size:12px}.latest-item-meta{flex-wrap:wrap;gap:6px}.latest-arrow{padding-top:16px}.trending-panel{padding:20px}.trending-panel li{padding:14px 0}}
 @media(max-width:420px){.container{width:calc(100% - 24px)}h1{font-size:42px}.search{flex-direction:column}.search button{width:100%}.hero-mascot{min-height:300px}.cat-3d{transform:scale(.72) rotate(-3deg)}.card-one{right:-2px}.card-two{left:-2px}.news-card.is-featured .news-image{height:190px}.news-card.is-featured .news-body h3{font-size:22px}.news-meta{align-items:flex-start}.data-panel{grid-template-columns:1fr}.footer-inner{flex-direction:column;gap:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+.auth-page{min-height:100vh;display:grid;place-items:center;padding:48px 20px;background:radial-gradient(circle at 50% 0,#fff 0,#fff0f5 44%,var(--bg) 78%)}
+.auth-shell{width:min(100%,440px);display:flex;flex-direction:column;align-items:center}
+.auth-brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:24px;font-weight:800;font-size:22px}
+.auth-brand .brand-mark{width:42px;height:42px}
+.auth-card{width:100%;padding:34px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:30px;box-shadow:0 24px 70px rgba(91,65,76,.11)}
+.auth-intro{text-align:center;margin-bottom:26px}
+.auth-intro h1{font-size:36px;letter-spacing:-.04em}
+.auth-intro>p:last-child{margin:12px auto 0;max-width:340px;color:var(--muted);font-size:14px;line-height:1.7}
+.auth-form{display:flex;flex-direction:column;gap:18px}
+.form-field{display:flex;flex-direction:column;gap:8px}
+.form-field label,.field-label-row label{font-size:13px;font-weight:700}
+.field-label-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.field-label-row a{color:var(--pink-dark);font-size:12px;font-weight:700}
+.form-field input[type="email"],.form-field input[type="password"]{width:100%;border:1px solid #e6dce1;border-radius:14px;background:#fff;padding:13px 14px;color:var(--text);outline:0;transition:border-color .2s ease,box-shadow .2s ease}
+.form-field input[type="email"]::placeholder,.form-field input[type="password"]::placeholder{color:#b4abb1}
+.form-field input[type="email"]:focus,.form-field input[type="password"]:focus{border-color:#e6a0b6;box-shadow:0 0 0 4px rgba(217,111,145,.11)}
+.remember-row{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;cursor:pointer}
+.remember-row input{width:16px;height:16px;accent-color:var(--pink-dark)}
+.auth-submit{width:100%;border:0;border-radius:14px;background:var(--text);color:#fff;padding:14px 18px;font-weight:800;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.auth-submit:hover{background:#3a343c;transform:translateY(-1px);box-shadow:0 10px 24px rgba(39,35,42,.14)}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:24px 0 18px;color:#aaa1a8;font-size:11px}
+.auth-divider::before,.auth-divider::after{content:"";height:1px;flex:1;background:var(--line)}
+.auth-register{margin:0;text-align:center;color:var(--muted);font-size:13px}
+.auth-register a{color:var(--pink-dark);font-weight:800}
+.auth-note{margin:18px 0 0;color:#9a9097;font-size:11px}
+@media(max-width:520px){.auth-page{padding:28px 14px}.auth-card{padding:26px 20px;border-radius:24px}.auth-intro h1{font-size:32px}}
