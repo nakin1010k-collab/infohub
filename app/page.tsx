@@ -12,9 +12,9 @@ const categories = [
 ];
 
 const featured = [
-  { tag: "ข่าวเด่น", title: "รวมเรื่องสำคัญที่ควรรู้วันนี้", summary: "ติดตามประเด็นที่กำลังได้รับความสนใจ พร้อมบริบทที่อ่านง่ายและกระชับ" },
-  { tag: "เทคโนโลยี", title: "เทคโนโลยีใกล้ตัวที่กำลังเปลี่ยนชีวิตเรา", summary: "สรุปแนวโน้มใหม่ ๆ ให้เข้าใจได้ในไม่กี่นาที" },
-  { tag: "ความรู้", title: "เรื่องน่ารู้ที่อธิบายด้วยข้อมูล", summary: "เชื่อมข่าว เหตุการณ์ และข้อมูลให้เห็นภาพเดียวกัน" }
+  { tag: "ข่าวเด่น", title: "รวมเรื่องสำคัญที่ควรรู้วันนี้", summary: "ติดตามประเด็นที่กำลังได้รับความสนใจ พร้อมบริบทที่อ่านง่ายและกระชับ", meta: "5 นาที", tone: "featured" },
+  { tag: "เทคโนโลยี", title: "เทคโนโลยีใกล้ตัวที่กำลังเปลี่ยนชีวิตเรา", summary: "สรุปแนวโน้มใหม่ ๆ ให้เข้าใจได้ในไม่กี่นาที", meta: "4 นาที", tone: "standard" },
+  { tag: "ความรู้", title: "เรื่องน่ารู้ที่อธิบายด้วยข้อมูล", summary: "เชื่อมข่าว เหตุการณ์ และข้อมูลให้เห็นภาพเดียวกัน", meta: "6 นาที", tone: "standard" }
 ];
 
 function HeroMascot() {
@@ -80,12 +80,7 @@ export default function HomePage() {
           {categories.map((category, index) => {
             const icons = ["✦", "TH", "◎", "⌘", "฿", "♡", "?"];
             return (
-              <a
-                key={category.id}
-                href={index === 0 ? "#news" : "#category-" + category.id}
-                className={"category-pill" + (index === 0 ? " is-active" : "")}
-                aria-current={index === 0 ? "page" : undefined}
-              >
+              <a key={category.id} href={index === 0 ? "#news" : "#category-" + category.id} className={"category-pill" + (index === 0 ? " is-active" : "")} aria-current={index === 0 ? "page" : undefined}>
                 <span className="category-icon" aria-hidden="true">{icons[index]}</span>
                 <span>{category.label}</span>
               </a>
@@ -98,10 +93,7 @@ export default function HomePage() {
         {categories.slice(1, 4).map((category, index) => (
           <a id={"category-" + category.id} href="#latest" className="category-preview-card" key={category.id}>
             <span className="category-preview-number">0{index + 1}</span>
-            <div>
-              <strong>{category.label}</strong>
-              <span>ดูเรื่องราวและข้อมูลล่าสุด</span>
-            </div>
+            <div><strong>{category.label}</strong><span>ดูเรื่องราวและข้อมูลล่าสุด</span></div>
             <span className="category-arrow" aria-hidden="true">↗</span>
           </a>
         ))}
@@ -113,14 +105,20 @@ export default function HomePage() {
           <a href="#latest">ดูทั้งหมด →</a>
         </div>
         <div className="featured-grid">
-          {featured.map((item) => (
-            <article className="news-card" key={item.title}>
-              <div className="news-image" aria-hidden="true">✦</div>
+          {featured.map((item, index) => (
+            <article className={"news-card " + (item.tone === "featured" ? "is-featured" : "")} key={item.title}>
+              <div className={"news-image news-image-" + (index + 1)} aria-hidden="true">
+                <span>{index === 0 ? "✦" : index === 1 ? "⌘" : "◌"}</span>
+                {index === 0 && <small>EDITOR&apos;S PICK</small>}
+              </div>
               <div className="news-body">
-                <span className="tag">{item.tag}</span>
+                <div className="news-meta">
+                  <span className="tag">{item.tag}</span>
+                  <span aria-label={"ใช้เวลาอ่าน " + item.meta}>อ่าน {item.meta}</span>
+                </div>
                 <h3>{item.title}</h3>
                 <p>{item.summary}</p>
-                <a href="#latest">อ่านต่อ →</a>
+                <a href="#latest" aria-label={"อ่านต่อ: " + item.title}>อ่านต่อ <span aria-hidden="true">→</span></a>
               </div>
             </article>
           ))}
