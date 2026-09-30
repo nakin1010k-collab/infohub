@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "ค้นหา | InfoHub",
   description: "ค้นหาข่าว ความรู้ และข้อมูลตัวอย่างบน InfoHub",
   keywords: ["ค้นหา", "ข่าว", "ความรู้", "ข้อมูล", "InfoHub"],
+  robots: { index: false, follow: true },
   alternates: { canonical: "/search" },
   openGraph: {
     title: "ค้นหา | InfoHub",

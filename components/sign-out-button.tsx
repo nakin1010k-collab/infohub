@@ -12,15 +12,23 @@ export function SignOutButton() {
   async function handleSignOut() {
     setError("");
     setLoading(true);
-    const supabase = createClient();
-    const { error: signOutError } = await supabase.auth.signOut();
-    if (signOutError) {
-      setError("ไม่สามารถออกจากระบบได้ กรุณาลองอีกครั้ง");
+
+    try {
+      const supabase = createClient();
+      const { error: signOutError } = await supabase.auth.signOut();
+
+      if (signOutError) {
+        setError("ไม่สามารถออกจากระบบได้ กรุณาลองอีกครั้ง");
+        return;
+      }
+
+      router.replace("/login");
+      router.refresh();
+    } catch {
+      setError("ไม่สามารถออกจากระบบได้ กรุณาตรวจสอบการตั้งค่าแล้วลองอีกครั้ง");
+    } finally {
       setLoading(false);
-      return;
     }
-    router.replace("/login");
-    router.refresh();
   }
 
   return (

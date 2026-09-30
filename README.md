@@ -8,7 +8,7 @@ InfoHub is a responsive Thai information hub for news, knowledge, and data, usin
 - TypeScript with strict checking
 - ESLint 9 + Next.js rules
 - Supabase Auth via `@supabase/ssr` and `@supabase/supabase-js`
-- GitHub Actions verification: `npm ci`, lint, typecheck, production build
+- GitHub Actions verification: `npm ci`, news/search smoke tests, lint, typecheck, production build
 
 ## Local development
 
@@ -22,6 +22,7 @@ npm run dev
 Verification:
 
 ```bash
+npm run test:news
 npm run lint
 npm run typecheck
 npm run build
@@ -30,7 +31,9 @@ npm run build
 ## Current routes
 
 - `/` — public homepage
-- `/search` — search handoff placeholder; real database search is planned for Phase 3
+- `/news` — news listing with category and tag filters
+- `/news/[slug]` — typed news detail preview with related news and metadata
+- `/search` — search preview across title, excerpt, category, and tags
 - `/login` — password login
 - `/register` — account registration
 - `/forgot-password` — password recovery request
@@ -38,6 +41,8 @@ npm run build
 - `/profile` — protected profile
 - `/dashboard` — protected dashboard shell
 - `/settings` — protected settings shell
+- `/sitemap.xml` — generated sitemap for public content
+- `/robots.txt` — crawler rules for public/protected areas
 
 ## Authentication architecture
 
@@ -45,6 +50,7 @@ npm run build
 - Server client: `lib/supabase/server.ts`
 - Session refresh / protected-route enforcement: `middleware.ts`
 - Protected routes: `/profile`, `/dashboard`, `/settings`
+- Middleware verifies sessions with Supabase `getClaims()` and refreshes auth cookies.
 - Login redirects safely back to an internal `next` path.
 - Sign-out is handled by `components/sign-out-button.tsx`.
 - No Supabase service-role secret is used or committed.
@@ -54,5 +60,7 @@ npm run build
 Phase 1 has a verified save point at commit `21a6c569b95d4f4e69876880f8a89aa8e3413f61`.
 
 Phase 2 authentication has been implemented through session/error handling and is undergoing final verification. A dedicated InfoHub Supabase project is still required for live end-to-end Auth verification.
+
+Phase 3 news listing/detail/search is implemented against typed preview data. Live database ingestion, RLS execution, and production Auth verification remain separate verification gates.
 
 Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap.

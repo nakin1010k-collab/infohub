@@ -12,13 +12,21 @@ const error = await read("app/news/error.tsx");
 const searchLoading = await read("app/search/loading.tsx");
 const searchError = await read("app/search/error.tsx");
 const data = await read("lib/news/mock-data.ts");
+const layout = await read("app/layout.tsx");
+const middleware = await read("middleware.ts");
+const sitemap = await read("app/sitemap.ts");
+const robots = await read("app/robots.ts");
+const signOut = await read("components/sign-out-button.tsx");
+const uiStates = await read("components/ui-states.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getAllTags\(\)/);
+assert.match(news, /getAllTags()/);
 assert.match(news, /article\.tags\.map/);
+assert.match(news, /\/search\?q=\$\{encodeURIComponent\(tag\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
 
 assert.match(search, /export const metadata: Metadata/);
+assert.match(search, /robots: \{ index: false, follow: true \}/);
 assert.match(search, /searchNews\(query\)/);
 assert.match(search, /name="q"/);
 assert.match(search, /\/news\/\$\{article\.slug\}/);
@@ -35,6 +43,16 @@ assert.match(searchError, /reset\(\)/);
 
 assert.match(data, /tags: string\[\]/);
 assert.match(data, /getAllTags/);
-assert.match(data, /searchNews/);
+assert.match(data, /\.\.\.article\.tags/);
 
-console.log("News/Search smoke tests passed.");
+assert.match(layout, /metadataBase: getSiteUrl\(\)/);
+assert.match(middleware, /auth\.getClaims\(\)/);
+assert.match(middleware, /matcher: \[\"\/profile\/:path\*\", \"\/dashboard\/:path\*\", \"\/settings\/:path\*\"\]/);
+assert.match(sitemap, /MetadataRoute\.Sitemap/);
+assert.match(robots, /MetadataRoute\.Robots/);
+assert.match(signOut, /try \{/);
+assert.match(signOut, /finally \{/);
+assert.match(uiStates, /onAction/);
+assert.match(uiStates, /actionLabel \? "ลองใหม่" : undefined/);
+
+console.log("News/Search/auth hardening smoke tests passed.");

@@ -3,20 +3,33 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const protectedRoutes = ["/profile", "/dashboard", "/settings"];
 
+function copyResponseState(source: NextResponse, target: NextResponse) {
+  source.cookies.getAll().forEach((cookie) => target.cookies.set(cookie));
+
+  for (const header of ["cache-control", "expires", "pragma"]) {
+    const value = source.headers.get(header);
+    if (value) target.headers.set(header, value);
+  }
+
+  return target;
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtected = protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+
+  if (!isProtected) {
+    return NextResponse.next();
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
-    if (isProtected) {
-      return NextResponse.json(
-        { error: "Authentication service is not configured." },
-        { status: 503 }
-      );
-    }
-    return NextResponse.next();
+    return NextResponse.json(
+      { error: "Authentication service is not configured." },
+      { status: 503 }
+    );
   }
 
   const response = NextResponse.next({ request });
@@ -36,34 +49,39 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: claimsData, error } = await supabase.auth.getClaims();
 
-    if (error && isProtected) {
-      return NextResponse.json(
-        { error: "Authentication service is temporarily unavailable." },
-        { status: 503 }
+    if (error) {
+      return copyResponseState(
+        response,
+        NextResponse.json(
+          { error: "Authentication service is temporarily unavailable." },
+          { status: 503 }
+        ),
       );
     }
 
-    if (isProtected && !user) {
+    if (!claimsData?.claims) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.search = "";
       loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
+
+      return copyResponseState(response, NextResponse.redirect(loginUrl));
     }
   } catch {
-    if (isProtected) {
-      return NextResponse.json(
+    return copyResponseState(
+      response,
+      NextResponse.json(
         { error: "Authentication service is temporarily unavailable." },
         { status: 503 }
-      );
-    }
+      ),
+    );
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/profile/:path*", "/dashboard/:path*", "/settings/:path*"],
 };

@@ -77,7 +77,7 @@ export function searchNews(query: string) {
   if (!normalized) return newsArticles;
 
   return newsArticles.filter((article) =>
-    [article.title, article.excerpt, article.category]
+    [article.title, article.excerpt, article.category, ...article.tags]
       .join(" ")
       .toLocaleLowerCase("th-TH")
       .includes(normalized),
