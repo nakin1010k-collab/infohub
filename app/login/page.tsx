@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +29,9 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      const next = searchParams.get("next");
+      const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      router.push(destination);
       router.refresh();
     } catch {
       setError("ยังเชื่อมต่อระบบสมาชิกไม่ได้ กรุณาตรวจสอบการตั้งค่า Supabase");
