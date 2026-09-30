@@ -4,4 +4,7 @@
 .item h2{margin:9px 0 7px;font-size:20px;line-height:1.4;letter-spacing:-.02em}
 .item p{margin:0;color:#756e78;font-size:13px;line-height:1.7}
 .form{max-width:none;margin-bottom:18px}
-@media(max-width:420px){.item{padding:16px}.item h2{font-size:18px}}
+.articleBody{display:grid;gap:16px;color:#4f4951;font-size:15px;line-height:1.85}
+.articleBody p{margin:0}
+.notice{padding:14px 16px;border:1px solid #eee5ea;border-radius:16px;background:#faf7f9;font-size:13px}
+@media(max-width:420px){.item{padding:16px}.item h2{font-size:18px}.articleBody{font-size:14px}}
