@@ -5,6 +5,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+function isSafeInternalPath(value: string | null) {
+  return Boolean(value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\"));
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -29,7 +33,7 @@ export default function LoginPage() {
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      const destination = isSafeInternalPath(next) ? next : "/";
       router.push(destination);
       router.refresh();
     } catch {
