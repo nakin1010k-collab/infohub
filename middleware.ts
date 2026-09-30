@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { APPWRITE_SESSION_COOKIE, appwriteRequest } from "@/lib/appwrite/server";
+import { appwriteRequest } from "@/lib/appwrite/request";
+import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/session";
 
 const protectedRoutes = ["/profile", "/dashboard", "/settings"];
 
