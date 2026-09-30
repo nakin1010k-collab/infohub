@@ -11,7 +11,7 @@ export default function HomePage() {
     <main>
       <header className="site-header">
         <div className="container header-inner">
-          <a className="brand" href="/" aria-label="InfoHub หน้าแรก">
+          <Link className="brand" href="/" aria-label="InfoHub หน้าแรก">
             <span className="brand-mark" aria-hidden="true">🐱</span>
             <span>InfoHub</span>
           </a>
