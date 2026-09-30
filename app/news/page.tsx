@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
-import { newsArticles } from "@/lib/news/mock-data";
+import { getAllTags, newsArticles } from "@/lib/news/mock-data";
 
 type NewsPageProps = {
   searchParams: Promise<{ category?: string }>;
@@ -16,6 +16,7 @@ const categoryOptions = [
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
+  const tags = getAllTags();
   const category = params.category?.trim().toLocaleLowerCase("th-TH") || "all";
   const activeCategory = categoryOptions.some((option) => option.slug === category) ? category : "all";
   const filteredArticles =
@@ -53,12 +54,21 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
             ))}
           </nav>
 
+          <div className={styles.tagList} aria-label="แท็กที่ใช้ในข่าว">
+            {tags.map((tag) => (
+              <Link className={styles.tagLink} href={`/search?q=${encodeURIComponent(tag)}`} key={tag}>
+                #{tag}
+              </Link>
+            ))}
+          </div>
+
           <div className={styles.list} aria-label="รายการข่าว">
             {filteredArticles.length > 0 ? filteredArticles.map((article) => (
               <article className={styles.item} key={article.slug}>
                 <div className="news-meta">
                   <span className="tag">{article.category}</span>
                   <span>อ่าน {article.readingMinutes} นาที</span>
+                  <span>{article.tags.map((tag) => `#${tag}`).join(" · ")}</span>
                 </div>
                 <h2><Link href={`/news/${article.slug}`}>{article.title}</Link></h2>
                 <p>{article.excerpt}</p>
