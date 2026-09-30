@@ -68,7 +68,20 @@ assert.match(resetPassword, /fetch\("/api\/auth\/reset-password"/);
 assert.match(resetPassword, /userId/);
 assert.match(middleware, /nextPath/);
 
-console.log("News/Search/auth hardening smoke tests passed.");
+const loginApi = await read("app/api/auth/login/route.ts");
+const registerApi = await read("app/api/auth/register/route.ts");
+const logoutApi = await read("app/api/auth/logout/route.ts");
+const sessionApi = await read("app/api/auth/session/route.ts");
+const forgotApi = await read("app/api/auth/forgot-password/route.ts");
+const resetApi = await read("app/api/auth/reset-password/route.ts");
+assert.match(loginApi, /account\/sessions\/email/);
+assert.match(registerApi, /\/account/);
+assert.match(logoutApi, /sessions\/current/);
+assert.match(sessionApi, /\/account/);
+assert.match(forgotApi, /\/account\/recovery/);
+assert.match(resetApi, /\/account\/recovery/);
+
+console.log("News/Search/Appwrite auth smoke tests passed.");
 
 const appwriteServer = await read("lib/appwrite/server.ts");
 const appwriteRequest = await read("lib/appwrite/request.ts");
