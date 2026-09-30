@@ -1,16 +1,18 @@
 # InfoHub
 
-InfoHub is a responsive Thai information hub for news, knowledge, and data.
+InfoHub is a responsive Thai information hub for news, knowledge, and data, using a kawaii cat visual identity.
 
-## Phase 0D baseline
+## Stack
 
-- Next.js + TypeScript
-- App Router
-- Responsive public homepage shell
-- ESLint, TypeScript, and production build scripts
-- Ready for later Supabase/Auth integration
+- Next.js 15 App Router + React 19
+- TypeScript with strict checking
+- ESLint 9 + Next.js rules
+- Supabase Auth via `@supabase/ssr` and `@supabase/supabase-js`
+- GitHub Actions verification: `npm ci`, lint, typecheck, production build
 
 ## Local development
+
+Create `.env.local` from `.env.example` and provide the InfoHub Supabase project URL and publishable key.
 
 ```bash
 npm install
@@ -25,18 +27,32 @@ npm run typecheck
 npm run build
 ```
 
-## Baseline verification
+## Current routes
 
-- Phase 0D baseline verified by GitHub Actions.
-- Lint: passed
-- Typecheck: passed
-- Production build: passed
-- Verification run: 36699694188
-- Verified commit: 398022d6940b3b792689da0406440c87be689c23
+- `/` — public homepage
+- `/search` — search handoff placeholder; real database search is planned for Phase 3
+- `/login` — password login
+- `/register` — account registration
+- `/forgot-password` — password recovery request
+- `/reset-password` — authenticated recovery password update
+- `/profile` — protected profile
+- `/dashboard` — protected dashboard shell
+- `/settings` — protected settings shell
 
-## Phase 1A verification
+## Authentication architecture
 
-- App shell extracted into reusable SiteHeader and SiteFooter components.
-- Navigation uses Next.js Link for internal routes/anchors.
-- GitHub Actions run `36700017834` passed lint, typecheck, and production build.
-- Phase 1A candidate save point: `87f0f73b197645557452bdf729dca3b0cc7c29cb`.
+- Browser client: `lib/supabase/client.ts`
+- Server client: `lib/supabase/server.ts`
+- Session refresh / protected-route enforcement: `middleware.ts`
+- Protected routes: `/profile`, `/dashboard`, `/settings`
+- Login redirects safely back to an internal `next` path.
+- Sign-out is handled by `components/sign-out-button.tsx`.
+- No Supabase service-role secret is used or committed.
+
+## Verification status
+
+Phase 1 has a verified save point at commit `21a6c569b95d4f4e69876880f8a89aa8e3413f61`.
+
+Phase 2 authentication has been implemented through session/error handling and is undergoing final verification. A dedicated InfoHub Supabase project is still required for live end-to-end Auth verification.
+
+Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap.
