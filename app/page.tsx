@@ -148,7 +148,7 @@ export default function HomePage() {
               <p className="eyebrow">FEATURED</p>
               <h2>เรื่องเด่นวันนี้</h2>
             </div>
-            <a href="/news">ดูทั้งหมด →</a>
+            <Link href="/news">ดูทั้งหมด →</Link>
           </div>
 
           <div className="featured-grid">
@@ -193,9 +193,9 @@ export default function HomePage() {
               InfoHub จะเชื่อมข่าวกับบุคคล องค์กร สถานที่ เหตุการณ์ และข้อมูลสถิติ
               เพื่อช่วยให้เห็นภาพรวมมากกว่าการอ่านพาดหัวเพียงอย่างเดียว
             </p>
-            <a className="primary-button" href="/news?category=knowledge">
+            <Link className="primary-button" href="/news?category=knowledge">
               สำรวจฐานความรู้
-            </a>
+            </Link>
           </div>
           <div id="data" className="data-panel">
             <div>
@@ -223,7 +223,7 @@ export default function HomePage() {
               <p className="eyebrow">LATEST • TRENDING</p>
               <h2>อัปเดตล่าสุด</h2>
             </div>
-            <a href="/news">ดูข่าวทั้งหมด →</a>
+            <Link href="/news">ดูข่าวทั้งหมด →</Link>
           </div>
 
           <div className="latest-layout">
