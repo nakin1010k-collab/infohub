@@ -1,14 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ResetPasswordPage() {
-  const router = useRouter(); const searchParams = useSearchParams();
-  const [error, setError] = useState(""); const [success, setSuccess] = useState(""); const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [recovery, setRecovery] = useState<{ userId: string; secret: string } | null>(null);
 
-  const userId = searchParams.get("userId"); const secret = searchParams.get("secret"); const ready = Boolean(userId && secret);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("userId");
+    const secret = params.get("secret");
+    if (userId && secret) setRecovery({ userId, secret });
+    else setError("ลิงก์รีเซ็ตไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่อีกครั้ง");
+  }, []);
+
+  const ready = Boolean(recovery);
 
   function validatePasswords(form: HTMLFormElement) {
     const password = form.elements.namedItem("password") as HTMLInputElement | null;
@@ -25,7 +36,7 @@ export default function ResetPasswordPage() {
       const form = new FormData(event.currentTarget);
       const response = await fetch("/api/auth/reset-password", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, secret, password: String(form.get("password") ?? "") }),
+        body: JSON.stringify({ userId: recovery?.userId, secret: recovery?.secret, password: String(form.get("password") ?? "") }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) { setError(body.error ?? "ไม่สามารถตั้งรหัสผ่านใหม่ได้ กรุณาขอลิงก์ใหม่อีกครั้ง"); return; }
