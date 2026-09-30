@@ -52,3 +52,5 @@ footer{margin-top:40px;padding:28px 0;border-top:1px solid var(--line)}.footer-i
 .field-hint{margin:-2px 0 0;color:#9a9097;font-size:11px;line-height:1.5}
 
 .auth-status{margin:-4px 0 0;padding:11px 13px;border-radius:12px;font-size:12px;line-height:1.6}.auth-status.is-error{background:#fff1f5;border:1px solid #f1c7d4;color:#b64f70}.auth-status.is-success{background:#f4fbf6;border:1px solid #cfe8d4;color:#47724e}.auth-submit:disabled{opacity:.58;cursor:not-allowed;transform:none;box-shadow:none}
+
+.auth-session{display:inline-flex;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}.login-link:focus-visible,.auth-register a:focus-visible{outline:3px solid rgba(217,111,145,.24);outline-offset:3px}
