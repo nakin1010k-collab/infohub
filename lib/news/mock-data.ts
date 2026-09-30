@@ -4,6 +4,7 @@ export type NewsArticle = {
   excerpt: string;
   category: string;
   categorySlug: string;
+  tags: string[];
   readingMinutes: number;
   publishedAt: string;
 };
@@ -11,6 +12,7 @@ export type NewsArticle = {
 export const newsArticles: NewsArticle[] = [
   {
     slug: "infohub-demo-daily-brief",
+    tags: ["ข่าวประจำวัน", "สรุปข่าว", "บริบท"],
     title: "สรุปประเด็นข่าวสำคัญประจำวัน",
     excerpt: "ต้นแบบการจัดข่าวแบบอ่านง่าย พร้อมบริบทที่ช่วยให้เห็นภาพรวมของประเด็น",
     category: "ข่าวเด่น",
@@ -20,6 +22,7 @@ export const newsArticles: NewsArticle[] = [
   },
   {
     slug: "technology-close-to-life",
+    tags: ["เทคโนโลยี", "นวัตกรรม", "ชีวิตประจำวัน"],
     title: "เทคโนโลยีใกล้ตัวที่กำลังเปลี่ยนชีวิตเรา",
     excerpt: "ทำความเข้าใจแนวโน้มเทคโนโลยีผ่านตัวอย่างที่พบได้ในชีวิตประจำวัน",
     category: "เทคโนโลยี",
@@ -29,6 +32,7 @@ export const newsArticles: NewsArticle[] = [
   },
   {
     slug: "data-story-of-the-day",
+    tags: ["ข้อมูล", "สถิติ", "ตัวเลข"],
     title: "ข้อมูลใหม่ที่น่าจับตา",
     excerpt: "ต้นแบบบทความข้อมูลที่เน้นตัวเลข ข้อเท็จจริง และแหล่งที่มาอย่างเป็นระบบ",
     category: "ข้อมูล",
@@ -38,6 +42,7 @@ export const newsArticles: NewsArticle[] = [
   },
   {
     slug: "knowledge-explained",
+    tags: ["ความรู้", "อธิบายง่าย", "ข้อมูล"],
     title: "เรื่องน่ารู้ที่อธิบายด้วยข้อมูล",
     excerpt: "เชื่อมเหตุการณ์ ข่าว และข้อมูลเพื่อช่วยให้เข้าใจเรื่องเดียวกันจากหลายมุม",
     category: "ความรู้",
@@ -59,6 +64,12 @@ export function getRelatedNews(slug: string, limit = 3) {
   );
 
   return [...sameCategory, ...fallback].slice(0, limit);
+}
+
+export function getAllTags() {
+  return Array.from(new Set(newsArticles.flatMap((article) => article.tags))).sort((a, b) =>
+    a.localeCompare(b, "th-TH"),
+  );
 }
 
 export function searchNews(query: string) {
