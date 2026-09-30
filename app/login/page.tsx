@@ -24,7 +24,7 @@ export default function LoginPage() {
       });
 
       if (signInError) {
-        setError(signInError.message);
+        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง");
         return;
       }
 
@@ -68,12 +68,7 @@ export default function LoginPage() {
               <input id="password" name="password" type="password" autoComplete="current-password" placeholder="กรอกรหัสผ่าน" required />
             </div>
 
-            <label className="remember-row">
-              <input type="checkbox" name="remember" />
-              <span>จดจำการเข้าสู่ระบบ</span>
-            </label>
-
-            {error && <p className="auth-status is-error" role="alert">{error}</p>}
+              {error && <p className="auth-status is-error" role="alert">{error}</p>}
 
             <button className="auth-submit" type="submit" disabled={loading}>
               {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
