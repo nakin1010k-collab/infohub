@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { SignOutButton } from "@/components/sign-out-button";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    redirect("/login?next=/profile");
+  }
 
   return (
     <main className="auth-page">
@@ -12,13 +18,18 @@ export default async function ProfilePage() {
           <div className="auth-intro">
             <p className="eyebrow">MEMBER AREA</p>
             <h1 id="profile-title">โปรไฟล์ของคุณ</h1>
-            <p>หน้านี้เข้าถึงได้เฉพาะสมาชิกที่เข้าสู่ระบบแล้ว</p>
+            <p>ข้อมูลบัญชีของคุณ</p>
           </div>
           <div className="ui-state">
-            <strong>{user?.user_metadata?.display_name || "สมาชิก InfoHub"}</strong>
-            <span>{user?.email || "บัญชีสมาชิก"}</span>
+            <div>
+              <strong>{user.user_metadata?.display_name || "สมาชิก InfoHub"}</strong>
+              <p>{user.email}</p>
+            </div>
           </div>
-          <p className="auth-register"><Link href="/">กลับหน้าแรก</Link></p>
+          <div className="profile-actions">
+            <Link className="primary-button" href="/">กลับหน้าแรก</Link>
+            <SignOutButton />
+          </div>
         </section>
       </div>
     </main>
