@@ -22,13 +22,25 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <div className="auth-intro">
             <p className="eyebrow">SEARCH</p>
             <h1 id="search-title">ค้นหา</h1>
-            <p>{query ? <>ผลการค้นหาสำหรับ “{query}” · พบ {results.length} รายการ</> : "ค้นหาจากข้อมูลตัวอย่างของ InfoHub"}</p>
+            <p>
+              {query
+                ? <>ผลการค้นหาสำหรับ “{query}” · พบ {results.length} รายการ</>
+                : "ค้นหาจากข้อมูลตัวอย่างของ InfoHub"}
+            </p>
           </div>
+
           <form className={`search ${styles.form}`} action="/search" method="get" role="search">
             <label htmlFor="search-page-query" className="sr-only">คำค้นหา</label>
-            <input id="search-page-query" name="q" type="search" defaultValue={query} placeholder="ค้นหาข่าวสาร ความรู้ หรือข้อมูล..." />
+            <input
+              id="search-page-query"
+              name="q"
+              type="search"
+              defaultValue={query}
+              placeholder="ค้นหาข่าวสาร ความรู้ หรือข้อมูล..."
+            />
             <button type="submit">ค้นหา</button>
           </form>
+
           <div className={styles.list} aria-live="polite">
             {results.length > 0 ? results.map((article) => (
               <article className={styles.item} key={article.slug}>
@@ -36,9 +48,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   <span className="tag">{article.category}</span>
                   <span>อ่าน {article.readingMinutes} นาที</span>
                 </div>
-                <h2>{article.title}</h2>
+                <h2><Link href={`/news/${article.slug}`}>{article.title}</Link></h2>
                 <p>{article.excerpt}</p>
-                <span className="field-hint">ข้อมูลชุดนี้เป็น preview และจะเปลี่ยนเป็นฐานข้อมูลจริงใน Phase 3B/3C</span>
+                <Link className="field-hint" href={`/news/${article.slug}`}>อ่านรายละเอียด →</Link>
               </article>
             )) : (
               <div className="ui-state" role="status">
@@ -49,7 +61,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               </div>
             )}
           </div>
-          <p className="auth-register"><Link href="/news">ดูข่าวทั้งหมด</Link> · <Link href="/">กลับหน้าแรก</Link></p>
+
+          <p className="auth-register">
+            <Link href="/news">ดูข่าวทั้งหมด</Link> · <Link href="/">กลับหน้าแรก</Link>
+          </p>
         </section>
       </div>
     </main>
