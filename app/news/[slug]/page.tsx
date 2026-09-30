@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
 import { newsArticles } from "@/lib/news/mock-data";
@@ -12,6 +13,34 @@ function formatPublishedAt(value: string) {
     timeStyle: "short",
     timeZone: "Asia/Bangkok",
   }).format(new Date(value));
+}
+
+export async function generateMetadata({ params }: NewsDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = newsArticles.find((item) => item.slug === slug);
+
+  if (!article) {
+    return {
+      title: "ไม่พบบทความ | InfoHub",
+      description: "ไม่พบบทความที่ต้องการบน InfoHub",
+    };
+  }
+
+  return {
+    title: `${article.title} | InfoHub`,
+    description: article.excerpt,
+    keywords: [article.category, "ข่าว", "InfoHub"],
+    alternates: {
+      canonical: `/news/${article.slug}`,
+    },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: "article",
+      publishedTime: article.publishedAt,
+      url: `/news/${article.slug}`,
+    },
+  };
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
