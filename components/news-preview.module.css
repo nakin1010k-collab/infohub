@@ -1,0 +1,7 @@
+.shell{width:min(100%,760px)}
+.list{display:flex;flex-direction:column;gap:12px}
+.item{padding:20px;border:1px solid #eee5ea;border-radius:20px;background:#fff}
+.item h2{margin:9px 0 7px;font-size:20px;line-height:1.4;letter-spacing:-.02em}
+.item p{margin:0;color:#756e78;font-size:13px;line-height:1.7}
+.form{max-width:none;margin-bottom:18px}
+@media(max-width:420px){.item{padding:16px}.item h2{font-size:18px}}
