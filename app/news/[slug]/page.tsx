@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
-import { newsArticles } from "@/lib/news/mock-data";
+import { getRelatedNews, newsArticles } from "@/lib/news/mock-data";
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -68,6 +68,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     );
   }
 
+  const relatedNews = getRelatedNews(article.slug);
+
   return (
     <main className="auth-page">
       <div className={`auth-shell ${styles.shell}`}>
@@ -98,6 +100,30 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               ขณะนี้เป็นข้อมูลตัวอย่าง ยังไม่ใช่ข่าวจากแหล่งข่าวจริง
             </div>
           </div>
+          {relatedNews.length > 0 && (
+            <section className={styles.related} aria-labelledby="related-news-title">
+              <div className={styles.relatedHeader}>
+                <p className="eyebrow">RELATED NEWS</p>
+                <h2 id="related-news-title">ข่าวที่เกี่ยวข้อง</h2>
+              </div>
+              <div className={styles.relatedList}>
+                {relatedNews.map((related) => (
+                  <Link
+                    className={styles.relatedItem}
+                    href={`/news/${related.slug}`}
+                    key={related.slug}
+                  >
+                    <div className="news-meta">
+                      <span className="tag">{related.category}</span>
+                      <span>อ่าน {related.readingMinutes} นาที</span>
+                    </div>
+                    <strong>{related.title}</strong>
+                    <span>{related.excerpt}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
           <p className="auth-register"><Link href="/news">← ข่าวทั้งหมด</Link></p>
         </article>
       </div>
