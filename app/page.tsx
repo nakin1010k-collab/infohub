@@ -9,6 +9,36 @@ const featured = [
   { tag: "ความรู้", title: "เรื่องน่ารู้ที่อธิบายด้วยข้อมูล", summary: "เชื่อมข่าว เหตุการณ์ และข้อมูลให้เห็นภาพเดียวกัน" }
 ];
 
+function HeroMascot() {
+  return (
+    <div className="hero-mascot" aria-label="มาสคอตแมวของ InfoHub" role="img">
+      <div className="mascot-glow" aria-hidden="true" />
+      <div className="cat-3d" aria-hidden="true">
+        <span className="cat-ear cat-ear-left" />
+        <span className="cat-ear cat-ear-right" />
+        <span className="cat-head">
+          <span className="cat-face">
+            <i className="cat-eye cat-eye-left" />
+            <i className="cat-eye cat-eye-right" />
+            <i className="cat-nose" />
+            <i className="cat-mouth" />
+            <i className="cat-cheek cat-cheek-left" />
+            <i className="cat-cheek cat-cheek-right" />
+          </span>
+        </span>
+        <span className="cat-body">
+          <span className="cat-belly" />
+          <span className="cat-paw cat-paw-left" />
+          <span className="cat-paw cat-paw-right" />
+        </span>
+        <span className="cat-tail" />
+      </div>
+      <div className="floating-card card-one">วันนี้มีอะไรน่าสนใจ?</div>
+      <div className="floating-card card-two">อ่านง่าย • เข้าใจเร็ว</div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <main>
@@ -26,11 +56,7 @@ export default function HomePage() {
               <button type="submit">ค้นหา</button>
             </form>
           </div>
-          <div className="hero-mascot" aria-label="มาสคอตแมวของ InfoHub" role="img">
-            <div className="cat-orb">🐱</div>
-            <div className="floating-card card-one">วันนี้มีอะไรน่าสนใจ?</div>
-            <div className="floating-card card-two">อ่านง่าย • เข้าใจเร็ว</div>
-          </div>
+          <HeroMascot />
         </div>
       </section>
 
