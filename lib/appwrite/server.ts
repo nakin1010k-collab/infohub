@@ -42,3 +42,12 @@ export function extractAppwriteSession(response: Response) {
 export async function getAppwriteSession() {
   return (await cookies()).get(APPWRITE_SESSION_COOKIE)?.value ?? null;
 }
+
+export async function getAppwriteAccount() {
+  const session = await getAppwriteSession();
+  if (!session) return null;
+
+  const response = await appwriteRequest("/account", { method: "GET" }, session);
+  if (!response.ok) return null;
+  return response.json() as Promise<{ $id: string; name: string; email: string }>;
+}
