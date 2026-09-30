@@ -50,11 +50,11 @@ assert.match(data, /getAllTags/);
 assert.match(data, /\.\.\.article\.tags/);
 
 assert.match(layout, /metadataBase: getSiteUrl\(\)/);
-assert.match(middleware, /auth\.getClaims\(\)/);
+assert.match(middleware, /appwriteRequest\("\/account"/);
 assert.match(middleware, /matcher: \[\"\/profile\/:path\*\", \"\/dashboard\/:path\*\", \"\/settings\/:path\*\"\]/);
 assert.match(sitemap, /MetadataRoute\.Sitemap/);
 assert.match(robots, /MetadataRoute\.Robots/);
-assert.match(signOut, /try \{/);
+assert.match(signOut, /fetch\("/api\/auth\/logout"/);
 assert.match(signOut, /finally \{/);
 assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undefined\}/);
 assert.match(uiStates, /onAction=\{onRetry\}/);
@@ -62,10 +62,16 @@ assert.match(uiStates, /onAction=\{onRetry\}/);
 assert.match(login, /isSafeInternalPath/);
 assert.match(login, /!value\.startsWith\("\/\/"\)/);
 assert.match(register, /name="terms" required/);
-assert.match(register, /auth\.signUp/);
-assert.match(forgotPassword, /resetPasswordForEmail/);
-assert.match(resetPassword, /PASSWORD_RECOVERY/);
-assert.match(resetPassword, /auth\.updateUser/);
+assert.match(register, /fetch\("/api\/auth\/register"/);
+assert.match(forgotPassword, /fetch\("/api\/auth\/forgot-password"/);
+assert.match(resetPassword, /fetch\("/api\/auth\/reset-password"/);
+assert.match(resetPassword, /userId/);
 assert.match(middleware, /nextPath/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
+
+const appwriteServer = await read("lib/appwrite/server.ts");
+const appwriteRequest = await read("lib/appwrite/request.ts");
+assert.match(appwriteServer, /httpOnly:|cookies/);
+assert.match(appwriteRequest, /X-Appwrite-Project/);
+assert.match(appwriteRequest, /X-Appwrite-Session/);
