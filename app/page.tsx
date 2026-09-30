@@ -1,7 +1,15 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-const categories = ["ข่าวเด่น", "ประเทศไทย", "ต่างประเทศ", "เทคโนโลยี", "ธุรกิจ", "ไลฟ์สไตล์", "ความรู้"];
+const categories = [
+  { label: "ข่าวเด่น", id: "news" },
+  { label: "ประเทศไทย", id: "thailand" },
+  { label: "ต่างประเทศ", id: "world" },
+  { label: "เทคโนโลยี", id: "technology" },
+  { label: "ธุรกิจ", id: "business" },
+  { label: "ไลฟ์สไตล์", id: "lifestyle" },
+  { label: "ความรู้", id: "knowledge" }
+];
 
 const featured = [
   { tag: "ข่าวเด่น", title: "รวมเรื่องสำคัญที่ควรรู้วันนี้", summary: "ติดตามประเด็นที่กำลังได้รับความสนใจ พร้อมบริบทที่อ่านง่ายและกระชับ" },
@@ -60,8 +68,43 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="container category-strip" aria-label="หมวดหมู่">
-        {categories.map((category) => <a key={category} href="#news" className="category-pill">{category}</a>)}
+      <section className="container category-navigation" aria-labelledby="category-title">
+        <div className="category-heading">
+          <div>
+            <p className="eyebrow">EXPLORE</p>
+            <h2 id="category-title">สำรวจตามหมวดหมู่</h2>
+          </div>
+          <span>เลือกหัวข้อที่อยากติดตาม</span>
+        </div>
+        <nav className="category-strip" aria-label="หมวดหมู่ข่าวและความรู้">
+          {categories.map((category, index) => {
+            const icons = ["✦", "TH", "◎", "⌘", "฿", "♡", "?"];
+            return (
+              <a
+                key={category.id}
+                href={index === 0 ? "#news" : "#category-" + category.id}
+                className={"category-pill" + (index === 0 ? " is-active" : "")}
+                aria-current={index === 0 ? "page" : undefined}
+              >
+                <span className="category-icon" aria-hidden="true">{icons[index]}</span>
+                <span>{category.label}</span>
+              </a>
+            );
+          })}
+        </nav>
+      </section>
+
+      <section className="container category-preview-grid" aria-label="หมวดหมู่ยอดนิยม">
+        {categories.slice(1, 4).map((category, index) => (
+          <a id={"category-" + category.id} href="#latest" className="category-preview-card" key={category.id}>
+            <span className="category-preview-number">0{index + 1}</span>
+            <div>
+              <strong>{category.label}</strong>
+              <span>ดูเรื่องราวและข้อมูลล่าสุด</span>
+            </div>
+            <span className="category-arrow" aria-hidden="true">↗</span>
+          </a>
+        ))}
       </section>
 
       <section id="news" className="container content-section">
