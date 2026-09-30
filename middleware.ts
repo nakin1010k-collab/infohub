@@ -65,7 +65,8 @@ export async function middleware(request: NextRequest) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.search = "";
-      loginUrl.searchParams.set("next", pathname);
+      const nextPath = `${pathname}${request.nextUrl.search}`;
+      loginUrl.searchParams.set("next", nextPath);
 
       return copyResponseState(response, NextResponse.redirect(loginUrl));
     }
