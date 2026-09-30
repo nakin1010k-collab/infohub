@@ -24,3 +24,12 @@ npm run lint
 npm run typecheck
 npm run build
 ```
+
+## Baseline verification
+
+- Phase 0D baseline verified by GitHub Actions.
+- Lint: passed
+- Typecheck: passed
+- Production build: passed
+- Verification run: 36699694188
+- Verified commit: 398022d6940b3b792689da0406440c87be689c23
