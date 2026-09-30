@@ -8,3 +8,13 @@
 .articleBody p{margin:0}
 .notice{padding:14px 16px;border:1px solid #eee5ea;border-radius:16px;background:#faf7f9;font-size:13px}
 @media(max-width:420px){.item{padding:16px}.item h2{font-size:18px}.articleBody{font-size:14px}}
+.related{display:grid;gap:14px;margin-top:24px;padding-top:22px;border-top:1px solid #eee5ea}
+.relatedHeader{display:grid;gap:4px}
+.relatedHeader h2{margin:0;font-size:22px;line-height:1.35;letter-spacing:-.02em}
+.relatedList{display:grid;gap:10px}
+.relatedItem{display:grid;gap:6px;padding:15px 16px;border:1px solid #eee5ea;border-radius:16px;background:#fff;color:inherit;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.relatedItem:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(65,45,55,.07);border-color:#e2d5dc}
+.relatedItem:focus-visible{outline:3px solid #d8b8c8;outline-offset:2px}
+.relatedItem strong{font-size:15px;line-height:1.5}
+.relatedItem>span:last-child{color:#756e78;font-size:13px;line-height:1.65}
+@media(max-width:420px){.relatedHeader h2{font-size:20px}.relatedItem{padding:14px}}
