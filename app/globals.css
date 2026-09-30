@@ -44,3 +44,9 @@ footer{margin-top:40px;padding:28px 0;border-top:1px solid var(--line)}.footer-i
 .auth-register a{color:var(--pink-dark);font-weight:800}
 .auth-note{margin:18px 0 0;color:#9a9097;font-size:11px}
 @media(max-width:520px){.auth-page{padding:28px 14px}.auth-card{padding:26px 20px;border-radius:24px}.auth-intro h1{font-size:32px}}
+
+
+.auth-form input[type="text"]{width:100%;border:1px solid #e6dce1;border-radius:14px;background:#fff;padding:13px 14px;color:var(--text);outline:0;transition:border-color .2s ease,box-shadow .2s ease}
+.auth-form input[type="text"]::placeholder{color:#b4abb1}
+.auth-form input[type="text"]:focus{border-color:#e6a0b6;box-shadow:0 0 0 4px rgba(217,111,145,.11)}
+.field-hint{margin:-2px 0 0;color:#9a9097;font-size:11px;line-height:1.5}
