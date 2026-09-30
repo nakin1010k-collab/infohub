@@ -18,6 +18,10 @@ const sitemap = await read("app/sitemap.ts");
 const robots = await read("app/robots.ts");
 const signOut = await read("components/sign-out-button.tsx");
 const uiStates = await read("components/ui-states.tsx");
+const login = await read("app/login/page.tsx");
+const register = await read("app/register/page.tsx");
+const forgotPassword = await read("app/forgot-password/page.tsx");
+const resetPassword = await read("app/reset-password/page.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
 assert.match(news, /getAllTags()/);
@@ -54,5 +58,14 @@ assert.match(signOut, /try \{/);
 assert.match(signOut, /finally \{/);
 assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undefined\}/);
 assert.match(uiStates, /onAction=\{onRetry\}/);
+
+assert.match(login, /isSafeInternalPath/);
+assert.match(login, /!value\.startsWith\("\/\/"\)/);
+assert.match(register, /name="terms" required/);
+assert.match(register, /auth\.signUp/);
+assert.match(forgotPassword, /resetPasswordForEmail/);
+assert.match(resetPassword, /PASSWORD_RECOVERY/);
+assert.match(resetPassword, /auth\.updateUser/);
+assert.match(middleware, /nextPath/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
