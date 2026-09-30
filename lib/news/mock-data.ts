@@ -47,6 +47,20 @@ export const newsArticles: NewsArticle[] = [
   },
 ];
 
+export function getRelatedNews(slug: string, limit = 3) {
+  const article = newsArticles.find((item) => item.slug === slug);
+  if (!article) return [];
+
+  const sameCategory = newsArticles.filter(
+    (item) => item.slug !== slug && item.categorySlug === article.categorySlug,
+  );
+  const fallback = newsArticles.filter(
+    (item) => item.slug !== slug && item.categorySlug !== article.categorySlug,
+  );
+
+  return [...sameCategory, ...fallback].slice(0, limit);
+}
+
 export function searchNews(query: string) {
   const normalized = query.trim().toLocaleLowerCase("th-TH");
   if (!normalized) return newsArticles;
