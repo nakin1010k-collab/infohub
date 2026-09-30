@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
 import { searchNews } from "@/lib/news/mock-data";
+
+export const metadata: Metadata = {
+  title: "ค้นหา | InfoHub",
+  description: "ค้นหาข่าว ความรู้ และข้อมูลตัวอย่างบน InfoHub",
+  keywords: ["ค้นหา", "ข่าว", "ความรู้", "ข้อมูล", "InfoHub"],
+  alternates: { canonical: "/search" },
+  openGraph: {
+    title: "ค้นหา | InfoHub",
+    description: "ค้นหาข่าว ความรู้ และข้อมูลตัวอย่างบน InfoHub",
+    type: "website",
+    url: "/search",
+  },
+};
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
