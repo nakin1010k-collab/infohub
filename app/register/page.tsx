@@ -26,7 +26,8 @@ export default function RegisterPage() {
   }
 
   function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {
-    validatePasswords(event.currentTarget.form ?? document.createElement("form"));
+    const form = event.currentTarget.form;
+    if (form) validatePasswords(form);
   }
 
   return (
