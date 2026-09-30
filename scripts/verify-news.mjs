@@ -53,6 +53,6 @@ assert.match(robots, /MetadataRoute\.Robots/);
 assert.match(signOut, /try \{/);
 assert.match(signOut, /finally \{/);
 assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undefined\}/);
-assert.match(uiStates, /actionLabel \? "ลองใหม่" : undefined/);
+assert.match(uiStates, /onAction=\{onRetry\}/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
