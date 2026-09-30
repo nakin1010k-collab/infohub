@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:news": "node scripts/verify-news.mjs"
   },
   "dependencies": {
     "next": "15.5.26",
