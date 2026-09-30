@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const categories = ["ข่าวเด่น", "ประเทศไทย", "ต่างประเทศ", "เทคโนโลยี", "ธุรกิจ", "ไลฟ์สไตล์", "ความรู้"];
 
 const featured = [
