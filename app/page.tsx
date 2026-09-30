@@ -173,12 +173,12 @@ export default function HomePage() {
                   </div>
                   <h3>{article.title}</h3>
                   <p>{article.excerpt}</p>
-                  <a
+                  <Link
                     href={`/news/${article.slug}`}
                     aria-label={`อ่านต่อ: ${article.title}`}
                   >
                     อ่านต่อ <span aria-hidden="true">→</span>
-                  </a>
+                  </Link>
                 </div>
               </article>
             ))}
@@ -230,7 +230,7 @@ export default function HomePage() {
             <div className="latest-list" aria-live="polite">
               {latest.length > 0 ? (
                 latest.map((article) => (
-                  <a
+                  <Link
                     className="latest-item"
                     href={`/news/${article.slug}`}
                     key={article.slug}
@@ -255,7 +255,7 @@ export default function HomePage() {
                     <span className="latest-arrow" aria-hidden="true">
                       ↗
                     </span>
-                  </a>
+                  </Link>
                 ))
               ) : (
                 <EmptyState />
