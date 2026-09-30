@@ -1,11 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent } from "react";
+import { ChangeEvent, FormEvent } from "react";
 
 export default function RegisterPage() {
+  function validatePasswords(form: HTMLFormElement) {
+    const password = form.elements.namedItem("password") as HTMLInputElement | null;
+    const confirmPassword = form.elements.namedItem("confirmPassword") as HTMLInputElement | null;
+
+    if (!password || !confirmPassword) return;
+
+    confirmPassword.setCustomValidity(
+      password.value === confirmPassword.value ? "" : "รหัสผ่านไม่ตรงกัน",
+    );
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    validatePasswords(event.currentTarget);
+
+    if (!event.currentTarget.checkValidity()) {
+      event.currentTarget.reportValidity();
+      return;
+    }
+  }
+
+  function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {
+    validatePasswords(event.currentTarget.form ?? document.createElement("form"));
   }
 
   return (
@@ -60,6 +81,7 @@ export default function RegisterPage() {
                 minLength={8}
                 required
                 aria-describedby="password-hint"
+                onChange={handlePasswordChange}
               />
               <p id="password-hint" className="field-hint">
                 ใช้รหัสผ่านอย่างน้อย 8 ตัวอักษร
@@ -76,7 +98,12 @@ export default function RegisterPage() {
                 placeholder="กรอกรหัสผ่านอีกครั้ง"
                 minLength={8}
                 required
+                aria-describedby="confirm-password-hint"
+                onChange={handlePasswordChange}
               />
+              <p id="confirm-password-hint" className="field-hint">
+                ต้องตรงกับรหัสผ่านที่ตั้งไว้
+              </p>
             </div>
 
             <label className="remember-row">
