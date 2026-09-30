@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   try {
     const supabase = createServerClient(url, key, {
