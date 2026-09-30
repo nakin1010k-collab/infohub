@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { EmptyState } from "@/components/ui-states";
 
 const categories = [
   { label: "ข่าวเด่น", id: "news" }, { label: "ประเทศไทย", id: "thailand" },
@@ -18,24 +19,12 @@ const latest = [
   { time: "07:50", tag: "เทคโนโลยี", title: "เทคโนโลยีที่กำลังเปลี่ยนวิธีใช้ชีวิต", summary: "ทำความเข้าใจเทรนด์ใหม่ผ่านตัวอย่างใกล้ตัว", trend: "3 ชั่วโมงที่แล้ว" }
 ];
 
-function LoadingState() {
-  return <div className="ui-state" role="status" aria-live="polite"><span className="state-icon" aria-hidden="true">…</span><div><strong>กำลังโหลดข้อมูล</strong><p>โปรดรอสักครู่ ระบบกำลังเตรียมเนื้อหาให้คุณ</p></div></div>;
-}
-
-function ErrorState() {
-  return <div className="ui-state is-error" role="alert"><span className="state-icon" aria-hidden="true">!</span><div><strong>ไม่สามารถโหลดข้อมูลได้</strong><p>ลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</p><button type="button" className="state-action">ลองใหม่</button></div></div>;
-}
-
-function EmptyState() {
-  return <div className="ui-state" role="status"><span className="state-icon" aria-hidden="true">⌕</span><div><strong>ยังไม่มีข้อมูล</strong><p>เมื่อมีเนื้อหาใหม่ ข้อมูลจะแสดงในส่วนนี้</p></div></div>;
-}
-
 function HeroMascot() {
   return <div className="hero-mascot" aria-label="มาสคอตแมวของ InfoHub" role="img"><div className="mascot-glow" aria-hidden="true" /><div className="cat-3d" aria-hidden="true"><span className="cat-ear cat-ear-left" /><span className="cat-ear cat-ear-right" /><span className="cat-head"><span className="cat-face"><i className="cat-eye cat-eye-left" /><i className="cat-eye cat-eye-right" /><i className="cat-nose" /><i className="cat-mouth" /><i className="cat-cheek cat-cheek-left" /><i className="cat-cheek cat-cheek-right" /></span></span><span className="cat-body"><span className="cat-belly" /><span className="cat-paw cat-paw-left" /><span className="cat-paw cat-paw-right" /></span><span className="cat-tail" /></div><div className="floating-card card-one">วันนี้มีอะไรน่าสนใจ?</div><div className="floating-card card-two">อ่านง่าย • เข้าใจเร็ว</div></div>;
 }
 
 export default function HomePage() {
-  return <main>
+  return <main id="main-content">
     <a className="skip-link" href="#main-content">ข้ามไปยังเนื้อหาหลัก</a><SiteHeader />
     <section className="hero"><div className="container hero-grid"><div className="hero-copy"><p className="eyebrow">INFO • DATA • KNOWLEDGE</p><h1>ทุกเรื่องที่คุณอยากรู้<br /><span>รวมไว้ในที่เดียว</span></h1><p className="hero-text">ศูนย์รวมข่าวสาร ข้อมูล และความรู้ที่ออกแบบให้ค้นหาง่าย อ่านสบาย และเข้าใจบริบทได้มากขึ้น</p><form className="search" role="search" action="#latest" method="get" aria-label="ค้นหาข่าวสารและความรู้"><label htmlFor="search" className="sr-only">ค้นหาข่าวสารและความรู้</label><input id="search" type="search" placeholder="ค้นหาข่าวสาร ความรู้ หรือข้อมูล..." /><button type="submit">ค้นหา</button></form></div><HeroMascot /></div></section>
     <section className="container category-navigation" aria-labelledby="category-title"><div className="category-heading"><div><p className="eyebrow">EXPLORE</p><h2 id="category-title">สำรวจตามหมวดหมู่</h2></div><span>เลือกหัวข้อที่อยากติดตาม</span></div><nav className="category-strip" aria-label="หมวดหมู่ข่าวและความรู้">{categories.map((category, index) => { const icons = ["✦", "TH", "◎", "⌘", "฿", "♡", "?"]; return <a key={category.id} href={index === 0 ? "#news" : "#category-" + category.id} className={"category-pill" + (index === 0 ? " is-active" : "")} aria-current={index === 0 ? "page" : undefined}><span className="category-icon" aria-hidden="true">{icons[index]}</span><span>{category.label}</span></a>; })}</nav></section>
