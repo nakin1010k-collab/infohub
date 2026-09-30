@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 const categories = ["ข่าวเด่น", "ประเทศไทย", "ต่างประเทศ", "เทคโนโลยี", "ธุรกิจ", "ไลฟ์สไตล์", "ความรู้"];
 
@@ -11,21 +12,7 @@ const featured = [
 export default function HomePage() {
   return (
     <main>
-      <header className="site-header">
-        <div className="container header-inner">
-          <Link className="brand" href="/" aria-label="InfoHub หน้าแรก">
-            <span className="brand-mark" aria-hidden="true">🐱</span>
-            <span>InfoHub</span>
-          </Link>
-          <nav aria-label="เมนูหลัก" className="main-nav">
-            <a href="#news">ข่าวสาร</a>
-            <a href="#knowledge">ความรู้</a>
-            <a href="#data">ข้อมูล</a>
-            <a href="#about">เกี่ยวกับ</a>
-          </nav>
-          <a className="login-link" href="/login">เข้าสู่ระบบ</a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="hero">
         <div className="container hero-grid">
@@ -95,9 +82,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer id="about">
-        <div className="container footer-inner"><span>🐱 InfoHub</span><span>ข่าวสาร • ข้อมูล • ความรู้</span></div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
