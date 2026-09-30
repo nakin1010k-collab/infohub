@@ -17,4 +17,7 @@
 .relatedItem:focus-visible{outline:3px solid #d8b8c8;outline-offset:2px}
 .relatedItem strong{font-size:15px;line-height:1.5}
 .relatedItem>span:last-child{color:#756e78;font-size:13px;line-height:1.65}
-@media(max-width:420px){.relatedHeader h2{font-size:20px}.relatedItem{padding:14px}}
+@media(max-width:420px){.relatedHeader h2{font-size:20px}.relatedItem{padding:14px}}.tagList{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tagLink{padding:7px 11px;border:1px solid #eee5ea;border-radius:999px;background:#faf7f9;color:#756e78;text-decoration:none;font-size:12px;line-height:1.2;transition:border-color .18s ease,background .18s ease}
+.tagLink:hover{border-color:#e2d5dc;background:#fff}
+.tagLink:focus-visible{outline:3px solid #d8b8c8;outline-offset:2px}
