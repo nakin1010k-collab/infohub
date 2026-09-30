@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
 import { getAllTags, newsArticles } from "@/lib/news/mock-data";
+
+export const metadata: Metadata = {
+  title: "ข่าวทั้งหมด | InfoHub",
+  description: "รวมข่าวตัวอย่างของ InfoHub แยกตามหมวดและแท็ก เพื่อสำรวจโครงสร้างข่าวก่อนเชื่อมข้อมูลจริง.",
+  keywords: ["ข่าว", "ข่าวเด่น", "เทคโนโลยี", "ข้อมูล", "ความรู้", "InfoHub"],
+  alternates: { canonical: "/news" },
+  openGraph: {
+    title: "ข่าวทั้งหมด | InfoHub",
+    description: "สำรวจข่าวตัวอย่างของ InfoHub ตามหมวดและแท็ก",
+    type: "website",
+    url: "/news",
+  },
+};
 
 type NewsPageProps = {
   searchParams: Promise<{ category?: string }>;
