@@ -16,7 +16,7 @@ export default function HomePage() {
           <Link className="brand" href="/" aria-label="InfoHub หน้าแรก">
             <span className="brand-mark" aria-hidden="true">🐱</span>
             <span>InfoHub</span>
-          </a>
+          </Link>
           <nav aria-label="เมนูหลัก" className="main-nav">
             <a href="#news">ข่าวสาร</a>
             <a href="#knowledge">ความรู้</a>
