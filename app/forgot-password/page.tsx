@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
       });
 
       if (resetError) {
-        setError(resetError.message);
+        setError("ไม่สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ได้ในขณะนี้ กรุณาลองอีกครั้งภายหลัง");
       } else {
         setSuccess("ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่แล้ว กรุณาตรวจสอบอีเมลของคุณ");
       }
