@@ -81,7 +81,7 @@ assert.match(sessionApi, /\/account/);
 assert.match(forgotApi, /\/account\/recovery/);
 assert.match(resetApi, /\/account\/recovery/);
 
-console.log("News/Search/Appwrite auth smoke tests passed.");
+console.log("News/Search/Appwrite auth smoke tests passed."); // CI checkpoint
 
 const appwriteServer = await read("lib/appwrite/server.ts");
 const appwriteRequest = await read("lib/appwrite/request.ts");
