@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +28,7 @@ export default function LoginPage() {
         return;
       }
 
-      const next = searchParams.get("next");
+      const next = new URLSearchParams(window.location.search).get("next");
       const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
       router.push(destination);
       router.refresh();
