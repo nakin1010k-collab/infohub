@@ -12,9 +12,6 @@ const categories = [
 ];
 
 function HeroMascot() {
-  const latest = await getNewsArticles();
-  const featured = latest.slice(0, 3);
-
   return (
     <div className="hero-mascot" aria-label="มาสคอตแมวของ InfoHub" role="img">
       <div className="mascot-glow" aria-hidden="true" />
@@ -45,6 +42,9 @@ function HeroMascot() {
 }
 
 export default async function HomePage() {
+  const latest = await getNewsArticles();
+  const featured = latest.slice(0, 3);
+
   return (
     <>
       <a className="skip-link" href="#main-content">
