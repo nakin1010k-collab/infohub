@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordArticleAudit } from "@/lib/news/audit";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
 type Payload={title?:string;slug?:string;excerpt?:string;content?:string;status?:"draft"|"published"|"archived";categoryId?:string;tags?:string;readingMinutes?:number|string};
