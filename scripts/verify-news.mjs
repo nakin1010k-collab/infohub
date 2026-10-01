@@ -100,7 +100,7 @@ assert.match(adminStatusApi, /article_categories/);
 assert.match(quality, /EditorialQualityCheck/);
 assert.match(quality, /canonicalUrl/);
 assert.match(quality, /categoryCount/);
-assert.match(quality, /tagCount/);
+assert.match(quality, /tagCount/);\nassert.match(quality, /MIN_CONTENT_LENGTH/);\nassert.match(quality, /MIN_EXCERPT_LENGTH/);\nassert.match(quality, /isValidHttpUrl/);\nassert.match(quality, /Canonical URL ไม่ถูกต้อง/);
 assert.match(adminApi, /recordArticleAudit/);
 assert.match(adminApi, /tagSlugify\(name\)/);
 assert.match(articleCreateApi, /rpc\("admin_create_article"/);
