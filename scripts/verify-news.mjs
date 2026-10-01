@@ -183,10 +183,8 @@ assert(ingestRoute.includes("skippedDuplicates"), "Ingestion API must count dupl
 assert(ingestRoute.includes("failedItems"), "Ingestion API must return failed item count");
 assert(ingestRoute.includes("failureDetails"), "Ingestion API must return structured failure details");
 assert(ingestRoute.includes("failure_details"), "Ingestion API must persist structured failure details");
-const queuePage = await read("app/admin/queue/page.tsx");
-assert(queuePage.includes("failure_details"), "Queue must display structured RSS failure details");
-const sourcesPage = await read("app/admin/sources/page.tsx");
-assert(sourcesPage.includes("failure_details"), "Sources page must display structured RSS failure details");
+assert(queuePage.includes("ดูรายละเอียดรอบนี้"), "Queue must link RSS run detail instead of rendering all failure details");
+assert(sourcesPage.includes("failure_details"), "Sources page must retain latest RSS failure summary");
 const failureMigration = await read("supabase/migrations/20261001001300_ingestion_failure_details.sql");
 assert(failureMigration.includes("failure_details jsonb"), "Migration must add structured RSS failure details");
 const runPage = await read("app/admin/queue/runs/[id]/page.tsx");
@@ -223,3 +221,30 @@ assert(admin.includes("admin-kpi-grid"), "CMS must show editorial KPI dashboard"
 assert(admin.includes("publishedTodayKpi"), "CMS KPI must include today's published count");
 assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activity count");
 
+
+
+const publicNews = await read("app/news/page.tsx");
+assert(publicNews.includes("getNewsArticlesPage"), "Public news must use paginated query");
+assert(publicNews.includes("newsPage.totalPages"), "Public news must expose pagination");
+assert(publicNews.includes("/news?tag="), "Public news must support tag filtering");
+const profilePage = await read("app/profile/page.tsx");
+const settingsPage = await read("app/settings/page.tsx");
+const dashboardPage = await read("app/dashboard/page.tsx");
+assert(profilePage.includes("ProfileForm"), "Profile page must support editing");
+assert(settingsPage.includes("เปลี่ยนรหัสผ่าน"), "Settings page must expose password recovery");
+assert(dashboardPage.includes("ข่าวเผยแพร่"), "Dashboard must show content metrics");
+const imageMigration = await read("supabase/migrations/20261001001800_article_images.sql");
+assert(imageMigration.includes("image_url"), "Articles must support optional images");
+const imageForm = await read("app/admin/article-form.tsx");
+assert(imageForm.includes("รูปภาพข่าว"), "Editor must support article image URL");
+const analyticsMigration = await read("supabase/migrations/20261001001500_analytics_events.sql");
+assert(analyticsMigration.includes("analytics_events"), "Analytics migration must exist");
+const healthRoute = await read("app/api/health/route.ts");
+assert(healthRoute.includes("database"), "Health route must check database");
+const cronRoute = await read("app/api/cron/ingest/route.ts");
+assert(cronRoute.includes("CRON_SECRET"), "RSS scheduler must be protected");
+const vercelConfig = await read("vercel.json");
+assert(vercelConfig.includes("/api/cron/ingest"), "Vercel cron must schedule RSS ingestion");
+const notifications = await read("app/admin/notifications/page.tsx");
+assert(notifications.includes("NOTIFICATIONS"), "Notification center must exist");
+console.log("InfoHub Phase 6 feature smoke tests passed.");
