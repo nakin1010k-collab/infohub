@@ -120,3 +120,10 @@ const queue = read("app/admin/queue/page.tsx");
 assert(queue.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queue.includes("queue-summary"), "Editorial queue must show summary counts");
 assert(queue.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
+
+const auditMigration = read("supabase/migrations/20261001000700_article_audit_logs.sql");
+assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
+const auditHelper = read("lib/news/audit.ts");
+assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
+const articleEditor = read("app/admin/[id]/page.tsx");
+assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
