@@ -58,6 +58,13 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
             </div>
           </div>
 
+          <div className="queue-summary" aria-label="สรุปคิวข่าว">
+            <div className="kpi-card"><span>ทั้งหมด</span><strong>{total}</strong></div>
+            <div className="kpi-card"><span>RSS</span><strong>{rssCount}</strong></div>
+            <div className="kpi-card"><span>เขียนเอง</span><strong>{manualCount}</strong></div>
+            <div className="kpi-card"><span>AI ช่วยแล้ว</span><strong>{aiCount}</strong></div>
+          </div>
+
           <form className="admin-filters" method="get">
             <select name="origin" defaultValue={origin} aria-label="กรองที่มา">
               <option value="all">ทุกที่มา</option>
