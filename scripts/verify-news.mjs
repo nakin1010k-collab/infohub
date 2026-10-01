@@ -173,6 +173,9 @@ const sourcesPage = await read("app/admin/sources/page.tsx");
 assert(sourcesPage.includes("latestBySource"), "Sources page must calculate per-source health");
 assert(sourcesPage.includes("healthLabel"), "Sources page must show source health");
 assert(sourcesPage.includes("ข้อผิดพลาดล่าสุด"), "Sources page must show latest RSS error");
+const sourceForm = await read("app/admin/source-form.tsx");
+assert(sourceForm.includes("retryStatus"), "Source form must receive RSS retry status");
+assert(sourceForm.includes("ingest(true)"), "Source form must expose RSS retry action");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
