@@ -99,3 +99,6 @@ Do not treat a phase as complete until its CI verification and exact commit SHA 
 - `/admin/analytics` — lightweight article view analytics stored in Supabase.
 - Public SEO routes: `/sitemap.xml` and `/robots.txt`.
 - AI enrichment remains optional; the basic RSS import flow does not require `OPENAI_API_KEY`.
+
+
+> Phase: RSS ingestion hardening, editorial dashboard, public pagination/SEO, and scheduler are implemented on the feature branch; production environment verification remains separate.
