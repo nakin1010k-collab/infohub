@@ -233,7 +233,8 @@ assert(queuePage.includes("sort === \"newest\""), "Editorial queue must honor so
 const auditMigration = await read("supabase/migrations/20261001000700_article_audit_logs.sql");
 assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
 const auditHelper = await read("lib/news/audit.ts");
-assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");\nassert(auditHelper.includes("record_article_audit"), "Audit helper must use the protected audit RPC");
+assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
+assert(auditHelper.includes("record_article_audit"), "Audit helper must use the protected audit RPC");
 const articleEditor = await read("app/admin/[id]/page.tsx");
 assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
 
