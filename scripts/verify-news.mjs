@@ -181,6 +181,14 @@ assert(sourceForm.includes("failedItems"), "Source form must show failed item co
 const ingestRoute = await read("app/api/admin/ingest/route.ts");
 assert(ingestRoute.includes("skippedDuplicates"), "Ingestion API must count duplicate items");
 assert(ingestRoute.includes("failedItems"), "Ingestion API must return failed item count");
+assert(ingestRoute.includes("failureDetails"), "Ingestion API must return structured failure details");
+assert(ingestRoute.includes("failure_details"), "Ingestion API must persist structured failure details");
+const queuePage = await read("app/admin/queue/page.tsx");
+assert(queuePage.includes("failure_details"), "Queue must display structured RSS failure details");
+const sourcesPage = await read("app/admin/sources/page.tsx");
+assert(sourcesPage.includes("failure_details"), "Sources page must display structured RSS failure details");
+const failureMigration = await read("supabase/migrations/20261001001300_ingestion_failure_details.sql");
+assert(failureMigration.includes("failure_details jsonb"), "Migration must add structured RSS failure details");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
