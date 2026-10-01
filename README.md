@@ -102,3 +102,39 @@ Do not treat a phase as complete until its CI verification and exact commit SHA 
 
 
 > Phase: RSS ingestion hardening, editorial dashboard, public pagination/SEO, and scheduler are implemented on the feature branch; production environment verification remains separate.
+
+
+## Buyer-ready handover
+
+See [BUYER_HANDOVER.md](./BUYER_HANDOVER.md) for included assets, buyer-owned configuration, known limitations, security boundaries, and the pre-sale verification checklist.
+
+### Public URL configuration
+
+Set `NEXT_PUBLIC_SITE_URL` to the buyer-owned HTTPS public URL in production. The application uses this value for metadata, canonical URLs, sitemap, robots, and article canonical URLs. On Vercel, if it is omitted in a production deployment, the application can fall back to Vercel's stable production project hostname; preview deployment URLs are not used as canonical URLs by design.
+
+### Public recovery behavior
+
+Public homepage, search, and news listing pages degrade to an explicit configuration notice when Supabase is unavailable. They do not create fake articles or fake users. `/status` and `/api/health` expose configuration/health state without returning raw database error messages.
+
+### Legal templates
+
+`/privacy` and `/terms` are draft templates for handover. They are not legal advice and must be reviewed and adapted by the buyer before production use.
+
+### Production checklist
+
+- [ ] Set `NEXT_PUBLIC_SITE_URL` to the buyer's HTTPS domain
+- [ ] Configure buyer-owned Supabase project and Auth redirects
+- [ ] Apply all migrations and verify RLS
+- [ ] Configure server-only secrets in Vercel
+- [ ] Configure permitted RSS/Atom sources
+- [ ] Verify CMS create/edit/publish/archive flow
+- [ ] Verify scheduled ingestion with `CRON_SECRET`
+- [ ] Configure optional OpenAI integration only if needed
+- [ ] Replace or clearly label demo content
+- [ ] Review Privacy Policy and Terms
+- [ ] Verify `/sitemap.xml` and `/robots.txt` on the production domain
+- [ ] Run `npm run test:news`, `npm run lint`, `npm run typecheck`, and `npm run build`
+
+## Licensing / IP
+
+The repository currently does not include an open-source `LICENSE`. Licensing, copyright assignment, exclusivity, and IP transfer terms are business/legal terms to be agreed separately as part of a sale. Do not add an open-source license without the owner's explicit decision.

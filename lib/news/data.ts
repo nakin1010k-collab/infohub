@@ -30,7 +30,7 @@ const ARTICLE_SELECT = "id, slug, title, excerpt, content, canonical_url, image_
 
 export async function getNewsArticles(categorySlug?: string) {
   const supabase = await createClient();
-  let query = supabase.from("articles").select(ARTICLE_SELECT).eq("status", "published").order("published_at", { ascending: false });
+  let query = supabase.from("articles").select(ARTICLE_SELECT).eq("status", "published").order("published_at", { ascending: false }).limit(50);
 
   if (categorySlug && categorySlug !== "all") {
     const { data: category, error } = await supabase.from("categories").select("id")
@@ -89,12 +89,12 @@ export async function getAllTags() {
 
 export async function searchNews(query: string) {
   const supabase = await createClient();
-  const normalized = query.trim();
+  const normalized = query.trim().slice(0, 120);
   let request = supabase.from("articles").select(ARTICLE_SELECT)
-    .eq("status", "published").order("published_at", { ascending: false });
+    .eq("status", "published").order("published_at", { ascending: false }).limit(50);
   if (normalized) {
-    const escaped = normalized.replace(/[%_]/g, "\\$&");
-    request = request.or("title.ilike.%" + escaped + "%,excerpt.ilike.%" + escaped + "%,content.ilike.%" + escaped + "%");
+    const escaped = normalized.replace(/[\\%_]/g, "\\$&");
+    request = request.or("title.ilike.%" + escaped + "%,excerpt.ilike.%" + escaped + "%,content.ilike.%" + escaped + "%").limit(50);
   }
   const { data, error } = await request;
   if (error) throw error;
@@ -152,4 +152,49 @@ export async function getTagBySlug(slug: string) {
   const { data, error } = await supabase.from("tags").select("name,slug").eq("slug", slug).maybeSingle();
   if (error) throw error;
   return data;
+}
+
+
+export type PublicDataResult<T> = {
+  data: T;
+  degraded: boolean;
+};
+
+export async function getPublicNewsArticles(categorySlug?: string): Promise<PublicDataResult<NewsArticle[]>> {
+  try {
+    return { data: await getNewsArticles(categorySlug), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
+}
+
+export async function searchPublicNews(query: string): Promise<PublicDataResult<NewsArticle[]>> {
+  try {
+    return { data: await searchNews(query), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
+}
+
+export async function getPublicNewsArticlesPage(
+  options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {},
+): Promise<PublicDataResult<NewsPage>> {
+  try {
+    return { data: await getNewsArticlesPage(options), degraded: false };
+  } catch {
+    const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10));
+    const page = Math.max(1, options.page ?? 1);
+    return {
+      data: { items: [], total: 0, page, pageSize, totalPages: 0 },
+      degraded: true,
+    };
+  }
+}
+
+export async function getPublicTags(): Promise<PublicDataResult<{ name: string; slug: string }[]>> {
+  try {
+    return { data: await getAllTags(), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
 }

@@ -4,22 +4,31 @@ function normalizeSiteUrl(value: string) {
   return value.replace(/\/$/, "");
 }
 
+function parseSiteUrl(value: string) {
+  try {
+    const url = new URL(normalizeSiteUrl(value));
+    if (url.protocol !== "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 export function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-
   if (configuredUrl) {
-    try {
-      return new URL(normalizeSiteUrl(configuredUrl));
-    } catch {
-      // Fall through to the deployment-aware fallback.
-    }
+    const parsed = parseSiteUrl(configuredUrl);
+    if (parsed) return parsed;
   }
 
-  // On Vercel, use the production deployment hostname when the public URL
-  // has not been configured explicitly. Preview deployments must not become
-  // the canonical production URL.
-  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_URL) {
-    return new URL(`https://${process.env.VERCEL_URL}`);
+  if (process.env.VERCEL_ENV === "production") {
+    const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+    const parsed = productionUrl ? parseSiteUrl(`https://${productionUrl}`) : null;
+    if (parsed) return parsed;
+
+    const deploymentUrl = process.env.VERCEL_URL?.trim();
+    const deploymentParsed = deploymentUrl ? parseSiteUrl(`https://${deploymentUrl}`) : null;
+    if (deploymentParsed) return deploymentParsed;
   }
 
   return new URL(DEFAULT_SITE_URL);

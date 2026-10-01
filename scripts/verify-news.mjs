@@ -42,16 +42,22 @@ const login = await read("app/login/page.tsx");
 const register = await read("app/register/page.tsx");
 const forgotPassword = await read("app/forgot-password/page.tsx");
 const resetPassword = await read("app/reset-password/page.tsx");
+const supabaseClient = await read("lib/supabase/client.ts");
+const health = await read("app/api/health/route.ts");
+const callback = await read("app/auth/callback/route.ts");
+const siteUrl = await read("lib/site-url.ts");
+const statusPage = await read("app/status/page.tsx");
+const publicNotice = await read("components/public-data-notice.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getAllTags\(\)/);
+assert.match(news, /getPublicTags\(\)/);
 assert.match(news, /article\.tags\.map/);
 assert.match(news, /\/news\?tag=\$\{encodeURIComponent\(tag\.slug\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
 
 assert.match(search, /export const metadata: Metadata/);
 assert.match(search, /robots: \{ index: false, follow: true \}/);
-assert.match(search, /searchNews\(query\)/);
+assert.match(search, /searchPublicNews\(query\)/);
 assert.match(search, /name="q"/);
 assert.match(search, /\/news\/\$\{article\.slug\}/);
 
@@ -81,7 +87,7 @@ assert.match(admin, /\/admin\/new/);
 assert.match(adminActions, /\/admin\/\$\{id\}/);
 assert.match(adminForm, /\/api\/admin\/articles/);
 assert.match(adminForm, /published/);
-assert.match(adminApiItem, /\.update\(/);
+assert.match(adminApiItem, /rpc\("admin_update_article"/);
 assert.match(adminApiItem, /published_at/);
 assert.match(adminStatusApi, /published_at/);
 assert.match(adminStatusApi, /\.update\(/);
@@ -92,6 +98,7 @@ assert.match(articleCreateApi, /checkEditorialQuality/);
 assert.match(articleCreateApi, /status===\"published\"/);
 assert.match(articleUpdateApi, /checkEditorialQuality/);
 assert.match(articleUpdateApi, /status===\"published\"/);
+assert.match(articleUpdateApi, /p_image_url/);
 assert.match(adminForm, /ยังขาด/);
 assert.match(adminForm, /qualityMissing/);
 assert.match(quality, /EditorialQualityCheck/);
@@ -111,6 +118,10 @@ assert.match(articleUpdateApi, /rpc\("admin_update_article"/);
 assert.match(txMigration, /security definer/);
 assert.match(txMigration, /admin_create_article/);
 assert.match(txMigration, /admin_update_article/);
+const hardeningMigration = await read("supabase/migrations/20261002002000_security_and_article_write_hardening.sql");
+assert.match(hardeningMigration, /search_path = pg_catalog, public, auth/);
+assert.match(hardeningMigration, /revoke execute/);
+assert.match(hardeningMigration, /auth\.jwt\(\)->>\x27role\x27/);
 assert.match(ingestApi, /rpc\("admin_import_article"/);
 assert.match(ingestApi, /runStatus = failures\.length > 0/);
 assert.match(ingestApi, /status: runStatus/);
@@ -145,6 +156,23 @@ assert.match(signOut, /try \{/);
 assert.match(signOut, /finally \{/);
 assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undefined\}/);
 assert.match(uiStates, /onAction=\{onRetry\}/);
+
+assert.match(supabaseClient, /SupabaseBrowserConfigError/);
+assert.match(supabaseClient, /SUPABASE_BROWSER_CONFIG_MISSING/);
+assert.match(login, /SupabaseBrowserConfigError/);
+assert.match(login, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+assert.match(login, /ระบบสมาชิกไม่ตอบสนอง/);
+assert.match(register, /SupabaseBrowserConfigError/);
+assert.match(register, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+assert.match(register, /ระบบสมาชิกไม่ตอบสนอง/);
+assert.match(health, /database: "unconfigured"/);
+assert.doesNotMatch(health, /message: error\\.message/);
+assert.match(callback, /try \{/);
+assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL/);
+assert.match(siteUrl, /VERCEL_PROJECT_PRODUCTION_URL/);
+assert.match(statusPage, /database_query_failed/);
+assert.doesNotMatch(statusPage, /error\\.message/);
+assert.match(publicNotice, /Supabase/);
 
 assert.match(login, /isSafeInternalPath/);
 assert.match(login, /!value\.startsWith\("\/\/"\)/);
@@ -206,6 +234,7 @@ const auditMigration = await read("supabase/migrations/20261001000700_article_au
 assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
 const auditHelper = await read("lib/news/audit.ts");
 assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
+assert(auditHelper.includes("record_article_audit"), "Audit helper must use the protected audit RPC");
 const articleEditor = await read("app/admin/[id]/page.tsx");
 assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
 
@@ -225,7 +254,7 @@ assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activit
 
 
 const publicNews = await read("app/news/page.tsx");
-assert(publicNews.includes("getNewsArticlesPage"), "Public news must use paginated query");
+assert(publicNews.includes("getPublicNewsArticlesPage"), "Public news must use paginated query");
 assert(publicNews.includes("newsPage.totalPages"), "Public news must expose pagination");
 assert(publicNews.includes("/news?tag="), "Public news must support tag filtering");
 const newsData = await read("lib/news/data.ts");

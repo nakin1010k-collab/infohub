@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, SupabaseBrowserConfigError } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -53,8 +53,12 @@ export default function RegisterPage() {
       } else {
         setSuccess("สร้างบัญชีแล้ว กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชีก่อนเข้าสู่ระบบ");
       }
-    } catch {
-      setError("ยังเชื่อมต่อระบบสมาชิกไม่ได้ กรุณาตรวจสอบการตั้งค่า Supabase");
+    } catch (error) {
+      if (error instanceof SupabaseBrowserConfigError) {
+        setError("ระบบสมาชิกยังไม่ได้ตั้งค่าในเว็บนี้ กรุณาตรวจสอบ NEXT_PUBLIC_SUPABASE_URL และ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ใน production");
+      } else {
+        setError("ระบบสมาชิกไม่ตอบสนองในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือตรวจสอบสถานะระบบ");
+      }
     } finally {
       setLoading(false);
     }

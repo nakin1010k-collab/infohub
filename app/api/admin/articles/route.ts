@@ -16,12 +16,11 @@ export async function POST(request:Request){
  if(!title||!slug||!content||!categoryId)return NextResponse.json({error:"กรอกหัวข้อ, slug, เนื้อหา และหมวดหมู่ให้ครบ"},{status:400});
  const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600));
  const imageUrl=b.imageUrl?.trim()||null;
- if(imageUrl){try{const u=new URL(imageUrl);if(u.protocol!=="https:")return NextResponse.json({error:"รูปภาพต้องใช้ HTTPS"},{status:400});}catch{return NextResponse.json({error:"URL รูปภาพไม่ถูกต้อง"},{status:400});}} const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString(); const publishedAt=status==="published"?new Date().toISOString():null;
+ if(imageUrl){try{const u=new URL(imageUrl);if(u.protocol!=="https:")return NextResponse.json({error:"รูปภาพต้องใช้ HTTPS"},{status:400});}catch{return NextResponse.json({error:"URL รูปภาพไม่ถูกต้อง"},{status:400});}}
+ const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString(); const publishedAt=status==="published"?new Date().toISOString():null;
  const tagPayload=parseTags(b.tags).map(name=>({name,slug:tagSlugify(name)})).filter(tag=>tag.slug);
  if(status==="published"){const quality=checkEditorialQuality({title,excerpt:b.excerpt?.trim()||null,content,canonicalUrl,categoryCount:categoryId?1:0,tagCount:tagPayload.length});if(!quality.ready)return NextResponse.json({error:"ยังเผยแพร่ไม่ได้",quality},{status:422});}
- const {data:articleId,error}=await supabase.rpc("admin_create_article",{p_actor_id:user.id,p_title:title,p_slug:slug,p_excerpt:b.excerpt?.trim()||null,p_content:content,p_status:status,p_category_id:categoryId,p_tags:tagPayload,p_reading_minutes:minutes,p_canonical_url:canonicalUrl,p_published_at:publishedAt});
+ const {data:articleId,error}=await supabase.rpc("admin_create_article",{p_actor_id:user.id,p_title:title,p_slug:slug,p_excerpt:b.excerpt?.trim()||null,p_content:content,p_status:status,p_category_id:categoryId,p_tags:tagPayload,p_reading_minutes:minutes,p_canonical_url:canonicalUrl,p_published_at:publishedAt,p_image_url:imageUrl});
  if(error)return NextResponse.json({error:error.message},{status:400});
- const {error:imageError}=await supabase.from("articles").update({image_url:imageUrl}).eq("id",articleId);
- if(imageError)return NextResponse.json({error:imageError.message},{status:400});
  return NextResponse.json({article:{id:articleId,slug}},{status:201});
 }
