@@ -6,11 +6,7 @@ const articlesTableId = process.env.APPWRITE_ARTICLES_TABLE_ID || "articles";
 
 export async function GET() {
   const started = Date.now();
-  const configured = Boolean(
-    process.env.APPWRITE_DATABASE_ID &&
-      process.env.APPWRITE_ARTICLES_TABLE_ID &&
-      process.env.APPWRITE_API_KEY,
-  );
+  const configured = Boolean(process.env.APPWRITE_API_KEY);
 
   if (!configured) {
     return NextResponse.json(
@@ -20,7 +16,7 @@ export async function GET() {
   }
 
   try {
-    const query = encodeURIComponent("limit(1)");
+    const query = encodeURIComponent(JSON.stringify({ method: "limit", values: [1] }));
     const response = await appwriteRequest(
       `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(articlesTableId)}/rows?queries[]=${query}`,
       { method: "GET" },
