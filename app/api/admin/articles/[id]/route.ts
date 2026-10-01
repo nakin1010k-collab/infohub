@@ -12,13 +12,13 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const b=(await request.json()) as Payload; const title=b.title?.trim()??""; const slug=slugify(b.slug||title); const content=b.content?.trim()??""; const categoryId=b.categoryId?.trim()??""; const status=b.status??"draft";
  if(!title||!slug||!content||!categoryId)return NextResponse.json({error:"กรอกหัวข้อ, slug, เนื้อหา และหมวดหมู่ให้ครบ"},{status:400});
  const existing=await getAppwriteRow("articles",id); if(!existing)return NextResponse.json({error:"ไม่พบข่าวนี้"},{status:404});
- const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600)); const imageUrl=b.imageUrl?.trim()||null;
+ const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600)); const imageUrl=b.imageUrl?.trim()||null; const excerpt=b.excerpt?.trim()??"";
  if(imageUrl){try{const u=new URL(imageUrl);if(u.protocol!=="https:")return NextResponse.json({error:"รูปภาพต้องใช้ HTTPS"},{status:400});}catch{return NextResponse.json({error:"URL รูปภาพไม่ถูกต้อง"},{status:400});}}
  const publishedAt=status==="published"?(existing.published_at ?? new Date().toISOString()):null; const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString();
  const previousStatus=String(existing.status ?? "draft"); const tagPayload=parseTags(b.tags).map(name=>({name,slug:tagSlugify(name)})).filter(tag=>tag.slug);
- if(status==="published"){const quality=checkEditorialQuality({title,excerpt:b.excerpt?.trim()||null,content,canonicalUrl,categoryCount:1,tagCount:tagPayload.length});if(!quality.ready)return NextResponse.json({error:"ยังเผยแพร่ไม่ได้",quality},{status:422});}
+ if(status==="published"){const quality=checkEditorialQuality({title,excerpt:excerpt||null,content,canonicalUrl,categoryCount:1,tagCount:tagPayload.length});if(!quality.ready)return NextResponse.json({error:"ยังเผยแพร่ไม่ได้",quality},{status:422});}
  try {
-   await updateAppwriteRow("articles",id,{title,slug,excerpt:b.excerpt?.trim()||null,content,status,reading_minutes:minutes,canonical_url:canonicalUrl,published_at:publishedAt,image_url:imageUrl});
+   await updateAppwriteRow("articles",id,{title,slug,excerpt,content,status,reading_minutes:minutes,canonical_url:canonicalUrl,published_at:publishedAt,image_url:imageUrl});
    const oldCats=await listAllAppwriteRows("article_categories",[appwriteQueries.queryEqual("article_id",id)]); for(const row of oldCats) { try { await import("@/lib/appwrite/database").then(m=>m.deleteAppwriteRow("article_categories",String(row.$id))); } catch {} }
    await createAppwriteRow("article_categories",{article_id:id,category_id:categoryId});
    const oldTags=await listAllAppwriteRows("article_tags",[appwriteQueries.queryEqual("article_id",id)]); for(const row of oldTags) { try { await import("@/lib/appwrite/database").then(m=>m.deleteAppwriteRow("article_tags",String(row.$id))); } catch {} }
