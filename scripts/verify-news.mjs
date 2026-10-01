@@ -169,3 +169,5 @@ assert(queueActions.includes('"/admin/" + id + "/preview"'), "Editorial queue mu
 assert(admin.includes("admin-kpi-grid"), "CMS must show editorial KPI dashboard");
 assert(admin.includes("publishedTodayKpi"), "CMS KPI must include today's published count");
 assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activity count");
+
+assert.match(migrationNames, /20261001001100_ingestion_partial_status\.sql/);
