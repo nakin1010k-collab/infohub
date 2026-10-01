@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState } from "@/components/ui-states";
-import { newsArticles } from "@/lib/news/mock-data";
+import { getNewsArticles } from "@/lib/news/data";
 
 const categories = [
   { label: "ข่าวเด่น", slug: "news", icon: "✦" },
@@ -11,10 +11,10 @@ const categories = [
   { label: "ความรู้", slug: "knowledge", icon: "?" },
 ];
 
-const featured = newsArticles.slice(0, 3);
-const latest = newsArticles;
-
 function HeroMascot() {
+  const latest = await getNewsArticles();
+  const featured = latest.slice(0, 3);
+
   return (
     <div className="hero-mascot" aria-label="มาสคอตแมวของ InfoHub" role="img">
       <div className="mascot-glow" aria-hidden="true" />
@@ -44,7 +44,7 @@ function HeroMascot() {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <>
       <a className="skip-link" href="#main-content">
