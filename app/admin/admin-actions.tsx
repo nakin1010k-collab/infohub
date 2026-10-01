@@ -19,7 +19,7 @@ export default function AdminActions({ id, slug, status }: { id: string; slug: s
 
   return (
     <div className="admin-actions">
-      <a className="state-action" href={`/news/${slug}`} aria-label="เปิดข่าว">ดู</a>
+      <a className="state-action" href={status === "published" ? `/news/${slug}` : `/admin/${id}/preview`} aria-label="เปิดข่าว">ดู</a>
       <a className="state-action" href={`/admin/${id}`}>แก้ไข</a>
       {status !== "published" && <button className="state-action" disabled={busy} onClick={() => changeStatus("published")}>เผยแพร่</button>}
       {status === "published" && <button className="state-action" disabled={busy} onClick={() => changeStatus("draft")}>ถอนเผยแพร่</button>}

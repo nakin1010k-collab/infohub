@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
 import { getNewsArticle, getRelatedNews } from "@/lib/news/data";
+import ArticleViewTracker from "@/app/components/article-view-tracker";
 
 type NewsDetailPageProps = { params: Promise<{ slug: string }> };
 
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: NewsDetailPageProps): Promise
   const { slug } = await params;
   const article = await getNewsArticle(slug);
   if (!article) return { title: "ไม่พบบทความ | InfoHub", description: "ไม่พบบทความที่ต้องการบน InfoHub" };
-  return { title: `${article.title} | InfoHub`, description: article.excerpt, keywords: [article.category, "ข่าว", "InfoHub"], alternates: { canonical: `/news/${article.slug}` }, openGraph: { title: article.title, description: article.excerpt, type: "article", publishedTime: article.publishedAt, url: `/news/${article.slug}` } };
+  return { title: `${article.title} | InfoHub`, description: article.excerpt, keywords: [article.category, "ข่าว", "InfoHub"], alternates: { canonical: `/news/${article.slug}` }, openGraph: { title: article.title, description: article.excerpt, type: "article", publishedTime: article.publishedAt, url: `/news/${article.slug}` }, twitter: { card: "summary", title: article.title, description: article.excerpt } };
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
@@ -28,8 +29,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     <main className="auth-page">
       <div className={`auth-shell ${styles.shell}`}>
         <Link className="auth-brand" href="/" aria-label="InfoHub หน้าแรก"><span className="brand-mark" aria-hidden="true">🐱</span><span>InfoHub</span></Link>
-        <article className="auth-card" aria-labelledby="article-title">
-          <div className="auth-intro"><div className="news-meta"><span className="tag">{article.category}</span><span>{formatPublishedAt(article.publishedAt)}</span><span>อ่าน {article.readingMinutes} นาที</span></div><h1 id="article-title">{article.title}</h1><p>{article.excerpt}</p></div>
+        <article className="auth-card" aria-labelledby="article-title"><ArticleViewTracker slug={article.slug} />
+          {article.imageUrl ? <img src={article.imageUrl} alt="" style={{width:"100%",maxHeight:"420px",objectFit:"cover",borderRadius:"20px",marginBottom:"20px"}} /> : null}<div className="auth-intro"><div className="news-meta"><span className="tag">{article.category}</span><span>{formatPublishedAt(article.publishedAt)}</span><span>อ่าน {article.readingMinutes} นาที</span></div><h1 id="article-title">{article.title}</h1><p>{article.excerpt}</p></div>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"NewsArticle","headline":article.title,"description":article.excerpt,"datePublished":article.publishedAt,"dateModified":article.publishedAt,"mainEntityOfPage":article.canonicalUrl,"url":article.canonicalUrl,"keywords":article.tags})}} />
           <div className={styles.articleBody}>
             {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             <div className={styles.notice} role="note">เนื้อหานี้มาจากฐานข้อมูล InfoHub และอยู่ในสถานะเผยแพร่</div>
