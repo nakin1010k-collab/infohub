@@ -20,7 +20,7 @@ create or replace function public.notify_ingestion_failure(
 declare v_role text; v_count integer:=0;
 begin
  select role into v_role from public.profiles where id=auth.uid();
- if auth.uid() is null or (auth.role() <> 'service_role' and (p_actor_id is null or p_actor_id<>auth.uid() or v_role not in ('editor','admin'))) then raise exception 'forbidden'; end if;
+ if auth.role() <> 'service_role' and (auth.uid() is null or p_actor_id is null or p_actor_id<>auth.uid() or v_role not in ('editor','admin')) then raise exception 'forbidden'; end if;
  insert into public.notifications(recipient_id,type,title,message)
  select id,'rss_failure','RSS นำเข้ามีปัญหา',left('แหล่งข่าว '||coalesce(p_source_name,'ไม่ระบุ')||' รอบ '||p_run_id::text||': '||coalesce(p_message,''),500)
  from public.profiles where role in ('editor','admin');
