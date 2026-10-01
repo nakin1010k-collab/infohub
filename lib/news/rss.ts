@@ -6,6 +6,7 @@ export type FeedItem = {
   excerpt: string;
   publishedAt: string | null;
   authorName: string | null;
+  imageUrl: string | null;
 };
 
 function decodeXml(value: string) {
@@ -61,6 +62,8 @@ export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
     const url = absoluteUrl(textOf(block, "link") || atomLink || textOf(block, "guid"), feedUrl);
     const rawDescription = textOf(block, "description") || textOf(block, "summary") || textOf(block, "content");
     const publishedRaw = textOf(block, "pubDate") || textOf(block, "published") || textOf(block, "updated");
+    const imageMatch = block.match(/<enclosure[^>]+url=[\"']([^\"']+)[\"']/i) || block.match(/<media:(?:content|thumbnail)[^>]+url=[\"']([^\"']+)[\"']/i);
+    const imageUrl = absoluteUrl(imageMatch?.[1] ?? "", feedUrl);
     const parsedDate = publishedRaw ? new Date(publishedRaw) : null;
     return {
       title: stripHtml(textOf(block, "title")),
@@ -68,6 +71,7 @@ export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
       excerpt: stripHtml(rawDescription).slice(0, 500),
       publishedAt: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null,
       authorName: textOf(block, "author") || textOf(block, "dc:creator") || null,
+      imageUrl: imageUrl || null,
     };
   }).filter(item => item.title && item.url);
 }
