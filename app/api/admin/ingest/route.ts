@@ -131,23 +131,23 @@ export async function POST(request: Request) {
 
       const baseSlug = slugify(item.title) || "imported-" + Date.now();
       const slug = baseSlug + "-" + crypto.randomUUID().slice(0, 8);
-      const { data: inserted, error } = await supabase.from("articles").insert({
-        slug,
-        title: item.title,
-        excerpt: item.excerpt || null,
-        content: item.excerpt || null,
-        canonical_url: item.url,
-        source_id: source.id,
-        author_name: item.authorName,
-        published_at: null,
-        status: "draft",
-        reading_minutes: Math.max(1, Math.ceil((item.excerpt || item.title).length / 600)),
-        ai_enriched_at: null,
-      }).select("id").single();
+      const { data: inserted, error } = await supabase.rpc("admin_import_article", {
+        p_actor_id: user.id,
+        p_source_id: source.id,
+        p_source_name: source.name,
+        p_slug: slug,
+        p_title: item.title,
+        p_excerpt: item.excerpt || null,
+        p_content: item.excerpt || null,
+        p_canonical_url: item.url,
+        p_author_name: item.authorName || null,
+        p_reading_minutes: Math.max(1, Math.ceil((item.excerpt || item.title).length / 600)),
+        p_category_id: null,
+        p_tags: [],
+      });
 
       if (!error && inserted) {
         created++;
-        await recordArticleAudit(supabase, inserted.id, user.id, "imported", { sourceId: source.id, sourceName: source.name, canonicalUrl: item.url });
 
         if (await enrichWithRules(supabase, inserted.id)) {
           ruleEnriched++;
