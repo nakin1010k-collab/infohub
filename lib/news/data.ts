@@ -26,12 +26,12 @@ type ArticleRow = {
 
 type CategoryRow = {
   article_id: string;
-  category: { name: string; slug: string } | null;
+  category: { name: string; slug: string }[] | null;
 };
 
 type TagRow = {
   article_id: string;
-  tag: { name: string } | null;
+  tag: { name: string }[] | null;
 };
 
 async function loadPublishedArticles() {
@@ -60,16 +60,18 @@ async function loadPublishedArticles() {
 
   const categoriesByArticle = new Map<string, { name: string; slug: string }>();
   for (const link of (categoryLinks ?? []) as CategoryRow[]) {
-    if (link.category && !categoriesByArticle.has(link.article_id)) {
-      categoriesByArticle.set(link.article_id, link.category);
+    const category = link.category?.[0];
+    if (category && !categoriesByArticle.has(link.article_id)) {
+      categoriesByArticle.set(link.article_id, category);
     }
   }
 
   const tagsByArticle = new Map<string, string[]>();
   for (const link of (tagLinks ?? []) as TagRow[]) {
-    if (!link.tag) continue;
+    const tag = link.tag?.[0];
+    if (!tag) continue;
     const tags = tagsByArticle.get(link.article_id) ?? [];
-    tags.push(link.tag.name);
+    tags.push(tag.name);
     tagsByArticle.set(link.article_id, tags);
   }
 
