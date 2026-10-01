@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { appwriteRequest, getAppwriteError } from "@/lib/appwrite/request";
 
+const databaseId = process.env.APPWRITE_DATABASE_ID || "infohub";
+const articlesTableId = process.env.APPWRITE_ARTICLES_TABLE_ID || "articles";
+
 export async function GET() {
   const started = Date.now();
   const configured = Boolean(
@@ -19,7 +22,7 @@ export async function GET() {
   try {
     const query = encodeURIComponent("limit(1)");
     const response = await appwriteRequest(
-      `/tablesdb/${encodeURIComponent(process.env.APPWRITE_DATABASE_ID!)}/tables/${encodeURIComponent(process.env.APPWRITE_ARTICLES_TABLE_ID!)}/rows?queries[]=${query}`,
+      `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(articlesTableId)}/rows?queries[]=${query}`,
       { method: "GET" },
       undefined,
       process.env.APPWRITE_API_KEY,
