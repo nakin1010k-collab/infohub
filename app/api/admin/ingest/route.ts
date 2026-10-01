@@ -213,6 +213,9 @@ export async function POST(request: Request) {
       item_details: itemDetails.slice(0, 500),
       finished_at: new Date().toISOString(),
     }).eq("id", run.id);
+    if (failures.length > 0) {
+      await supabase.rpc("notify_ingestion_failure", { p_actor_id: user.id, p_source_name: source.name, p_run_id: run.id, p_message: failures.slice(0, 3).join(" | ") });
+    }
     if (runStatus !== "failed") {
       await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
     }
