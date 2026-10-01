@@ -7,12 +7,12 @@ InfoHub is a responsive Thai information hub for news, knowledge, and data, usin
 - Next.js 15 App Router + React 19
 - TypeScript with strict checking
 - ESLint 9 + Next.js rules
-- Supabase Auth via `@supabase/ssr` and `@supabase/supabase-js`
+- Appwrite Auth + TablesDB
 - GitHub Actions verification: `npm ci`, news/search smoke tests, lint, typecheck, production build
 
 ## Local development
 
-Create `.env.local` from `.env.example` and provide the InfoHub Supabase project URL and publishable key.
+Create `.env.local` from `.env.example` and provide the InfoHub Appwrite project configuration and server API key.
 
 ```bash
 npm install
@@ -53,22 +53,20 @@ npm run build
 
 ## Authentication architecture
 
-- Browser client: `lib/supabase/client.ts`
-- Server client: `lib/supabase/server.ts`
-- Session refresh / protected-route enforcement: `middleware.ts`
-- Protected routes: `/profile`, `/dashboard`, `/settings`, `/admin`
-- Middleware verifies sessions with Supabase `getClaims()` and refreshes auth cookies.
+- Browser/server authentication uses Appwrite sessions via `lib/appwrite/*`.
+- Session and protected-route enforcement: `middleware.ts`.
+- Protected routes: `/profile`, `/dashboard`, `/settings`, `/admin`.
 - Login redirects safely back to an internal `next` path.
 - Sign-out is handled by `components/sign-out-button.tsx`.
-- No Supabase service-role secret is used or committed.
+- Appwrite API keys remain server-side and are never committed.
 
 ## Verification status
 
 Phase 1 is being hardened around a single Supabase Auth architecture. The production site URL now falls back to the Vercel production hostname when `NEXT_PUBLIC_SITE_URL` is not explicitly configured, and email verification/password recovery use the `/auth/callback` exchange flow.
 
-Live end-to-end Auth verification still requires the production Supabase project settings and redirect URLs to be configured correctly.
+Live end-to-end Auth verification requires the production Appwrite project and session configuration to be configured correctly.
 
-News listing/detail/search read published articles from Supabase. Editorial writes are protected by editor/admin roles and RLS. RSS/Atom ingestion stores imported items as `draft` so an editor must review before publishing. Configure source `feed_url` values from `/admin/sources` and run ingestion there.
+News listing/detail/search read published articles from Appwrite TablesDB. Editorial writes are protected by editor/admin roles and server-side authorization. RSS/Atom ingestion stores imported items as `draft` so an editor must review before publishing. Configure source `feed_url` values from `/admin/sources` and run ingestion there.
 
 ## $0-first editorial flow
 
@@ -114,7 +112,7 @@ Set `NEXT_PUBLIC_SITE_URL` to the buyer-owned HTTPS public URL in production. Th
 
 ### Public recovery behavior
 
-Public homepage, search, and news listing pages degrade to an explicit configuration notice when Supabase is unavailable. They do not create fake articles or fake users. `/status` and `/api/health` expose configuration/health state without returning raw database error messages.
+Public homepage, search, and news listing pages degrade to an explicit configuration notice when Appwrite is unavailable. They do not create fake articles or fake users. `/status` and `/api/health` expose configuration/health state without returning raw database error messages.
 
 ### Legal templates
 
@@ -123,8 +121,8 @@ Public homepage, search, and news listing pages degrade to an explicit configura
 ### Production checklist
 
 - [ ] Set `NEXT_PUBLIC_SITE_URL` to the buyer's HTTPS domain
-- [ ] Configure buyer-owned Supabase project and Auth redirects
-- [ ] Apply all migrations and verify RLS
+- [ ] Configure buyer-owned Appwrite project, TablesDB, and Auth
+- [ ] Provision Appwrite TablesDB schema and verify permissions/
 - [ ] Configure server-only secrets in Vercel
 - [ ] Configure permitted RSS/Atom sources
 - [ ] Verify CMS create/edit/publish/archive flow
