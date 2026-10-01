@@ -136,7 +136,7 @@ assert(activityPage.includes('name="days"'), "Editorial activity must filter by 
 const preview = await read("app/admin/[id]/preview/page.tsx");
 assert(preview.includes("EDITORIAL PREVIEW"), "Draft preview page must exist");
 assert(preview.includes('["editor", "admin"]'), "Draft preview must require editorial role");
-assert(queueActions.includes("/admin/" + " + id + " + "/preview"), "Editorial queue must use protected draft preview");
+assert(queueActions.includes('"/admin/" + id + "/preview"'), "Editorial queue must use protected draft preview");
 assert(admin.includes("admin-kpi-grid"), "CMS must show editorial KPI dashboard");
 assert(admin.includes("publishedTodayKpi"), "CMS KPI must include today's published count");
 assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activity count");
