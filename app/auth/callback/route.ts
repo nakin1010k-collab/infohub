@@ -11,16 +11,18 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get("next");
   const destination = isSafeInternalPath(next) ? next : "/";
 
-  if (!code) {
+  if (!code) return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      console.error("[auth/callback] code exchange failed", error);
+      return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
+    }
+    return NextResponse.redirect(new URL(destination, requestUrl.origin));
+  } catch (error) {
+    console.error("[auth/callback] callback failed", error);
     return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
   }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
-    return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
-  }
-
-  return NextResponse.redirect(new URL(destination, requestUrl.origin));
 }
