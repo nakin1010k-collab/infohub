@@ -190,7 +190,7 @@ const failureMigration = await read("supabase/migrations/20261001001300_ingestio
 assert(failureMigration.includes("failure_details jsonb"), "Migration must add structured RSS failure details");
 const runPage = await read("app/admin/queue/runs/[id]/page.tsx");
 assert(runPage.includes("รายละเอียดรอบนำเข้า"), "RSS run detail page must exist");
-assert(runPage.includes("failure_details"), "RSS run detail page must read failure details");
+assert(runPage.includes("error_message"), "RSS run detail page must read run error details");
 assert(runPage.includes("item_details"), "RSS run detail page must read item outcomes");
 assert(runPage.includes("Duplicate"), "RSS run detail page must expose duplicate filter");
 assert(runPage.includes("PAGE_SIZE"), "RSS run detail page must paginate item results");
