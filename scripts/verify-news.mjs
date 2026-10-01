@@ -108,3 +108,10 @@ assert.match(resetPassword, /auth\.updateUser/);
 assert.match(middleware, /nextPath/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
+
+const queuePage = read("app/admin/queue/page.tsx");
+assert(queuePage.includes('eq("status", "draft")'), "Editorial queue must load draft articles");
+assert(queuePage.includes("/admin/queue"), "Editorial queue route must be wired");
+const queueActions = read("app/admin/queue/queue-actions.tsx");
+assert(queueActions.includes("/api/admin/ai/enrich"), "Editorial queue must expose AI enrichment");
+assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expose publish action");
