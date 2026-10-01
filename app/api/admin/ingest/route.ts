@@ -20,7 +20,7 @@ async function enrichWithRules(supabase: Awaited<ReturnType<typeof createClient>
     excerpt: article.excerpt,
     content: article.content,
     readingMinutes: article.reading_minutes,
-  });
+  }, categories);
   if (!result.category) return false;
 
   const { error } = await supabase.from("articles").update({ reading_minutes: result.readingMinutes }).eq("id", articleId);
@@ -74,11 +74,11 @@ async function aiEnrich(supabase: Awaited<ReturnType<typeof createClient>>, arti
 
   const category = categories.find((c) => c.slug === result.categorySlug) ?? categories[0];
   const tags = Array.isArray(result.tags)
-    ? parsed.tags.filter((x: unknown): x is string => typeof x === "string").map((x: string) => x.trim().slice(0, 40)).filter(Boolean).slice(0, 6)
+    ? result.tags.filter((x: unknown): x is string => typeof x === "string").map((x: string) => x.trim().slice(0, 40)).filter(Boolean).slice(0, 6)
     : [];
   const minutes = Number(result.readingMinutes);
-  const title = typeof result.title === "string" && parsed.title.trim() ? parsed.title.trim().slice(0, 180) : article.title;
-  const excerpt = typeof result.excerpt === "string" ? parsed.excerpt.trim().slice(0, 500) : article.excerpt;
+  const title = typeof result.title === "string" && result.title.trim() ? parsed.title.trim().slice(0, 180) : article.title;
+  const excerpt = typeof result.excerpt === "string" ? result.excerpt.trim().slice(0, 500) : article.excerpt;
 
   const { error } = await supabase.from("articles").update({
     title,
