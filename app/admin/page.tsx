@@ -22,6 +22,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   if (query) request = request.ilike("title", `%${query.replace(/[%_]/g, "\\$&")}%`);
   const { data: articles, error } = await request;
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString();
+
+  const [draftKpi, rssKpi, aiKpi, publishedTodayKpi, activityTodayKpi] = await Promise.all([
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft"),
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft").not("source_id", "is", null),
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft").not("ai_enriched_at", "is", null),
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", todayIso),
+    supabase.from("article_audit_logs").select("id", { count: "exact", head: true }).gte("created_at", todayIso),
+  ]);
+
+  const kpis = [
+    { label: "รอตรวจ", value: draftKpi.count ?? 0, href: "/admin/queue", note: "ฉบับร่างทั้งหมด" },
+    { label: "จาก RSS", value: rssKpi.count ?? 0, href: "/admin/queue?origin=rss", note: "รอตรวจจากแหล่งข่าว" },
+    { label: "AI ช่วยแล้ว", value: aiKpi.count ?? 0, href: "/admin/queue?ai=yes", note: "ร่างที่ผ่าน AI" },
+    { label: "เผยแพร่วันนี้", value: publishedTodayKpi.count ?? 0, href: "/admin?status=published", note: "นับตั้งแต่ 00:00" },
+    { label: "กิจกรรมวันนี้", value: activityTodayKpi.count ?? 0, href: "/admin/activity?days=1", note: "Audit ทั้งระบบ" },
+  ];
+
   return (
     <main className="auth-page">
       <div className="auth-shell admin-shell">
@@ -32,6 +52,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <div><p className="eyebrow">EDITORIAL CMS</p><h1 id="admin-title">จัดการข่าว</h1><p>สวัสดี {profile.display_name || user.email} · สิทธิ์ {profile.role}</p></div>
               <div className="admin-heading-actions"><Link className="state-action" href="/admin/activity">กิจกรรม</Link><Link className="state-action" href="/admin/queue">คิวตรวจข่าว</Link><Link className="state-action" href="/admin/sources">แหล่งข่าว</Link><Link className="primary-button" href="/admin/new">+ สร้างข่าวใหม่</Link></div>
             </div>
+          </div>
+
+          <div className="admin-kpi-grid">
+            {kpis.map((kpi) => (
+              <Link className="admin-kpi-card" href={kpi.href} key={kpi.label}>
+                <span>{kpi.label}</span><strong>{kpi.value}</strong><small>{kpi.note}</small>
+              </Link>
+            ))}
           </div>
 
           <form className="admin-filters" method="get">
