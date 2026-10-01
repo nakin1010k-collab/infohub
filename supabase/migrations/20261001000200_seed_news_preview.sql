@@ -110,26 +110,26 @@ on conflict do nothing;
 
 insert into public.tags (slug, name)
 values
-  ('ข่าวประจำวัน', 'ข่าวประจำวัน'),
-  ('สรุปข่าว', 'สรุปข่าว'),
-  ('บริบท', 'บริบท'),
-  ('เทคโนโลยี', 'เทคโนโลยี'),
-  ('นวัตกรรม', 'นวัตกรรม'),
-  ('ชีวิตประจำวัน', 'ชีวิตประจำวัน'),
-  ('ข้อมูล', 'ข้อมูล'),
-  ('สถิติ', 'สถิติ'),
-  ('ตัวเลข', 'ตัวเลข'),
-  ('ความรู้', 'ความรู้'),
-  ('อธิบายง่าย', 'อธิบายง่าย')
+  ('daily-news', 'ข่าวประจำวัน'),
+  ('news-brief', 'สรุปข่าว'),
+  ('context', 'บริบท'),
+  ('technology', 'เทคโนโลยี'),
+  ('innovation', 'นวัตกรรม'),
+  ('daily-life', 'ชีวิตประจำวัน'),
+  ('data', 'ข้อมูล'),
+  ('statistics', 'สถิติ'),
+  ('numbers', 'ตัวเลข'),
+  ('knowledge', 'ความรู้'),
+  ('explained', 'อธิบายง่าย')
 on conflict (slug) do update set name = excluded.name;
 
 insert into public.article_tags (article_id, tag_id)
 select a.id, t.id
 from public.articles a
 join public.tags t on (
-  (a.slug = 'infohub-demo-daily-brief' and t.slug in ('ข่าวประจำวัน', 'สรุปข่าว', 'บริบท'))
-  or (a.slug = 'technology-close-to-life' and t.slug in ('เทคโนโลยี', 'นวัตกรรม', 'ชีวิตประจำวัน'))
-  or (a.slug = 'data-story-of-the-day' and t.slug in ('ข้อมูล', 'สถิติ', 'ตัวเลข'))
-  or (a.slug = 'knowledge-explained' and t.slug in ('ความรู้', 'อธิบายง่าย', 'ข้อมูล'))
+  (a.slug = 'infohub-demo-daily-brief' and t.slug in ('daily-news', 'news-brief', 'context'))
+  or (a.slug = 'technology-close-to-life' and t.slug in ('technology', 'innovation', 'daily-life'))
+  or (a.slug = 'data-story-of-the-day' and t.slug in ('data', 'statistics', 'numbers'))
+  or (a.slug = 'knowledge-explained' and t.slug in ('knowledge', 'explained', 'data'))
 )
 on conflict do nothing;
