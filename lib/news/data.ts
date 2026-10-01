@@ -6,7 +6,7 @@ export type NewsArticle = {
   readingMinutes: number; publishedAt: string; canonicalUrl: string; imageUrl: string | null;
 };
 
-type Row = Record<string, any> & { $id?: string };
+type Row = Record<string, unknown> & { $id?: string };
 
 function rowId(row: Row) { return String(row.$id ?? row.id ?? ""); }
 
