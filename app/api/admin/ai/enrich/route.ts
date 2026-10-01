@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { recordArticleAudit } from "@/lib/news/audit";
 
 type Suggestion = { title: string; excerpt: string; categorySlug: string; tags: string[]; readingMinutes: number };
 function cleanText(value: unknown, max: number) { return typeof value === "string" ? value.trim().slice(0, max) : ""; }
@@ -45,5 +46,6 @@ export async function POST(request: Request) {
   const tags = Array.isArray(parsed.tags) ? parsed.tags.filter((tag): tag is string => typeof tag === "string").map((tag) => tag.trim().slice(0, 40)).filter(Boolean).slice(0, 6) : [];
   const minutes = Number(parsed.readingMinutes);
   const suggestion: Suggestion = { title: cleanText(parsed.title, 180) || article.title, excerpt: cleanText(parsed.excerpt, 500) || article.excerpt || "", categorySlug: allowedCategories.includes(categorySlug) ? categorySlug : (allowedCategories[0] || "news"), tags, readingMinutes: Math.min(30, Math.max(1, Number.isFinite(minutes) ? Math.round(minutes) : (article.reading_minutes || 1))) };
+  await recordArticleAudit(supabase, articleId, user.id, "ai_enriched", { model, mode: "suggestion" });
   return NextResponse.json({ suggestion, model });
 }
