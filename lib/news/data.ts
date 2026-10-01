@@ -153,3 +153,48 @@ export async function getTagBySlug(slug: string) {
   if (error) throw error;
   return data;
 }
+
+
+export type PublicDataResult<T> = {
+  data: T;
+  degraded: boolean;
+};
+
+export async function getPublicNewsArticles(categorySlug?: string): Promise<PublicDataResult<NewsArticle[]>> {
+  try {
+    return { data: await getNewsArticles(categorySlug), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
+}
+
+export async function searchPublicNews(query: string): Promise<PublicDataResult<NewsArticle[]>> {
+  try {
+    return { data: await searchNews(query), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
+}
+
+export async function getPublicNewsArticlesPage(
+  options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {},
+): Promise<PublicDataResult<NewsPage>> {
+  try {
+    return { data: await getNewsArticlesPage(options), degraded: false };
+  } catch {
+    const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10));
+    const page = Math.max(1, options.page ?? 1);
+    return {
+      data: { items: [], total: 0, page, pageSize, totalPages: 0 },
+      degraded: true,
+    };
+  }
+}
+
+export async function getPublicTags(): Promise<PublicDataResult<{ name: string; slug: string }[]>> {
+  try {
+    return { data: await getAllTags(), degraded: false };
+  } catch {
+    return { data: [], degraded: true };
+  }
+}
