@@ -6,7 +6,7 @@ export async function getAdminArticles(status?: string, query?: string) {
   const filters = status && status !== "all" ? [appwriteQueries.queryEqual("status", status)] : [];
   const rows = await listAllAppwriteRows("articles", filters, 100);
   const normalized = query ? rows.filter((row) => String(row.title ?? "").toLowerCase().includes(query.toLowerCase())) : rows;
-  return normalized.sort((a,b)=>String(b.updated_at??"").localeCompare(String(a.updated_at??"")));
+  return normalized.sort((a,b)=>String(b.$updatedAt??"").localeCompare(String(a.$updatedAt??"")));
 }
 export async function getActiveCategories() {
   return listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true), appwriteQueries.queryOrderAsc("sort_order")], 100);
