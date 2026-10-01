@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { recordArticleAudit } from "@/lib/news/audit";
+import { tagSlugify } from "@/lib/news/editorial";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
 type Payload={title?:string;slug?:string;excerpt?:string;content?:string;status?:"draft"|"published"|"archived";categoryId?:string;tags?:string;readingMinutes?:number|string};
@@ -21,6 +22,6 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
   if (action !== "updated") await recordArticleAudit(supabase, id, user.id, action, { previousStatus, status });
  }
  const {error:td}=await supabase.from("article_tags").delete().eq("article_id",id);if(td)return NextResponse.json({error:td.message},{status:400});
- for(const name of parseTags(b.tags)){const ts=slugify(name);if(!ts)continue;const {data:tag,error:te}=await supabase.from("tags").upsert({slug:ts,name},{onConflict:"slug"}).select("id").single();if(te)return NextResponse.json({error:te.message},{status:400});const {error:le}=await supabase.from("article_tags").insert({article_id:id,tag_id:tag.id});if(le)return NextResponse.json({error:le.message},{status:400});}
+ for(const name of parseTags(b.tags)){const ts=tagSlugify(name);if(!ts)continue;const {data:tag,error:te}=await supabase.from("tags").upsert({slug:ts,name},{onConflict:"slug"}).select("id").single();if(te)return NextResponse.json({error:te.message},{status:400});const {error:le}=await supabase.from("article_tags").insert({article_id:id,tag_id:tag.id});if(le)return NextResponse.json({error:le.message},{status:400});}
  return NextResponse.json({ok:true});
 }
