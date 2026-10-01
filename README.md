@@ -57,10 +57,10 @@ npm run build
 
 ## Verification status
 
-Phase 1 has a verified save point at commit `21a6c569b95d4f4e69876880f8a89aa8e3413f61`.
+Phase 1 is being hardened around a single Supabase Auth architecture. The production site URL now falls back to the Vercel production hostname when `NEXT_PUBLIC_SITE_URL` is not explicitly configured, and email verification/password recovery use the `/auth/callback` exchange flow.
 
-Phase 2 authentication has been implemented through session/error handling and is undergoing final verification. A dedicated InfoHub Supabase project is still required for live end-to-end Auth verification.
+Live end-to-end Auth verification still requires the production Supabase project settings and redirect URLs to be configured correctly.
 
-Phase 3 news listing/detail/search is implemented against typed preview data. Live database ingestion, RLS execution, and production Auth verification remain separate verification gates.
+News listing/detail/search currently use typed preview data. Live database ingestion, RLS execution, and production Auth verification remain separate verification gates.
 
 Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap.
