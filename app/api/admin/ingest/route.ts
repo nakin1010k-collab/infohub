@@ -140,6 +140,7 @@ export async function POST(request: Request) {
     let aiEnriched = 0;
 
     const failures: string[] = [];
+    const failureDetails: Array<{ url: string; title: string; reason: string }> = [];
     for (const item of items.slice(0, 50)) {
       try {
         const { data: existing, error: lookupError } = await supabase.from("articles").select("id").eq("canonical_url", item.url).maybeSingle();
@@ -187,7 +188,13 @@ export async function POST(request: Request) {
         }
       } catch (itemError) {
         const message = itemError instanceof Error ? itemError.message : "Unknown item import error";
-        failures.push(message.slice(0, 180));
+        const reason = message.slice(0, 300);
+        failures.push(reason.slice(0, 180));
+        failureDetails.push({
+          url: item.url,
+          title: item.title.slice(0, 180),
+          reason,
+        });
       }
     }
 
@@ -197,13 +204,14 @@ export async function POST(request: Request) {
       items_seen: items.length,
       items_created: created,
       error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
+      failure_details: failureDetails.slice(0, 50),
       finished_at: new Date().toISOString(),
     }).eq("id", run.id);
     if (runStatus !== "failed") {
       await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
     }
 
-    return NextResponse.json({ ok: true, source: source.name, status: runStatus, retry: Boolean(body.retry), itemsSeen: items.length, itemsCreated: created, skippedDuplicates, failedItems: failures.length, ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
+    return NextResponse.json({ ok: true, source: source.name, status: runStatus, retry: Boolean(body.retry), itemsSeen: items.length, itemsCreated: created, skippedDuplicates, failedItems: failures.length, failureDetails: failureDetails.slice(0, 50), ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown ingestion error";
     await supabase.from("ingestion_runs").update({ status: "failed", error_message: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", run.id);
