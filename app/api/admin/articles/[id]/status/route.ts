@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { recordArticleAudit } from "@/lib/news/audit";
+import { checkEditorialQuality } from "@/lib/news/quality";
 import { createClient } from "@/lib/supabase/server";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -14,8 +15,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const body = await request.json().catch(() => ({})) as { status?: "draft" | "published" | "archived" };
   if (!body.status) return NextResponse.json({ error: "ต้องระบุสถานะ" }, { status: 400 });
 
-  const { data: article } = await supabase.from("articles").select("published_at,status").eq("id", id).maybeSingle();
+  const { data: article } = await supabase.from("articles").select("published_at,status,title,excerpt,content,canonical_url,article_categories(category_id),article_tags(tag_id)").eq("id", id).maybeSingle();
   if (!article) return NextResponse.json({ error: "ไม่พบข่าวนี้" }, { status: 404 });
+
+  if (body.status === "published") {
+    const quality = checkEditorialQuality({
+      title: article.title,
+      excerpt: article.excerpt,
+      content: article.content,
+      canonicalUrl: article.canonical_url,
+      categoryCount: article.article_categories?.length ?? 0,
+      tagCount: article.article_tags?.length ?? 0,
+    });
+    if (!quality.ready) {
+      return NextResponse.json({ error: "ยังเผยแพร่ไม่ได้", quality }, { status: 422 });
+    }
+  }
 
   const { error } = await supabase.from("articles").update({
     status: body.status,
