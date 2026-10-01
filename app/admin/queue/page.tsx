@@ -96,7 +96,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
                   <h2>{article.title}</h2>
                   <p>{article.excerpt || "ยังไม่มีคำโปรย"}</p>
                   <p className="field-hint">สร้างเมื่อ {new Date(article.created_at).toLocaleString("th-TH")}</p>
-                  <QueueActions id={article.id} slug={article.slug} />
+                  <QueueActions id={article.id} />
                 </article>
               ))}
             </div>
