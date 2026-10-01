@@ -54,7 +54,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
             {filteredArticles.length > 0 ? filteredArticles.map((article) => (
               <article className={styles.item} key={article.slug}>
                 <div className="news-meta"><span className="tag">{article.category}</span><span>อ่าน {article.readingMinutes} นาที</span><span>{article.tags.map((tag) => `#${tag}`).join(" · ")}</span></div>
-                <h2><Link href={`/news/${article.slug}`}>{article.title}</Link></h2>
+                {article.imageUrl ? <img src={article.imageUrl} alt="" loading="lazy" style={{width:"100%",aspectRatio:"16/9",objectFit:"cover",borderRadius:"16px",marginBottom:"12px"}} /> : null}<h2><Link href={`/news/${article.slug}`}>{article.title}</Link></h2>
                 <p>{article.excerpt}</p>
                 <Link className="field-hint" href={`/news/${article.slug}`}>อ่านรายละเอียด →</Link>
               </article>
