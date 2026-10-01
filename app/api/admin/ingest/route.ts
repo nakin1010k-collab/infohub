@@ -179,6 +179,7 @@ export async function POST(request: Request) {
         }
 
         created++;
+        if (item.imageUrl) await supabase.from("articles").update({ image_url: item.imageUrl }).eq("id", inserted);
         itemDetails.push({ url: item.url, title: item.title.slice(0, 180), outcome: "created" });
         if (await enrichWithRules(supabase, inserted)) {
           ruleEnriched++;
