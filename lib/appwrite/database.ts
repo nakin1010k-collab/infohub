@@ -1,6 +1,6 @@
 import { appwriteRequest, getAppwriteConfig } from "@/lib/appwrite/server";
 
-type Row = Record<string, any> & { $id?: string };
+type Row = Record<string, unknown> & { $id?: string };
 
 function tableId(name: string) {
   const map: Record<string, string | undefined> = {
