@@ -82,9 +82,9 @@ export async function getRelatedNews(slug: string, limit = 3) {
 
 export async function getAllTags() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("tags").select("name").order("name", { ascending: true });
+  const { data, error } = await supabase.from("tags").select("name,slug").order("name", { ascending: true });
   if (error) throw error;
-  return Array.from(new Set((data ?? []).map((tag) => tag.name))).sort((a, b) => a.localeCompare(b, "th-TH"));
+  return data ?? [];
 }
 
 export async function searchNews(query: string) {
