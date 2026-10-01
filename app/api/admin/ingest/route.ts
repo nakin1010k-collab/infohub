@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { enrichWithoutAI } from "@/lib/news/editorial";
+import { enrichWithoutAI, tagSlugify } from "@/lib/news/editorial";
 import { recordArticleAudit } from "@/lib/news/audit";
 import { createClient } from "@/lib/supabase/server";
 import { fetchFeed } from "@/lib/news/rss";
@@ -92,7 +92,7 @@ async function aiEnrich(supabase: Awaited<ReturnType<typeof createClient>>, arti
   await supabase.from("article_tags").delete().eq("article_id", articleId);
 
   for (const tag of tags) {
-    const slug = slugify(tag);
+    const slug = tagSlugify(tag);
     if (!slug) continue;
     const { data: existing } = await supabase.from("tags").select("id").eq("slug", slug).maybeSingle();
     const tagId = existing?.id ?? (await supabase.from("tags").insert({ name: tag, slug }).select("id").single()).data?.id;
