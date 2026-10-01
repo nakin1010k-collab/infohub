@@ -42,7 +42,7 @@ export default function QueueActions({ id, slug }: { id: string; slug: string })
   return (
     <div className="admin-actions">
       <a className="state-action" href={"/admin/" + id}>แก้ไข</a>
-      <a className="state-action" href={"/news/" + slug}>Preview</a>
+      <a className="state-action" href={"/admin/" + id + "/preview"}>Preview</a>
       <button className="state-action" disabled={busy} onClick={enrich}>✨ AI ช่วยร่าง</button>
       <button className="primary-button" disabled={busy} onClick={publish}>เผยแพร่</button>
       {message ? <span className="field-hint">{message}</span> : null}
