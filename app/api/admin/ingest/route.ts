@@ -192,9 +192,11 @@ export async function POST(request: Request) {
       error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
       finished_at: new Date().toISOString(),
     }).eq("id", run.id);
-    if (runStatus !== "failed") {\n      await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);\n    }
+    if (runStatus !== "failed") {
+      await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
+    }
 
-    return NextResponse.json({ ok: true, source: source.name, itemsSeen: items.length, itemsCreated: created, ruleEnriched, aiEnriched });
+    return NextResponse.json({ ok: true, source: source.name, status: runStatus, itemsSeen: items.length, itemsCreated: created, ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown ingestion error";
     await supabase.from("ingestion_runs").update({ status: "failed", error_message: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", run.id);
