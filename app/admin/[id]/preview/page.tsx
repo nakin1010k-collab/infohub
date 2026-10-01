@@ -37,7 +37,7 @@ export default async function DraftPreviewPage({ params }: { params: Promise<{ i
           </div>
           {article.excerpt ? <p className="preview-excerpt">{article.excerpt}</p> : null}
           <article className="preview-article">
-            {article.content.split(/\n{2,}/).map((paragraph: string, index: number) => (
+            {(article.content ?? "").split(/\n{2,}/).map((paragraph: string, index: number) => (
               <p key={index}>{paragraph}</p>
             ))}
           </article>
