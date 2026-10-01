@@ -19,7 +19,7 @@ export default async function AdminPage() {
       <div className="auth-shell">
         <Link className="auth-brand" href="/"><span className="brand-mark" aria-hidden="true">🐱</span><span>InfoHub</span></Link>
         <section className="auth-card" aria-labelledby="admin-title">
-          <div className="auth-intro">
+          <div className="auth-intro"><div className="admin-toolbar"><Link className="primary-button" href="/admin/new">+ สร้างข่าวใหม่</Link></div>
             <p className="eyebrow">EDITORIAL CMS</p>
             <h1 id="admin-title">จัดการข่าว</h1>
             <p>สวัสดี {profile.display_name || user.email} · สิทธิ์ {profile.role}</p>
@@ -35,7 +35,7 @@ export default async function AdminPage() {
               {articles.map((article) => (
                 <article className="news-card" key={article.id}>
                   <div className="news-meta"><span className="tag">{article.status}</span><span>{article.published_at ? new Date(article.published_at).toLocaleString("th-TH") : "ยังไม่เผยแพร่"}</span></div>
-                  <h2>{article.title}</h2>
+                  <h2>{article.title}</h2><Link href={`/admin/${article.id}`} className="field-hint">แก้ไขข่าว →</Link>
                   <p className="field-hint">{article.slug}</p>
                 </article>
               ))}
