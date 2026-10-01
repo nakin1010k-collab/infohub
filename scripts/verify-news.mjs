@@ -11,7 +11,7 @@ const loading = await read("app/news/loading.tsx");
 const error = await read("app/news/error.tsx");
 const searchLoading = await read("app/search/loading.tsx");
 const searchError = await read("app/search/error.tsx");
-const data = await read("lib/news/mock-data.ts");
+const data = await read("lib/news/data.ts");
 const layout = await read("app/layout.tsx");
 const middleware = await read("middleware.ts");
 const sitemap = await read("app/sitemap.ts");
@@ -24,7 +24,7 @@ const forgotPassword = await read("app/forgot-password/page.tsx");
 const resetPassword = await read("app/reset-password/page.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getAllTags()/);
+assert.match(news, /getAllTags\(\)/);
 assert.match(news, /article\.tags\.map/);
 assert.match(news, /\/search\?q=\$\{encodeURIComponent\(tag\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
