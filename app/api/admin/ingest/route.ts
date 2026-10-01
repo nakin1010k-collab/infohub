@@ -87,6 +87,7 @@ async function aiEnrich(supabase: Awaited<ReturnType<typeof createClient>>, arti
 
   await supabase.from("article_categories").delete().eq("article_id", articleId);
   await supabase.from("article_categories").insert({ article_id: articleId, category_id: category.id });
+  await supabase.from("article_tags").delete().eq("article_id", articleId);
 
   for (const tag of tags) {
     const slug = slugify(tag);
