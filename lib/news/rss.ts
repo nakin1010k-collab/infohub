@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 export type FeedItem = {
   title: string;
   url: string;
@@ -18,7 +20,33 @@ function textOf(block: string, tag: string) {
 }
 
 function stripHtml(value: string) {
-  return value.replace(/<[^>]+>/g, " ").replace(/\\s+/g, " ").trim();
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function assertSafeFeedUrl(feedUrl: string) {
+  const url = new URL(feedUrl);
+  if (url.protocol !== "https:") throw new Error("Feed URL ต้องใช้ HTTPS");
+  const hostname = url.hostname.toLowerCase();
+  const ipVersion = isIP(hostname);
+  const privateIpv4 = ipVersion === 4 && (
+    hostname.startsWith("10.") ||
+    hostname.startsWith("127.") ||
+    hostname.startsWith("169.254.") ||
+    hostname.startsWith("192.168.") ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname) ||
+    hostname === "0.0.0.0"
+  );
+  const privateIpv6 = ipVersion === 6 && (
+    hostname === "::1" ||
+    hostname.startsWith("fe80:") ||
+    hostname.startsWith("fc") ||
+    hostname.startsWith("fd") ||
+    hostname.startsWith("::ffff:127.")
+  );
+  if (privateIpv4 || privateIpv6 || hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local") || hostname === "metadata.google.internal") {
+    throw new Error("ไม่อนุญาตให้ดึง Feed จากโฮสต์ภายในหรือ private network");
+  }
+  return url.toString();
 }
 
 function absoluteUrl(value: string, base: string) {
@@ -44,13 +72,24 @@ export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
 }
 
 export async function fetchFeed(feedUrl: string) {
-  const response = await fetch(feedUrl, {
-    headers: { Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8" },
-    cache: "no-store",
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!response.ok) throw new Error(`Feed responded with HTTP ${response.status}`);
-  const xml = await response.text();
-  if (xml.length > 2_000_000) throw new Error("Feed is too large");
-  return parseFeed(xml, feedUrl);
+  let currentUrl = assertSafeFeedUrl(feedUrl);
+  for (let redirects = 0; redirects <= 5; redirects++) {
+    const response = await fetch(currentUrl, {
+      headers: { Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8" },
+      cache: "no-store",
+      redirect: "manual",
+      signal: AbortSignal.timeout(15000),
+    });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) throw new Error("Feed redirect ไม่มีปลายทาง");
+      currentUrl = assertSafeFeedUrl(new URL(location, currentUrl).toString());
+      continue;
+    }
+    if (!response.ok) throw new Error(`Feed responded with HTTP ${response.status}`);
+    const xml = await response.text();
+    if (xml.length > 2_000_000) throw new Error("Feed is too large");
+    return parseFeed(xml, currentUrl);
+  }
+  throw new Error("Feed redirect มากเกินไป");
 }
