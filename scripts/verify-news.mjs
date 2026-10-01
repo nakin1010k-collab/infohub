@@ -59,7 +59,7 @@ assert.match(searchError, /reset\(\)/);
 
 assert.match(data, /tags: string\[\]/);
 assert.match(editorial, /export function tagSlugify/);
-assert.match(editorial, /return "tag-" \+ hash\.toString\("base36"\)/);
+assert.match(editorial, /return "tag-" \+ hash\.toString\(36\)/);
 assert.match(data, /getAllTags/);
 assert.match(data, /mapArticle/);
 assert.match(data, /\.or\(/);
