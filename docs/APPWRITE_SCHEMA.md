@@ -25,9 +25,9 @@ APPWRITE_API_KEY=... npm run setup:appwrite
 
 The script uses `NEXT_PUBLIC_APPWRITE_ENDPOINT`, `NEXT_PUBLIC_APPWRITE_PROJECT_ID`, and `APPWRITE_DATABASE_ID` when provided. Otherwise it uses the existing InfoHub Appwrite endpoint/project and database ID `infohub`.
 
-The API key is read only from the process environment and is never written to the repository. Appwrite's REST API requires the project ID and server API key for database provisioning; the key must remain server-side. citeturn0search1turn0search10
+The API key is read only from the process environment and is never written to the repository. Keep it server-side.
 
-The script creates the database, tables, columns, and the indexes required by the repository's common equality/order queries. New tables are created with no table-level permissions because InfoHub performs CMS/database access through the server API key; public reads are exposed by the application's server repository. Appwrite grants no table access by default, so permissions should not be opened to public clients unless the architecture is intentionally changed. citeturn0search0turn0search3
+The script creates the database, tables, columns, and indexes required by the repository's common equality/order queries. New tables are created with no table-level permissions because InfoHub performs CMS/database access through the server API key; public reads are exposed by the application's server repository.
 
 ## IDs
 
