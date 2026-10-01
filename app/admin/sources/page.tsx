@@ -14,7 +14,7 @@ export default async function SourcesPage() {
     .order("name");
   const sourceIds = (sources ?? []).map((source) => source.id);
   const { data: latestRuns } = sourceIds.length
-    ? await supabase.from("ingestion_runs").select("source_id, status, error_message, started_at, finished_at, undefined").in("source_id", sourceIds).order("started_at", { ascending: false })
+    ? await supabase.from("ingestion_runs").select("source_id, status, error_message, started_at, finished_at, items_seen, items_created, failure_details").in("source_id", sourceIds).order("started_at", { ascending: false })
     : { data: [] };
   const latestBySource = new Map<string, (typeof latestRuns)[number]>();
   for (const run of latestRuns ?? []) {
