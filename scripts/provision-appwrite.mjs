@@ -55,7 +55,7 @@ async function ensureDatabase() {
   catch (error) {
     if (error.status !== 404) throw error;
     console.log(`Creating database ${databaseId}...`);
-    return request("/tablesdb",{method:"POST",body:JSON.stringify({databaseId,name:"InfoHub",enabled:true,specification:"serverless",replicas:0,syncMode:"async"})});
+    return request("/tablesdb",{method:"POST",body:JSON.stringify({databaseId,name:"InfoHub",enabled:true,specification:"serverless"})});
   }
 }
 
