@@ -162,7 +162,7 @@ assert.match(register, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
 assert.match(register, /ระบบสมาชิกไม่ตอบสนอง/);
 assert.match(health, /database: "unconfigured"/);
 assert.doesNotMatch(health, /message: error\\.message/);
-assert.match(callback, /try \\{/);
+assert.match(callback, /try \{/);
 assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL/);
 assert.match(siteUrl, /VERCEL_PROJECT_PRODUCTION_URL/);
 assert.match(statusPage, /database_query_failed/);
