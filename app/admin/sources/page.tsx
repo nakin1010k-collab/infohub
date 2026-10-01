@@ -29,7 +29,7 @@ export default async function SourcesPage() {
       <div className="source-list">{sources?.map(source => { const latestRun = latestBySource.get(source.id); const healthLabel = !latestRun ? "ยังไม่มีประวัติ" : latestRun.status === "failed" ? "ต้องตรวจสอบ" : latestRun.status === "partial" ? "สำเร็จบางส่วน" : latestRun.status === "running" ? "กำลังทำงาน" : "ปกติ"; return <article className="news-card source-card" key={source.id}>
         <div className="news-meta"><span className="tag">{source.is_active ? "เปิดใช้งาน" : "ปิดใช้งาน"}</span><span className="tag">{healthLabel}</span><span>{source.last_ingested_at ? `นำเข้าล่าสุด ${new Date(source.last_ingested_at).toLocaleString("th-TH")}` : "ยังไม่เคยนำเข้า"}</span></div>
         <h2>{source.name}</h2><p className="field-hint">{source.domain}</p>{latestRun ? <p className="field-hint">รอบล่าสุด: {latestRun.items_seen} รายการ · สร้าง {latestRun.items_created} บทความ · เริ่ม {new Date(latestRun.started_at).toLocaleString("th-TH")}</p> : <p className="field-hint">ยังไม่มีรอบนำเข้า RSS</p>}{latestRun?.error_message ? <p className="field-hint">ข้อผิดพลาดล่าสุด: {latestRun.error_message}</p> : null}
-        <SourceForm id={source.id} feedUrl={source.feed_url} isActive={source.is_active} />
+        <SourceForm id={source.id} feedUrl={source.feed_url} isActive={source.is_active} retryStatus={latestRun?.status === "failed" || latestRun?.status === "partial" ? latestRun.status : null} />
       </article>; })}</div>
       <p className="auth-register"><Link href="/admin">กลับ CMS</Link> · <Link href="/news">ดูหน้าเว็บข่าว</Link></p>
     </section>
