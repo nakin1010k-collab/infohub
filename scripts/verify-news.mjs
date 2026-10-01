@@ -14,6 +14,7 @@ const searchError = await read("app/search/error.tsx");
 const data = await read("lib/news/data.ts");
 const layout = await read("app/layout.tsx");
 const middleware = await read("middleware.ts");
+const admin = await read("app/admin/page.tsx");
 const sitemap = await read("app/sitemap.ts");
 const robots = await read("app/robots.ts");
 const signOut = await read("components/sign-out-button.tsx");
@@ -47,11 +48,14 @@ assert.match(searchError, /reset\(\)/);
 
 assert.match(data, /tags: string\[\]/);
 assert.match(data, /getAllTags/);
-assert.match(data, /\.\.\.article\.tags/);
+assert.match(data, /mapArticle/);
+assert.match(data, /\.or\(/);
 
 assert.match(layout, /metadataBase: getSiteUrl\(\)/);
 assert.match(middleware, /auth\.getClaims\(\)/);
-assert.match(middleware, /matcher: \[\"\/profile\/:path\*\", \"\/dashboard\/:path\*\", \"\/settings\/:path\*\"\]/);
+assert.match(middleware, /\/admin\/:path\*/);
+assert.match(admin, /isEditor/);
+assert.match(admin, /profiles/);
 assert.match(sitemap, /MetadataRoute\.Sitemap/);
 assert.match(robots, /MetadataRoute\.Robots/);
 assert.match(signOut, /try \{/);
@@ -60,7 +64,7 @@ assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undef
 assert.match(uiStates, /onAction=\{onRetry\}/);
 
 assert.match(login, /isSafeInternalPath/);
-assert.match(login, /!value\.startsWith\("\/\/"\)/);
+assert.match(login, /!value\.startsWith\("//")/);
 assert.match(register, /name="terms" required/);
 assert.match(register, /auth\.signUp/);
 assert.match(forgotPassword, /resetPasswordForEmail/);
