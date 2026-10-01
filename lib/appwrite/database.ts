@@ -1,19 +1,19 @@
 import { appwriteRequest, getAppwriteConfig } from "@/lib/appwrite/server";
 
-type Row = Record<string, unknown> & { $id?: string };
+type Row = Record<string, unknown> & { $id?: string };\n\nconst databaseId = () => process.env.APPWRITE_DATABASE_ID || "infohub";
 
 function tableId(name: string) {
   const map: Record<string, string | undefined> = {
-    articles: process.env.APPWRITE_ARTICLES_TABLE_ID,
-    categories: process.env.APPWRITE_CATEGORIES_TABLE_ID,
-    article_categories: process.env.APPWRITE_ARTICLE_CATEGORIES_TABLE_ID,
-    tags: process.env.APPWRITE_TAGS_TABLE_ID,
-    article_tags: process.env.APPWRITE_ARTICLE_TAGS_TABLE_ID,
-    profiles: process.env.APPWRITE_PROFILES_TABLE_ID,
-    audit_logs: process.env.APPWRITE_AUDIT_LOGS_TABLE_ID,
-    sources: process.env.APPWRITE_SOURCES_TABLE_ID,
-    ingestion_runs: process.env.APPWRITE_INGESTION_RUNS_TABLE_ID,
-    notifications: process.env.APPWRITE_NOTIFICATIONS_TABLE_ID,
+    articles: process.env.APPWRITE_ARTICLES_TABLE_ID || "articles",
+    categories: process.env.APPWRITE_CATEGORIES_TABLE_ID || "categories",
+    article_categories: process.env.APPWRITE_ARTICLE_CATEGORIES_TABLE_ID || "article_categories",
+    tags: process.env.APPWRITE_TAGS_TABLE_ID || "tags",
+    article_tags: process.env.APPWRITE_ARTICLE_TAGS_TABLE_ID || "article_tags",
+    profiles: process.env.APPWRITE_PROFILES_TABLE_ID || "profiles",
+    audit_logs: process.env.APPWRITE_AUDIT_LOGS_TABLE_ID || "audit_logs",
+    sources: process.env.APPWRITE_SOURCES_TABLE_ID || "sources",
+    ingestion_runs: process.env.APPWRITE_INGESTION_RUNS_TABLE_ID || "ingestion_runs",
+    notifications: process.env.APPWRITE_NOTIFICATIONS_TABLE_ID || "notifications",
   };
   return map[name];
 }
@@ -22,7 +22,7 @@ function requireTable(name: string) {
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   const id = tableId(name);
   if (!databaseId || !id) throw new Error(`Appwrite table configuration missing: ${name}`);
-  return { databaseId, id };
+  return { databaseId: databaseId(), id };
 }
 
 function queryEqual(field: string, value: string | boolean) {
