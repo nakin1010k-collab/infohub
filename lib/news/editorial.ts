@@ -7,7 +7,7 @@ const RULES: Array<{ slug: string; keywords: string[] }> = [
   { slug: "news", keywords: [] },
 ];
 
-function slugify(value: string) {
+export function tagSlugify(value: string) {
   const ascii = value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
   if (ascii) return ascii;
   let hash = 0;
@@ -36,7 +36,7 @@ export function enrichWithoutAI(article: {
     .slice(0, 4);
 
   const tags = Array.from(new Set([category?.name ?? "ข่าว", ...tagCandidates]))
-    .map((name) => ({ name: name.slice(0, 40), slug: slugify(name) }))
+    .map((name) => ({ name: name.slice(0, 40), slug: tagSlugify(name) }))
     .filter((tag) => tag.slug)
     .slice(0, 5);
 
