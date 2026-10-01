@@ -3,12 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 export type NewsArticle = {
   slug: string; title: string; excerpt: string; content: string;
   category: string; categorySlug: string; tags: string[];
-  readingMinutes: number; publishedAt: string; canonicalUrl: string;
+  readingMinutes: number; publishedAt: string; canonicalUrl: string; imageUrl: string | null;
 };
 
 type ArticleRow = {
   id: string; slug: string; title: string; excerpt: string | null; content: string | null;
-  canonical_url: string; published_at: string | null; reading_minutes: number | null;
+  canonical_url: string; image_url: string | null; published_at: string | null; reading_minutes: number | null;
   article_categories?: { category: { name: string; slug: string }[] | null }[];
   article_tags?: { tag: { name: string }[] | null }[];
 };
@@ -22,11 +22,11 @@ function mapArticle(article: ArticleRow): NewsArticle {
     content: article.content ?? "", category: category?.name ?? "ข่าวเด่น",
     categorySlug: category?.slug ?? "news", tags,
     readingMinutes: article.reading_minutes ?? 1,
-    publishedAt: article.published_at ?? article.slug, canonicalUrl: article.canonical_url,
+    publishedAt: article.published_at ?? article.slug, canonicalUrl: article.canonical_url, imageUrl: article.image_url,
   };
 }
 
-const ARTICLE_SELECT = "id, slug, title, excerpt, content, canonical_url, published_at, reading_minutes, article_categories(category:categories(name, slug)), article_tags(tag:tags(name))";
+const ARTICLE_SELECT = "id, slug, title, excerpt, content, canonical_url, image_url, published_at, reading_minutes, article_categories(category:categories(name, slug)), article_tags(tag:tags(name))";
 
 export async function getNewsArticles(categorySlug?: string) {
   const supabase = await createClient();
