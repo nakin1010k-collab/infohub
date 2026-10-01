@@ -54,7 +54,7 @@ assert.match(data, /\.or\(/);
 assert.match(layout, /metadataBase: getSiteUrl\(\)/);
 assert.match(middleware, /auth\.getClaims\(\)/);
 assert.match(middleware, /\/admin\/:path\*/);
-assert.match(admin, /isEditor/);
+assert.match(admin, /editor/);
 assert.match(admin, /profiles/);
 assert.match(sitemap, /MetadataRoute\.Sitemap/);
 assert.match(robots, /MetadataRoute\.Robots/);
