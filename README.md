@@ -88,3 +88,14 @@ The zero-cost rules are intentionally suggestions, not claims about article trut
 Apply Supabase migrations in timestamp order. The ingestion foundation adds `sources.feed_url`, ingestion run history, and the CMS write path. No service-role key is required for the application runtime.
 
 Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap. CI remains the final gate for the current implementation.
+
+
+## Automation / monitoring
+
+- `/api/health` — lightweight database health check.
+- `/api/cron/ingest` — secured daily RSS scheduler via Vercel Cron.
+- Set `CRON_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` in the production environment for scheduled imports.
+- `/admin/notifications` — in-app RSS failure notifications for editors/admins.
+- `/admin/analytics` — lightweight article view analytics stored in Supabase.
+- Public SEO routes: `/sitemap.xml` and `/robots.txt`.
+- AI enrichment remains optional; the basic RSS import flow does not require `OPENAI_API_KEY`.
