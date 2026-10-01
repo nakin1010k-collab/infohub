@@ -10,7 +10,7 @@ const checks=[
 ["Appwrite auth","lib/appwrite/auth.ts",["getCurrentAppwriteUser","requireEditor","profiles"]],
 ["Appwrite request","lib/appwrite/request.ts",["X-Appwrite-Project","X-Appwrite-Session"]],
 ["schema contract","docs/APPWRITE_SCHEMA.md",["APPWRITE_ARTICLES_TABLE_ID","audit_logs","ingestion_runs"]],
-["middleware","middleware.ts",["infohub_appwrite_session","/admin/:path*"]],
+["middleware","middleware.ts",["APPWRITE_SESSION_COOKIE","/admin/:path*"]],
 ["health","app/api/health/route.ts",["Appwrite","database: \"unconfigured\""]],
 ["status","app/status/page.tsx",["database_not_configured","Appwrite"]],
 ["CMS","app/admin/page.tsx",["getAdminArticles","getCurrentEditor"]],
