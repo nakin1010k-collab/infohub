@@ -15,8 +15,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const existing=await getAppwriteRow("articles",id); if(!existing)return NextResponse.json({error:"ไม่พบข่าวนี้"},{status:404});
  const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600)); const imageUrl=b.imageUrl?.trim()||null; const excerpt=b.excerpt?.trim()??"";
  if(imageUrl){try{const u=new URL(imageUrl);if(u.protocol!=="https:")return NextResponse.json({error:"รูปภาพต้องใช้ HTTPS"},{status:400});}catch{return NextResponse.json({error:"URL รูปภาพไม่ถูกต้อง"},{status:400});}}
- const publishedAt=status==="published"?(existing.published_at ?? new Date().toISOString()):null; const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString(); const canonicalUrlHash=createHash("sha256").update(canonicalUrl).digest("hex");
- const canonicalUrlHash=createHash("sha256").update(canonicalUrl).digest("hex"); const previousStatus=String(existing.status ?? "draft"); const tagPayload=parseTags(b.tags).map(name=>({name,slug:tagSlugify(name)})).filter(tag=>tag.slug);
+ const publishedAt=status==="published"?(existing.published_at ?? new Date().toISOString()):null; const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString(); const canonicalUrlHash=createHash("sha256").update(canonicalUrl).digest("hex"); const previousStatus=String(existing.status ?? "draft"); const tagPayload=parseTags(b.tags).map(name=>({name,slug:tagSlugify(name)})).filter(tag=>tag.slug);
  if(status==="published"){const quality=checkEditorialQuality({title,excerpt:excerpt||null,content,canonicalUrl,categoryCount:1,tagCount:tagPayload.length});if(!quality.ready)return NextResponse.json({error:"ยังเผยแพร่ไม่ได้",quality},{status:422});}
  try {
    await updateAppwriteRow("articles",id,{title,slug,excerpt,content,status,reading_minutes:minutes,canonical_url:canonicalUrl,canonical_url_hash:canonicalUrlHash,published_at:publishedAt,image_url:imageUrl});
