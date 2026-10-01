@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { newsArticles } from "@/lib/news/mock-data";
+import { getNewsArticles } from "@/lib/news/data";
 import { getSiteUrl } from "@/lib/site-url";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl().origin;
+  const articles = await getNewsArticles();
 
   return [
     {
@@ -14,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/news`,
       changeFrequency: "daily",
     },
-    ...newsArticles.map((article) => ({
+    ...articles.map((article) => ({
       url: `${baseUrl}/news/${article.slug}`,
       lastModified: new Date(article.publishedAt),
       changeFrequency: "daily" as const,
