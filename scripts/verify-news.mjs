@@ -42,6 +42,11 @@ const login = await read("app/login/page.tsx");
 const register = await read("app/register/page.tsx");
 const forgotPassword = await read("app/forgot-password/page.tsx");
 const resetPassword = await read("app/reset-password/page.tsx");
+const health = await read("app/api/health/route.ts");
+const callback = await read("app/auth/callback/route.ts");
+const siteUrl = await read("lib/site-url.ts");
+const statusPage = await read("app/status/page.tsx");
+const publicNotice = await read("components/public-data-notice.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
 assert.match(news, /getPublicTags\(\)/);
@@ -154,6 +159,15 @@ assert.match(forgotPassword, /resetPasswordForEmail/);
 assert.match(resetPassword, /PASSWORD_RECOVERY/);
 assert.match(resetPassword, /auth\.updateUser/);
 assert.match(middleware, /nextPath/);
+assert.match(health, /database: "unconfigured"/);
+assert.doesNotMatch(health, /message: error\.message/);
+assert.match(callback, /try \{/);
+assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL/);
+assert.match(siteUrl, /VERCEL_PROJECT_PRODUCTION_URL/);
+assert.doesNotMatch(siteUrl, /VERCEL_ENV === "preview"/);
+assert.match(statusPage, /database_query_failed/);
+assert.doesNotMatch(statusPage, /error\.message/);
+assert.match(publicNotice, /Supabase/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
 
