@@ -11,7 +11,7 @@ Create one Appwrite TablesDB database and these tables. Keep the table IDs in Ve
 | tags | name string, slug string |
 | article_tags | article_id string, tag_id string |
 | sources | name string, domain string, homepage_url string, feed_url string, is_active boolean, last_ingested_at datetime |
-| ingestion_runs | source_id string, status string, error_message longtext, started_at datetime, finished_at datetime, items_seen integer, items_created integer, items_skipped integer, items_failed integer, failure_details longtext |
+| ingestion_runs | source_id string, status string, error_message longtext, started_at datetime, finished_at datetime, items_seen integer, items_created integer, items_skipped integer, items_failed integer, failure_details longtext, item_details longtext |
 | audit_logs | article_id string, actor_id string, action string, metadata longtext, created_at datetime |
 | notifications | type string, title string, message text, read_at datetime, created_at datetime |
 
