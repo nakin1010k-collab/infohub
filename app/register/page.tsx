@@ -38,7 +38,7 @@ export default function RegisterPage() {
         password: String(form.get("password") ?? ""),
         options: {
           data: { display_name: String(form.get("name") ?? "") },
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
         },
       });
 
