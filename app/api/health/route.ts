@@ -3,39 +3,22 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   const started = Date.now();
+  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+
+  if (!configured) {
+    return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "unconfigured", timestamp: new Date().toISOString() }, { status: 503 });
+  }
 
   try {
     const supabase = await createClient();
     const { error } = await supabase.from("categories").select("id").limit(1);
-
     if (error) {
-      return NextResponse.json(
-        {
-          ok: false,
-          service: "infohub",
-          database: "error",
-          message: error.message,
-        },
-        { status: 503 },
-      );
+      console.error("[health] database check failed", error);
+      return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "error", timestamp: new Date().toISOString() }, { status: 503 });
     }
-
-    return NextResponse.json({
-      ok: true,
-      service: "infohub",
-      database: "ok",
-      latencyMs: Date.now() - started,
-      timestamp: new Date().toISOString(),
-    });
+    return NextResponse.json({ ok: true, service: "infohub", application: "ok", database: "ok", latencyMs: Date.now() - started, timestamp: new Date().toISOString() });
   } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        service: "infohub",
-        database: "unconfigured",
-        message: error instanceof Error ? error.message : "Database health check failed",
-      },
-      { status: 503 },
-    );
+    console.error("[health] database check threw", error);
+    return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "error", timestamp: new Date().toISOString() }, { status: 503 });
   }
 }
