@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "editor" && profile?.role !== "admin") return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  const body = await request.json().catch(() => ({})) as { sourceId?: string; enrich?: boolean };
+  const body = await request.json().catch(() => ({})) as { sourceId?: string; enrich?: boolean; retry?: boolean };
   if (!body.sourceId) return NextResponse.json({ error: "ต้องระบุ sourceId" }, { status: 400 });
 
   const { data: source, error: sourceError } = await supabase.from("sources").select("id,name,feed_url,is_active").eq("id", body.sourceId).maybeSingle();
@@ -135,6 +135,7 @@ export async function POST(request: Request) {
   try {
     const items = await fetchFeed(source.feed_url);
     let created = 0;
+    let skippedDuplicates = 0;
     let ruleEnriched = 0;
     let aiEnriched = 0;
 
@@ -143,7 +144,10 @@ export async function POST(request: Request) {
       try {
         const { data: existing, error: lookupError } = await supabase.from("articles").select("id").eq("canonical_url", item.url).maybeSingle();
         if (lookupError) throw lookupError;
-        if (existing) continue;
+        if (existing) {
+          skippedDuplicates++;
+          continue;
+        }
 
         const baseSlug = slugify(item.title) || "imported-" + Date.now();
         const slug = baseSlug + "-" + crypto.randomUUID().slice(0, 8);
@@ -163,7 +167,10 @@ export async function POST(request: Request) {
         });
 
         if (error || !inserted) {
-          if (error?.code === "23505") continue;
+          if (error?.code === "23505") {
+            skippedDuplicates++;
+            continue;
+          }
           throw error ?? new Error("article import returned no id");
         }
 
@@ -196,7 +203,7 @@ export async function POST(request: Request) {
       await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
     }
 
-    return NextResponse.json({ ok: true, source: source.name, status: runStatus, itemsSeen: items.length, itemsCreated: created, ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
+    return NextResponse.json({ ok: true, source: source.name, status: runStatus, retry: Boolean(body.retry), itemsSeen: items.length, itemsCreated: created, skippedDuplicates, failedItems: failures.length, ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown ingestion error";
     await supabase.from("ingestion_runs").update({ status: "failed", error_message: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", run.id);
