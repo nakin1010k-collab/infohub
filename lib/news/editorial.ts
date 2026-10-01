@@ -8,7 +8,11 @@ const RULES: Array<{ slug: string; keywords: string[] }> = [
 ];
 
 function slugify(value: string) {
-  return value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+  const ascii = value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+  if (ascii) return ascii;
+  let hash = 0;
+  for (const char of value) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return "tag-" + hash.toString(36);
 }
 
 export function enrichWithoutAI(article: {
