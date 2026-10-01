@@ -6,7 +6,7 @@ const checks=[
 ["search","app/search/page.tsx",["searchPublicNews(query)","name=\"q\""]],
 ["detail","app/news/[slug]/page.tsx",["generateMetadata","getRelatedNews","notFound()"]],
 ["news data","lib/news/data.ts",["listAllAppwriteRows","getAllTags","getNewsArticlesPage"]],
-["Appwrite database","lib/appwrite/database.ts",["APPWRITE_DATABASE_ID","APPWRITE_API_KEY","Query.limit","/tablesdb/"]],
+["Appwrite database","lib/appwrite/database.ts",["APPWRITE_DATABASE_ID","APPWRITE_API_KEY","queryLimit","/tablesdb/"]],
 ["Appwrite auth","lib/appwrite/auth.ts",["getCurrentAppwriteUser","requireEditor","profiles"]],
 ["Appwrite request","lib/appwrite/request.ts",["X-Appwrite-Project","X-Appwrite-Session"]],
 ["schema contract","docs/APPWRITE_SCHEMA.md",["APPWRITE_ARTICLES_TABLE_ID","audit_logs","ingestion_runs"]],
