@@ -255,3 +255,41 @@ grant execute on function public.admin_update_article(uuid,uuid,text,text,text,t
 alter function public.admin_create_article(uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz) set search_path = pg_catalog, public, auth;
 alter function public.admin_update_article(uuid,uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text) set search_path = pg_catalog, public, auth;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- Protect audit-log integrity: direct INSERT is no longer exposed to clients.
+drop policy if exists "article_audit_logs_editor_write" on public.article_audit_logs;
+revoke insert on table public.article_audit_logs from public, anon, authenticated;
+
+create or replace function public.record_article_audit(
+  p_article_id uuid,
+  p_actor_id uuid,
+  p_action text,
+  p_metadata jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+declare
+  v_role text;
+begin
+  select role into v_role from public.profiles where id = auth.uid();
+
+  if auth.uid() is null
+     or p_actor_id <> auth.uid()
+     or v_role not in ('editor','admin') then
+    raise exception 'forbidden';
+  end if;
+
+  if not exists (select 1 from public.articles where id = p_article_id) then
+    raise exception 'not_found';
+  end if;
+
+  insert into public.article_audit_logs(article_id, actor_id, action, metadata)
+  values (p_article_id, p_actor_id, p_action, coalesce(p_metadata, '{}'::jsonb));
+end;
+$$;
+
+revoke execute on function public.record_article_audit(uuid,uuid,text,jsonb) from public, anon;
+grant execute on function public.record_article_audit(uuid,uuid,text,jsonb) to authenticated;
