@@ -2,7 +2,8 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState } from "@/components/ui-states";
-import { getNewsArticles } from "@/lib/news/data";
+import { PublicDataNotice } from "@/components/public-data-notice";
+import { getPublicNewsArticles } from "@/lib/news/data";
 
 const categories = [
   { label: "ข่าวเด่น", slug: "news", icon: "✦" },
@@ -42,7 +43,8 @@ function HeroMascot() {
 }
 
 export default async function HomePage() {
-  const latest = await getNewsArticles();
+  const latestResult = await getPublicNewsArticles();
+  const latest = latestResult.data;
   const featured = latest.slice(0, 3);
 
   return (
@@ -53,6 +55,7 @@ export default async function HomePage() {
       <SiteHeader />
 
       <main id="main-content">
+        {latestResult.degraded ? <div className="container" style={{ paddingTop: "24px" }}><PublicDataNotice /></div> : null}
         <section className="hero">
           <div className="container hero-grid">
             <div className="hero-copy">
