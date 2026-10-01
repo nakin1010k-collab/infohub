@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import QueueActions from "./queue-actions";
 
-export default async function EditorialQueuePage({ searchParams }: { searchParams: Promise<{ origin?: string; ai?: string }> }) {
+export default async function EditorialQueuePage({ searchParams }: { searchParams: Promise<{ origin?: string; ai?: string; sort?: string }> }) {
   const params = await searchParams;
   const origin = ["all", "rss", "manual"].includes(params.origin ?? "") ? (params.origin ?? "all") : "all";
   const ai = params.ai === "yes" ? "yes" : "all";
+  const sort = params.sort === "oldest" ? "oldest" : "newest";
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,6 +27,10 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
   if (ai === "yes") request = request.not("ai_enriched_at", "is", null);
 
   const { data: articles, error } = await request;
+  const total = articles?.length ?? 0;
+  const rssCount = articles?.filter((article) => Boolean(article.source_id)).length ?? 0;
+  const manualCount = total - rssCount;
+  const aiCount = articles?.filter((article) => Boolean(article.ai_enriched_at)).length ?? 0;
 
   return (
     <main className="auth-page">
@@ -64,7 +69,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
               <option value="yes">AI ช่วยแล้ว</option>
             </select>
             <button className="state-action" type="submit">กรอง</button>
-            {(origin !== "all" || ai !== "all") && <Link className="state-action" href="/admin/queue">ล้าง</Link>}
+            {(origin !== "all" || ai !== "all" || sort !== "newest") && <Link className="state-action" href="/admin/queue">ล้าง</Link>}
           </form>
 
           {!error && articles?.length ? (
