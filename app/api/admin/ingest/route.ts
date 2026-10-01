@@ -125,44 +125,60 @@ export async function POST(request: Request) {
     let ruleEnriched = 0;
     let aiEnriched = 0;
 
+    const failures: string[] = [];
     for (const item of items.slice(0, 50)) {
-      const { data: existing } = await supabase.from("articles").select("id").eq("canonical_url", item.url).maybeSingle();
-      if (existing) continue;
+      try {
+        const { data: existing, error: lookupError } = await supabase.from("articles").select("id").eq("canonical_url", item.url).maybeSingle();
+        if (lookupError) throw lookupError;
+        if (existing) continue;
 
-      const baseSlug = slugify(item.title) || "imported-" + Date.now();
-      const slug = baseSlug + "-" + crypto.randomUUID().slice(0, 8);
-      const { data: inserted, error } = await supabase.rpc("admin_import_article", {
-        p_actor_id: user.id,
-        p_source_id: source.id,
-        p_source_name: source.name,
-        p_slug: slug,
-        p_title: item.title,
-        p_excerpt: item.excerpt || null,
-        p_content: item.excerpt || null,
-        p_canonical_url: item.url,
-        p_author_name: item.authorName || null,
-        p_reading_minutes: Math.max(1, Math.ceil((item.excerpt || item.title).length / 600)),
-        p_category_id: null,
-        p_tags: [],
-      });
+        const baseSlug = slugify(item.title) || "imported-" + Date.now();
+        const slug = baseSlug + "-" + crypto.randomUUID().slice(0, 8);
+        const { data: inserted, error } = await supabase.rpc("admin_import_article", {
+          p_actor_id: user.id,
+          p_source_id: source.id,
+          p_source_name: source.name,
+          p_slug: slug,
+          p_title: item.title,
+          p_excerpt: item.excerpt || null,
+          p_content: item.excerpt || null,
+          p_canonical_url: item.url,
+          p_author_name: item.authorName || null,
+          p_reading_minutes: Math.max(1, Math.ceil((item.excerpt || item.title).length / 600)),
+          p_category_id: null,
+          p_tags: [],
+        });
 
-      if (!error && inserted) {
+        if (error || !inserted) {
+          if (error?.code === "23505") continue;
+          throw error ?? new Error("article import returned no id");
+        }
+
         created++;
-
-        if (await enrichWithRules(supabase, inserted.id)) {
+        if (await enrichWithRules(supabase, inserted)) {
           ruleEnriched++;
-          await recordArticleAudit(supabase, inserted.id, user.id, "updated", { mode: "zero_cost_rules" });
+          await recordArticleAudit(supabase, inserted, user.id, "updated", { mode: "zero_cost_rules" });
         }
 
-        if (body.enrich && process.env.OPENAI_API_KEY && await aiEnrich(supabase, inserted.id, process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL?.trim() || "gpt-5-mini")) {
+        if (body.enrich && process.env.OPENAI_API_KEY && await aiEnrich(supabase, inserted, process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL?.trim() || "gpt-5-mini")) {
           aiEnriched++;
-          await supabase.from("articles").update({ ai_enriched_at: new Date().toISOString() }).eq("id", inserted.id);
-          await recordArticleAudit(supabase, inserted.id, user.id, "ai_enriched", { model: process.env.OPENAI_MODEL?.trim() || "gpt-5-mini", mode: "auto_import" });
+          await supabase.from("articles").update({ ai_enriched_at: new Date().toISOString() }).eq("id", inserted);
+          await recordArticleAudit(supabase, inserted, user.id, "ai_enriched", { model: process.env.OPENAI_MODEL?.trim() || "gpt-5-mini", mode: "auto_import" });
         }
+      } catch (itemError) {
+        const message = itemError instanceof Error ? itemError.message : "Unknown item import error";
+        failures.push(message.slice(0, 180));
       }
     }
 
-    await supabase.from("ingestion_runs").update({ status: "success", items_seen: items.length, items_created: created, finished_at: new Date().toISOString() }).eq("id", run.id);
+    const runStatus = failures.length > 0 ? (created > 0 ? "partial" : "failed") : "success";
+    await supabase.from("ingestion_runs").update({
+      status: runStatus,
+      items_seen: items.length,
+      items_created: created,
+      error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
+      finished_at: new Date().toISOString(),
+    }).eq("id", run.id);
     await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
 
     return NextResponse.json({ ok: true, source: source.name, itemsSeen: items.length, itemsCreated: created, ruleEnriched, aiEnriched });
