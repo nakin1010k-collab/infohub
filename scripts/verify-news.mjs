@@ -128,7 +128,7 @@ assert.match(rss, /fetch\(currentUrl/);
 assert.match(rss, /redirect: "manual"/);
 assert.match(rss, /private network/);
 assert.match(rss, /username \|\| url\.password/);
-assert.match(ingest, /status: "draft"/);
+assert.match(importMigration, /'draft'/);
 assert.match(ingest, /published_at: null/);
 assert.match(ingest, /canonical_url/);
 assert.match(ingest, /enrich/);
