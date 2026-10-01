@@ -27,6 +27,12 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
   if (ai === "yes") request = request.not("ai_enriched_at", "is", null);
 
   const { data: articles, error } = await request;
+  const { data: ingestionRuns, error: ingestionError } = await supabase
+    .from("ingestion_runs")
+    .select("id, source_id, status, items_seen, items_created, error_message, started_at, finished_at")
+    .order("started_at", { ascending: false })
+    .limit(8);
+
   const total = articles?.length ?? 0;
   const rssCount = articles?.filter((article) => Boolean(article.source_id)).length ?? 0;
   const manualCount = total - rssCount;
@@ -58,12 +64,45 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
             </div>
           </div>
 
+          {ingestionError ? (
+            <div className="ui-state is-error">
+              <div><strong>โหลดประวัติ RSS ไม่สำเร็จ</strong><p>{ingestionError.message}</p></div>
+            </div>
+          ) : null}
+
           <div className="queue-summary" aria-label="สรุปคิวข่าว">
             <div className="kpi-card"><span>ทั้งหมด</span><strong>{total}</strong></div>
             <div className="kpi-card"><span>RSS</span><strong>{rssCount}</strong></div>
             <div className="kpi-card"><span>เขียนเอง</span><strong>{manualCount}</strong></div>
             <div className="kpi-card"><span>AI ช่วยแล้ว</span><strong>{aiCount}</strong></div>
           </div>
+
+          <section className="admin-section" aria-labelledby="ingestion-title">
+            <div className="admin-heading-row">
+              <div>
+                <p className="eyebrow">RSS INGESTION</p>
+                <h2 id="ingestion-title">รอบนำเข้าล่าสุด</h2>
+                <p>ตรวจสถานะการดึงข่าวและจำนวนรายการที่สร้างได้จาก RSS</p>
+              </div>
+              <Link className="state-action" href="/admin/sources">จัดการแหล่งข่าว</Link>
+            </div>
+            {!ingestionRuns?.length ? (
+              <div className="ui-state"><div><strong>ยังไม่มีประวัติการนำเข้า</strong><p>เมื่อเริ่มนำเข้า RSS รอบแรก ผลลัพธ์จะแสดงที่นี่</p></div></div>
+            ) : (
+              <div className="news-list">
+                {ingestionRuns.map((run) => (
+                  <article className="news-card admin-news-card" key={run.id}>
+                    <div className="news-meta">
+                      <span className="tag">{run.status === "success" ? "สำเร็จ" : run.status === "partial" ? "สำเร็จบางส่วน" : run.status === "failed" ? "ล้มเหลว" : "กำลังทำงาน"}</span>
+                      <span>{new Date(run.started_at).toLocaleString("th-TH")}</span>
+                    </div>
+                    <h3>นำเข้า {run.items_seen} รายการ · สร้าง {run.items_created} บทความ</h3>
+                    {run.error_message ? <p className="field-hint">ข้อผิดพลาด: {run.error_message}</p> : <p className="field-hint">ไม่มีข้อผิดพลาดที่บันทึกไว้</p>}
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
 
           <form className="admin-filters" method="get">
             <select name="origin" defaultValue={origin} aria-label="กรองที่มา">
