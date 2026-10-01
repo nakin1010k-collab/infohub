@@ -44,6 +44,9 @@ npm run build
 - `/admin` — editorial CMS for drafts, publishing, archive, search, and filtering
 - `/admin/new` — create an article
 - `/admin/[id]` — edit an article
+- `/admin/[id]/preview` — protected draft preview for editors/admins
+- `/admin/queue` — editorial review queue for draft articles
+- `/admin/activity` — editorial audit/activity log
 - `/admin/sources` — configure RSS/Atom sources and trigger ingestion
 - `/sitemap.xml` — generated sitemap for public content
 - `/robots.txt` — crawler rules for public/protected areas
