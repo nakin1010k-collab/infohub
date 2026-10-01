@@ -77,7 +77,7 @@ async function aiEnrich(supabase: Awaited<ReturnType<typeof createClient>>, arti
     ? result.tags.filter((x: unknown): x is string => typeof x === "string").map((x: string) => x.trim().slice(0, 40)).filter(Boolean).slice(0, 6)
     : [];
   const minutes = Number(result.readingMinutes);
-  const title = typeof result.title === "string" && result.title.trim() ? parsed.title.trim().slice(0, 180) : article.title;
+  const title = typeof result.title === "string" && result.title.trim() ? result.title.trim().slice(0, 180) : article.title;
   const excerpt = typeof result.excerpt === "string" ? result.excerpt.trim().slice(0, 500) : article.excerpt;
 
   const { error } = await supabase.from("articles").update({
