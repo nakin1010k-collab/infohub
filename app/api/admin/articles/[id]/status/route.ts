@@ -26,7 +26,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const previousStatus = article.status as "draft" | "published" | "archived";
   const action = body.status === "published"
     ? "published"
-    : previousStatus === "published" && body.status !== "published"
+    : previousStatus === "published"
       ? "unpublished"
       : body.status === "archived"
         ? "archived"
