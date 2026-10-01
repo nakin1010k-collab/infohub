@@ -67,7 +67,7 @@ assert.match(middleware, /\/admin\/:path\*/);
 assert.match(admin, /editor/);
 assert.match(admin, /profiles/);
 assert.match(admin, /\/admin\/new/);
-assert.match(admin, /\/admin\/\$\{article\.id\}/);
+assert.match(adminActions, /\/admin\/\$\{id\}/);
 assert.match(adminForm, /\/api\/admin\/articles/);
 assert.match(adminForm, /published/);
 assert.match(adminApi, /article_categories/);
