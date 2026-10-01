@@ -14,14 +14,22 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const {data:existing}=await supabase.from("articles").select("published_at,status").eq("id",id).maybeSingle();if(!existing)return NextResponse.json({error:"ไม่พบข่าวนี้"},{status:404});
  const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600));const publishedAt=status==="published"?(existing.published_at??new Date().toISOString()):null;const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString();
  const previousStatus=existing.status as "draft"|"published"|"archived";
- const {error}=await supabase.from("articles").update({title,slug,excerpt:b.excerpt?.trim()||null,content,status,canonical_url:canonicalUrl,reading_minutes:minutes,published_at:publishedAt}).eq("id",id);if(error)return NextResponse.json({error:error.message},{status:400});
- const {error:cd}=await supabase.from("article_categories").delete().eq("article_id",id);if(cd)return NextResponse.json({error:cd.message},{status:400});const {error:ci}=await supabase.from("article_categories").insert({article_id:id,category_id:categoryId});if(ci)return NextResponse.json({error:ci.message},{status:400});
- await recordArticleAudit(supabase, id, user.id, "updated", { status, previousStatus });
- if (status !== previousStatus) {
-  const action = status === "published" ? "published" : previousStatus === "published" ? "unpublished" : status === "archived" ? "archived" : "updated";
-  if (action !== "updated") await recordArticleAudit(supabase, id, user.id, action, { previousStatus, status });
- }
- const {error:td}=await supabase.from("article_tags").delete().eq("article_id",id);if(td)return NextResponse.json({error:td.message},{status:400});
- for(const name of parseTags(b.tags)){const ts=tagSlugify(name);if(!ts)continue;const {data:tag,error:te}=await supabase.from("tags").upsert({slug:ts,name},{onConflict:"slug"}).select("id").single();if(te)return NextResponse.json({error:te.message},{status:400});const {error:le}=await supabase.from("article_tags").insert({article_id:id,tag_id:tag.id});if(le)return NextResponse.json({error:le.message},{status:400});}
+ const tagPayload = parseTags(b.tags).map((name) => ({ name, slug: tagSlugify(name) })).filter((tag) => tag.slug);
+ const { error } = await supabase.rpc("admin_update_article", {
+  p_actor_id: user.id,
+  p_article_id: id,
+  p_title: title,
+  p_slug: slug,
+  p_excerpt: b.excerpt?.trim() || null,
+  p_content: content,
+  p_status: status,
+  p_category_id: categoryId,
+  p_tags: tagPayload,
+  p_reading_minutes: minutes,
+  p_canonical_url: canonicalUrl,
+  p_published_at: publishedAt,
+  p_previous_status: previousStatus,
+ });
+ if(error) return NextResponse.json({error:error.message},{status:400});
  return NextResponse.json({ok:true});
 }
