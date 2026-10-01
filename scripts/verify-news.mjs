@@ -127,3 +127,8 @@ const auditHelper = read("lib/news/audit.ts");
 assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
 const articleEditor = read("app/admin/[id]/page.tsx");
 assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
+
+const activityPage = read("app/admin/activity/page.tsx");
+assert(activityPage.includes("EDITORIAL ACTIVITY"), "Editorial activity page must exist");
+assert(activityPage.includes('name="action"'), "Editorial activity must filter by action");
+assert(activityPage.includes('name="days"'), "Editorial activity must filter by time");
