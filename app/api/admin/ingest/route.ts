@@ -179,7 +179,7 @@ export async function POST(request: Request) {
       error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
       finished_at: new Date().toISOString(),
     }).eq("id", run.id);
-    await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
+    if (runStatus !== "failed") {\n      await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);\n    }
 
     return NextResponse.json({ ok: true, source: source.name, itemsSeen: items.length, itemsCreated: created, ruleEnriched, aiEnriched });
   } catch (error) {
