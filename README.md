@@ -41,6 +41,10 @@ npm run build
 - `/profile` — protected profile
 - `/dashboard` — protected dashboard shell
 - `/settings` — protected settings shell
+- `/admin` — editorial CMS for drafts, publishing, archive, search, and filtering
+- `/admin/new` — create an article
+- `/admin/[id]` — edit an article
+- `/admin/sources` — configure RSS/Atom sources and trigger ingestion
 - `/sitemap.xml` — generated sitemap for public content
 - `/robots.txt` — crawler rules for public/protected areas
 
@@ -49,7 +53,7 @@ npm run build
 - Browser client: `lib/supabase/client.ts`
 - Server client: `lib/supabase/server.ts`
 - Session refresh / protected-route enforcement: `middleware.ts`
-- Protected routes: `/profile`, `/dashboard`, `/settings`
+- Protected routes: `/profile`, `/dashboard`, `/settings`, `/admin`
 - Middleware verifies sessions with Supabase `getClaims()` and refreshes auth cookies.
 - Login redirects safely back to an internal `next` path.
 - Sign-out is handled by `components/sign-out-button.tsx`.
@@ -61,6 +65,10 @@ Phase 1 is being hardened around a single Supabase Auth architecture. The produc
 
 Live end-to-end Auth verification still requires the production Supabase project settings and redirect URLs to be configured correctly.
 
-News listing/detail/search currently use typed preview data. Live database ingestion, RLS execution, and production Auth verification remain separate verification gates.
+News listing/detail/search read published articles from Supabase. Editorial writes are protected by editor/admin roles and RLS. RSS/Atom ingestion stores imported items as `draft` so an editor must review before publishing. Configure source `feed_url` values from `/admin/sources` and run ingestion there.
 
-Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap.
+### Database migrations
+
+Apply Supabase migrations in timestamp order. The ingestion foundation adds `sources.feed_url`, ingestion run history, and the CMS write path. No service-role key is required for the application runtime.
+
+Do not treat a phase as complete until its CI verification and exact commit SHA are recorded in the project roadmap. CI remains the final gate for the current implementation.
