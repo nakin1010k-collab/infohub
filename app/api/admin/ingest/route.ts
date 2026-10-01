@@ -116,8 +116,21 @@ export async function POST(request: Request) {
   if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 });
   if (!source?.is_active || !source.feed_url) return NextResponse.json({ error: "แหล่งข่าวนี้ยังไม่มี feed URL หรือถูกปิดใช้งาน" }, { status: 400 });
 
+  const staleCutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  await supabase
+    .from("ingestion_runs")
+    .update({ status: "failed", error_message: "Timed out before a new ingestion run started", finished_at: new Date().toISOString() })
+    .eq("source_id", source.id)
+    .eq("status", "running")
+    .lt("started_at", staleCutoff);
+
   const { data: run, error: runError } = await supabase.from("ingestion_runs").insert({ source_id: source.id, status: "running" }).select("id").single();
-  if (runError) return NextResponse.json({ error: runError.message }, { status: 400 });
+  if (runError) {
+    if (runError.code === "23505") {
+      return NextResponse.json({ error: "แหล่งข่าวนี้กำลังนำเข้าอยู่ กรุณารอรอบปัจจุบันให้เสร็จก่อน" }, { status: 409 });
+    }
+    return NextResponse.json({ error: runError.message }, { status: 400 });
+  }
 
   try {
     const items = await fetchFeed(source.feed_url);
