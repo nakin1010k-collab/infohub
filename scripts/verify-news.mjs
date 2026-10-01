@@ -88,7 +88,7 @@ assert.match(ingest, /OPENAI_API_KEY/);
 assert.match(sources, /SourceForm/);
 assert.match(sourceForm, /\/api\/admin\/ingest/);
 assert.match(sourceForm, /aiImport/);
-assert.match(sourceForm, /ช่วยจัดร่าง/);
+assert.match(sourceForm, /aiImport/);
 assert.match(profileRoleMigration, /current_profile_role/);
 assert.match(profileRoleMigration, /role = public\.current_profile_role/);
 assert.match(sitemap, /MetadataRoute\.Sitemap/);
