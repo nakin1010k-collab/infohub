@@ -17,7 +17,9 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      const appwriteError = await getAppwriteError(response);\n      console.error("Appwrite login failed", appwriteError);\n      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง" }, { status: 401 });
+      const appwriteError = await getAppwriteError(response);
+      console.error("Appwrite login failed", appwriteError);
+      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง" }, { status: 401 });
     }
 
     const session = await extractAppwriteSession(response);
