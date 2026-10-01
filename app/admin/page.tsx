@@ -52,7 +52,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <div className="news-meta"><span className="tag">{statusLabels[article.status] ?? article.status}</span><span>{article.updated_at ? new Date(article.updated_at).toLocaleString("th-TH") : ""}</span></div>
               <h2>{article.title}</h2>
               <p className="field-hint">{article.slug}</p>
-              <AdminActions id={article.id} status={article.status} />
+              <AdminActions id={article.id} slug={article.slug} status={article.status} />
             </article>
           ))}</div> : !error ? <div className="ui-state"><div><strong>ยังไม่มีข่าวตามตัวกรอง</strong><p>ลองเปลี่ยนสถานะหรือสร้างข่าวใหม่</p></div></div> : null}
 
