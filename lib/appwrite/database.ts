@@ -70,7 +70,7 @@ export async function createAppwriteRow(table: string, data: Row) {
   const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows`, {
     method: "POST",
     body: JSON.stringify({ rowId: crypto.randomUUID(), data }),
-  }, process.env.APPWRITE_API_KEY);
+  }, undefined, process.env.APPWRITE_API_KEY);
   if (!response.ok) throw new Error(`Appwrite row create failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
 }
