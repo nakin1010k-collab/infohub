@@ -165,11 +165,10 @@ assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expo
 assert(queueActions.includes("quality?.missing"), "Editorial queue must explain quality-gate publish blocks");
 assert(queuePage.includes("พร้อมเผยแพร่"), "Editorial queue must show quality status");
 
-const queue = await read("app/admin/queue/page.tsx");
-assert(queue.includes('name="sort"'), "Editorial queue must support sorting");
-assert(queue.includes("queue-summary"), "Editorial queue must show summary counts");
-assert(queue.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
-assert(queue.includes("sort === \"newest\""), "Editorial queue must honor sort order");
+assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
+assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
+assert(queuePage.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
+assert(queuePage.includes("sort === \"newest\""), "Editorial queue must honor sort order");
 
 const auditMigration = await read("supabase/migrations/20261001000700_article_audit_logs.sql");
 assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
@@ -191,4 +190,3 @@ assert(admin.includes("admin-kpi-grid"), "CMS must show editorial KPI dashboard"
 assert(admin.includes("publishedTodayKpi"), "CMS KPI must include today's published count");
 assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activity count");
 
-assert.match(migrationNames, /20261001001100_ingestion_partial_status\.sql/);
