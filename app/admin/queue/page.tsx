@@ -38,6 +38,8 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
   const rssCount = articles?.filter((article) => Boolean(article.source_id)).length ?? 0;
   const manualCount = total - rssCount;
   const aiCount = articles?.filter((article) => Boolean(article.ai_enriched_at)).length ?? 0;
+  const readyCount = articles?.filter((article) => checkEditorialQuality({ title: article.title, excerpt: article.excerpt, content: article.content, canonicalUrl: article.canonical_url, categoryCount: article.article_categories?.length ?? 0, tagCount: article.article_tags?.length ?? 0 }).ready).length ?? 0;
+  const needsReviewCount = total - readyCount;
 
   return (
     <main className="auth-page">
@@ -76,6 +78,8 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
             <div className="kpi-card"><span>RSS</span><strong>{rssCount}</strong></div>
             <div className="kpi-card"><span>เขียนเอง</span><strong>{manualCount}</strong></div>
             <div className="kpi-card"><span>AI ช่วยแล้ว</span><strong>{aiCount}</strong></div>
+            <div className="kpi-card"><span>พร้อมเผยแพร่</span><strong>{readyCount}</strong></div>
+            <div className="kpi-card"><span>ต้องแก้</span><strong>{needsReviewCount}</strong></div>
           </div>
 
           <section className="admin-section" aria-labelledby="ingestion-title">
