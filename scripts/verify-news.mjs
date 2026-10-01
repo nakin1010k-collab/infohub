@@ -115,3 +115,8 @@ assert(queuePage.includes("/admin/queue"), "Editorial queue route must be wired"
 const queueActions = read("app/admin/queue/queue-actions.tsx");
 assert(queueActions.includes("/api/admin/ai/enrich"), "Editorial queue must expose AI enrichment");
 assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expose publish action");
+
+const queue = read("app/admin/queue/page.tsx");
+assert(queue.includes('name="sort"'), "Editorial queue must support sorting");
+assert(queue.includes("queue-summary"), "Editorial queue must show summary counts");
+assert(queue.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
