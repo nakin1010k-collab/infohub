@@ -1,11 +1,12 @@
 import { getAppwriteConfig } from "@/lib/appwrite/config";
 
-export async function appwriteRequest(path: string, init: RequestInit = {}, session?: string) {
+export async function appwriteRequest(path: string, init: RequestInit = {}, session?: string, apiKey?: string) {
   const { endpoint, projectId } = getAppwriteConfig();
   const headers = new Headers(init.headers);
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   headers.set("X-Appwrite-Project", projectId);
   if (session) headers.set("X-Appwrite-Session", session);
+  if (apiKey) headers.set("X-Appwrite-Key", apiKey);
   return fetch(`${endpoint}${path}`, { ...init, headers, cache: "no-store" });
 }
 
