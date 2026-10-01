@@ -164,6 +164,8 @@ assert(queueActions.includes("/api/admin/ai/enrich"), "Editorial queue must expo
 assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expose publish action");
 assert(queueActions.includes("quality?.missing"), "Editorial queue must explain quality-gate publish blocks");
 assert(queuePage.includes("พร้อมเผยแพร่"), "Editorial queue must show quality status");
+assert(queuePage.includes("readyCount"), "Editorial queue must show publish-ready count");
+assert(queuePage.includes("needsReviewCount"), "Editorial queue must show review-needed count");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
