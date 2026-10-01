@@ -30,7 +30,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
   const { data: articles, error } = await request;
   const { data: ingestionRuns, error: ingestionError } = await supabase
     .from("ingestion_runs")
-    .select("id, source_id, status, items_seen, items_created, error_message, started_at, finished_at")
+    .select("id, source_id, status, items_seen, items_created, error_message, started_at, finished_at, source:sources(name)")
     .order("started_at", { ascending: false })
     .limit(8);
 
@@ -40,6 +40,8 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
   const aiCount = articles?.filter((article) => Boolean(article.ai_enriched_at)).length ?? 0;
   const readyCount = articles?.filter((article) => checkEditorialQuality({ title: article.title, excerpt: article.excerpt, content: article.content, canonicalUrl: article.canonical_url, categoryCount: article.article_categories?.length ?? 0, tagCount: article.article_tags?.length ?? 0 }).ready).length ?? 0;
   const needsReviewCount = total - readyCount;
+  const failedIngestionCount = ingestionRuns?.filter((run) => run.status === "failed").length ?? 0;
+  const partialIngestionCount = ingestionRuns?.filter((run) => run.status === "partial").length ?? 0;
 
   return (
     <main className="auth-page">
@@ -82,7 +84,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
             <div className="kpi-card"><span>ต้องแก้</span><strong>{needsReviewCount}</strong></div>
           </div>
 
-          <section className="admin-section" aria-labelledby="ingestion-title">
+          <div className="queue-summary" aria-label="สุขภาพ RSS">\n            <div className="kpi-card"><span>RSS ล้มเหลว</span><strong>{failedIngestionCount}</strong></div>\n            <div className="kpi-card"><span>RSS บางส่วน</span><strong>{partialIngestionCount}</strong></div>\n          </div>\n\n          <section className="admin-section" aria-labelledby="ingestion-title">
             <div className="admin-heading-row">
               <div>
                 <p className="eyebrow">RSS INGESTION</p>
@@ -101,7 +103,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
                       <span className="tag">{run.status === "success" ? "สำเร็จ" : run.status === "partial" ? "สำเร็จบางส่วน" : run.status === "failed" ? "ล้มเหลว" : "กำลังทำงาน"}</span>
                       <span>{new Date(run.started_at).toLocaleString("th-TH")}</span>
                     </div>
-                    <h3>นำเข้า {run.items_seen} รายการ · สร้าง {run.items_created} บทความ</h3>
+                    <h3>{run.source?.[0]?.name ?? "แหล่งข่าวไม่ระบุ"} · นำเข้า {run.items_seen} รายการ · สร้าง {run.items_created} บทความ</h3>
                     {run.error_message ? <p className="field-hint">ข้อผิดพลาด: {run.error_message}</p> : <p className="field-hint">ไม่มีข้อผิดพลาดที่บันทึกไว้</p>}
                   </article>
                 ))}
