@@ -166,6 +166,9 @@ assert(queueActions.includes("quality?.missing"), "Editorial queue must explain 
 assert(queuePage.includes("พร้อมเผยแพร่"), "Editorial queue must show quality status");
 assert(queuePage.includes("readyCount"), "Editorial queue must show publish-ready count");
 assert(queuePage.includes("needsReviewCount"), "Editorial queue must show review-needed count");
+assert(queuePage.includes("failedIngestionCount"), "Editorial queue must show failed RSS count");
+assert(queuePage.includes("partialIngestionCount"), "Editorial queue must show partial RSS count");
+assert(queuePage.includes("source:sources(name)"), "Editorial queue must show RSS source names");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
