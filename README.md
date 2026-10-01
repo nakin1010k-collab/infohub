@@ -70,6 +70,19 @@ Live end-to-end Auth verification still requires the production Supabase project
 
 News listing/detail/search read published articles from Supabase. Editorial writes are protected by editor/admin roles and RLS. RSS/Atom ingestion stores imported items as `draft` so an editor must review before publishing. Configure source `feed_url` values from `/admin/sources` and run ingestion there.
 
+## $0-first editorial flow
+
+The basic editorial pipeline does **not** require an AI API or paid service:
+
+1. Configure an RSS/Atom source in `/admin/sources`.
+2. Run **นำเข้าข่าวตอนนี้**.
+3. InfoHub deduplicates by canonical URL and creates draft articles.
+4. A small deterministic ruleset assigns a category, basic tags, and reading time locally.
+5. Review/edit the draft in `/admin/queue` and publish manually.
+6. OpenAI enrichment is optional and only runs when an API key exists and the editor explicitly enables it.
+
+The zero-cost rules are intentionally suggestions, not claims about article truth. The editor remains the final reviewer.
+
 ### Database migrations
 
 Apply Supabase migrations in timestamp order. The ingestion foundation adds `sources.feed_url`, ingestion run history, and the CMS write path. No service-role key is required for the application runtime.
