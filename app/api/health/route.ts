@@ -11,25 +11,15 @@ export async function GET() {
 
   if (!configured) {
     return NextResponse.json(
-      {
-        ok: false,
-        service: "infohub",
-        application: "ok",
-        database: "unconfigured",
-        timestamp: new Date().toISOString(),
-      },
+      { ok: false, service: "infohub", application: "ok", database: "unconfigured", timestamp: new Date().toISOString() },
       { status: 503 },
     );
   }
 
   try {
+    const query = encodeURIComponent("limit(1)");
     const response = await appwriteRequest(
-      "/tablesdb/" +
-        encodeURIComponent(process.env.APPWRITE_DATABASE_ID!) +
-        "/tables/" +
-        encodeURIComponent(process.env.APPWRITE_ARTICLES_TABLE_ID!) +
-        "/rows?queries[]=" +
-        encodeURIComponent("Query.limit(1)"),
+      `/tablesdb/${encodeURIComponent(process.env.APPWRITE_DATABASE_ID!)}/tables/${encodeURIComponent(process.env.APPWRITE_ARTICLES_TABLE_ID!)}/rows?queries[]=${query}`,
       { method: "GET" },
       undefined,
       process.env.APPWRITE_API_KEY,
@@ -44,12 +34,7 @@ export async function GET() {
           service: "infohub",
           application: "ok",
           database: "error",
-          diagnostic: {
-            status: response.status,
-            code: error.code,
-            type: error.type || undefined,
-            message: error.message || undefined,
-          },
+          diagnostic: { status: response.status, code: error.code, type: error.type || undefined, message: error.message || undefined },
           timestamp: new Date().toISOString(),
         },
         { status: 503 },
@@ -72,10 +57,7 @@ export async function GET() {
         service: "infohub",
         application: "ok",
         database: "error",
-        diagnostic: {
-          type: "network_error",
-          message: error instanceof Error ? error.message : "Unknown error",
-        },
+        diagnostic: { type: "network_error", message: error instanceof Error ? error.message : "Unknown error" },
         timestamp: new Date().toISOString(),
       },
       { status: 503 },
