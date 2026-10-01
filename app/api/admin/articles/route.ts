@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { tagSlugify } from "@/lib/news/editorial";
 import { createAppwriteRow, appwriteQueries, listAllAppwriteRows } from "@/lib/appwrite/database";
 import { requireEditor } from "@/lib/appwrite/auth";
-import { getAppwriteError } from "@/lib/appwrite/server";
 import { getSiteUrl } from "@/lib/site-url";
 import { checkEditorialQuality } from "@/lib/news/quality";
 
