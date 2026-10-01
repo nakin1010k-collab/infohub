@@ -22,4 +22,20 @@ export async function POST(request:Request){
  if(status==="published") await recordArticleAudit(supabase, article.id, user.id, "published", {});
  for(const name of parseTags(b.tags)){const ts=tagSlugify(name);if(!ts)continue;const {data:tag,error:te}=await supabase.from("tags").upsert({slug:ts,name},{onConflict:"slug"}).select("id").single();if(te)return NextResponse.json({error:te.message},{status:400});const {error:le}=await supabase.from("article_tags").insert({article_id:article.id,tag_id:tag.id});if(le)return NextResponse.json({error:le.message},{status:400});}
  return NextResponse.json({article},{status:201});
+} const tagPayload = parseTags(b.tags).map((name) => ({ name, slug: tagSlugify(name) })).filter((tag) => tag.slug);
+ const { data:articleId, error } = await supabase.rpc("admin_create_article", {
+  p_actor_id: user.id,
+  p_title: title,
+  p_slug: slug,
+  p_excerpt: b.excerpt?.trim() || null,
+  p_content: content,
+  p_status: status,
+  p_category_id: categoryId,
+  p_tags: tagPayload,
+  p_reading_minutes: minutes,
+  p_canonical_url: canonicalUrl,
+  p_published_at: publishedAt,
+ });
+ if(error) return NextResponse.json({error:error.message},{status:400});
+ return NextResponse.json({article:{id:articleId,slug}},{status:201});
 }
