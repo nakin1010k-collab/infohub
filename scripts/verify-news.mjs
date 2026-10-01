@@ -192,6 +192,10 @@ assert(failureMigration.includes("failure_details jsonb"), "Migration must add s
 const runPage = await read("app/admin/queue/runs/[id]/page.tsx");
 assert(runPage.includes("รายละเอียดรอบนำเข้า"), "RSS run detail page must exist");
 assert(runPage.includes("failure_details"), "RSS run detail page must read failure details");
+assert(runPage.includes("item_details"), "RSS run detail page must read item outcomes");
+assert(runPage.includes("Duplicate"), "RSS run detail page must expose duplicate filter");
+assert(runPage.includes("PAGE_SIZE"), "RSS run detail page must paginate item results");
+assert(runPage.includes("ถัดไป"), "RSS run detail page must expose pagination");
 assert(queuePage.includes("ดูรายละเอียดรอบนี้"), "Queue must link to RSS run detail page");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
