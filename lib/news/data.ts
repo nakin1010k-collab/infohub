@@ -91,7 +91,7 @@ export async function searchNews(query: string) {
   const supabase = await createClient();
   const normalized = query.trim().slice(0, 120);
   let request = supabase.from("articles").select(ARTICLE_SELECT)
-    .eq("status", "published").order("published_at", { ascending: false });
+    .eq("status", "published").order("published_at", { ascending: false }).limit(50);
   if (normalized) {
     const escaped = normalized.replace(/[\\%_]/g, "\\$&");
     request = request.or("title.ilike.%" + escaped + "%,excerpt.ilike.%" + escaped + "%,content.ilike.%" + escaped + "%").limit(50);
