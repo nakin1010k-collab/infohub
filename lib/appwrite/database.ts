@@ -59,7 +59,7 @@ export async function listAllAppwriteRows(table: string, queries: string[] = [],
 
 export async function getAppwriteRow(table: string, rowId: string) {
   const { databaseId, id } = requireTable(table);
-  const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, { method: "GET" });
+  const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, { method: "GET" }, undefined, process.env.APPWRITE_API_KEY);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Appwrite row read failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
@@ -80,7 +80,7 @@ export async function updateAppwriteRow(table: string, rowId: string, data: Row)
   const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, {
     method: "PATCH",
     body: JSON.stringify({ data }),
-  }, process.env.APPWRITE_API_KEY);
+  }, undefined, process.env.APPWRITE_API_KEY);
   if (!response.ok) throw new Error(`Appwrite row update failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
 }
@@ -89,7 +89,7 @@ export async function deleteAppwriteRow(table: string, rowId: string) {
   const { databaseId, id } = requireTable(table);
   const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, {
     method: "DELETE",
-  }, process.env.APPWRITE_API_KEY);
+  }, undefined, process.env.APPWRITE_API_KEY);
   if (!response.ok) throw new Error(`Appwrite row delete failed (${table}): ${response.status}`);
 }
 
