@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession } from "@/lib/appwrite/server";
+import { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession, getAppwriteError } from "@/lib/appwrite/server";
 
 export async function POST(request: Request) {
   try {
@@ -17,10 +17,10 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง" }, { status: 401 });
+      const appwriteError = await getAppwriteError(response);\n      console.error("Appwrite login failed", appwriteError);\n      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง" }, { status: 401 });
     }
 
-    const session = extractAppwriteSession(response);
+    const session = await extractAppwriteSession(response);
     if (!session) {
       return NextResponse.json({ error: "ไม่สามารถสร้าง session ได้ กรุณาลองอีกครั้ง" }, { status: 502 });
     }
