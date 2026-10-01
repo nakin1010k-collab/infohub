@@ -13,9 +13,10 @@ export default async function SourcesPage() {
     .select("id, name, domain, homepage_url, feed_url, is_active, last_ingested_at")
     .order("name");
   const sourceIds = (sources ?? []).map((source) => source.id);
-  const { data: latestRuns } = sourceIds.length
+  const latestRunQuery = sourceIds.length
     ? await supabase.from("ingestion_runs").select("source_id, status, error_message, started_at, finished_at, items_seen, items_created, items_skipped, items_failed, failure_details").in("source_id", sourceIds).order("started_at", { ascending: false })
-    : { data: [] };
+    : null;
+  const latestRuns = latestRunQuery?.data ?? [];
   const latestBySource = new Map<string, (typeof latestRuns)[number]>();
   for (const run of latestRuns ?? []) {
     if (!latestBySource.has(run.source_id)) latestBySource.set(run.source_id, run);
