@@ -100,3 +100,56 @@ export async function searchNews(query: string) {
   if (error) throw error;
   return ((data ?? []) as ArticleRow[]).map(mapArticle);
 }
+
+
+export type NewsPage = { items: NewsArticle[]; total: number; page: number; pageSize: number; totalPages: number };
+
+export async function getNewsArticlesPage(options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {}): Promise<NewsPage> {
+  const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10));
+  const page = Math.max(1, options.page ?? 1);
+  const supabase = await createClient();
+  let query = supabase.from("articles").select(ARTICLE_SELECT, { count: "exact" })
+    .eq("status", "published").order("published_at", { ascending: false });
+
+  if (options.categorySlug && options.categorySlug !== "all") {
+    const { data: category, error } = await supabase.from("categories").select("id").eq("slug", options.categorySlug).eq("is_active", true).maybeSingle();
+    if (error) throw error;
+    if (!category) return { items: [], total: 0, page, pageSize, totalPages: 0 };
+    const { data: links, error: linksError } = await supabase.from("article_categories").select("article_id").eq("category_id", category.id);
+    if (linksError) throw linksError;
+    const ids = (links ?? []).map((link) => link.article_id);
+    if (!ids.length) return { items: [], total: 0, page, pageSize, totalPages: 0 };
+    query = query.in("id", ids);
+  }
+
+  if (options.tag) {
+    const { data: tag, error: tagError } = await supabase.from("tags").select("id").eq("slug", options.tag).maybeSingle();
+    if (tagError) throw tagError;
+    if (!tag) return { items: [], total: 0, page, pageSize, totalPages: 0 };
+    const { data: links, error: linksError } = await supabase.from("article_tags").select("article_id").eq("tag_id", tag.id);
+    if (linksError) throw linksError;
+    const ids = (links ?? []).map((link) => link.article_id);
+    if (!ids.length) return { items: [], total: 0, page, pageSize, totalPages: 0 };
+    query = query.in("id", ids);
+  }
+
+  const from = (page - 1) * pageSize;
+  const { data, error, count } = await query.range(from, from + pageSize - 1);
+  if (error) throw error;
+  const total = count ?? 0;
+  return { items: ((data ?? []) as ArticleRow[]).map(mapArticle), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+}
+
+export async function getPublicCategories() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("categories").select("name,slug").eq("is_active", true).order("sort_order");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getTagBySlug(slug: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("tags").select("name,slug").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  return data;
+}
