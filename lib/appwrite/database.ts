@@ -38,7 +38,7 @@ export async function listAppwriteRows(table: string, queries: string[] = [], li
   const { databaseId, id } = requireTable(table);
   const params = new URLSearchParams();
   for (const query of [...queries, queryLimit(Math.min(100, Math.max(1, limit)))]) params.append("queries[]", query);
-  const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows?${params}`, { method: "GET" });
+  const response = await appwriteRequest(`/databases/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows?${params}`, { method: "GET" }, undefined, process.env.APPWRITE_API_KEY);
   if (!response.ok) throw new Error(`Appwrite table read failed (${table}): ${response.status}`);
   const payload = await response.json() as { rows?: Row[] };
   return payload.rows ?? [];
