@@ -33,7 +33,8 @@ export default function QueueActions({ id }: { id: string }) {
     const result = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) {
-      setMessage(result.error || "เผยแพร่ไม่สำเร็จ");
+      const missing = Array.isArray(result.quality?.missing) ? result.quality.missing.join(" · ") : "";
+      setMessage(missing ? `ยังเผยแพร่ไม่ได้: ${missing}` : result.error || "เผยแพร่ไม่สำเร็จ");
       return;
     }
     router.refresh();
@@ -44,7 +45,7 @@ export default function QueueActions({ id }: { id: string }) {
       <a className="state-action" href={"/admin/" + id}>แก้ไข</a>
       <a className="state-action" href={"/admin/" + id + "/preview"}>Preview</a>
       <button className="state-action" disabled={busy} onClick={enrich}>✨ AI ช่วยร่าง</button>
-      <button className="primary-button" disabled={busy} onClick={publish}>เผยแพร่</button>
+      <button className="primary-button" disabled={busy} onClick={publish}>{busy ? "กำลังทำงาน…" : "เผยแพร่"}</button>
       {message ? <span className="field-hint">{message}</span> : null}
     </div>
   );
