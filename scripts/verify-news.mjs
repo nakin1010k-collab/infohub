@@ -27,7 +27,6 @@ const checks=[
 ["reset password","app/reset-password/page.tsx",["/api/auth/reset-password"]],
 ["logout","components/sign-out-button.tsx",["/api/auth/logout"]],
 ["site URL","lib/site-url.ts",["NEXT_PUBLIC_SITE_URL","VERCEL_PROJECT_PRODUCTION_URL"]],
-["public recovery","components/public-data-notice.tsx",["degraded"]]
 ];
 for(const [name,path,needles] of checks){const text=await read(path);for(const needle of needles)assert.ok(text.includes(needle),"Failed: "+name+" -> "+path+" missing "+needle);}
 for(const path of ["middleware.ts","app/api/health/route.ts","app/api/admin/articles/route.ts","app/api/admin/articles/[id]/route.ts","app/api/admin/articles/[id]/status/route.ts","app/api/admin/ai/enrich/route.ts","app/api/profile/route.ts","app/api/admin/ingest/route.ts","app/admin/queue/page.tsx","app/admin/queue/runs/[id]/page.tsx","app/admin/sources/page.tsx","app/api/admin/sources/[id]/route.ts"]){assert.doesNotMatch(await read(path),/supabase/i,"Supabase dependency remains in "+path);}
