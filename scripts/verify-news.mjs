@@ -176,6 +176,11 @@ assert(sourcesPage.includes("ข้อผิดพลาดล่าสุด"),
 const sourceForm = await read("app/admin/source-form.tsx");
 assert(sourceForm.includes("retryStatus"), "Source form must receive RSS retry status");
 assert(sourceForm.includes("ingest(true)"), "Source form must expose RSS retry action");
+assert(sourceForm.includes("skippedDuplicates"), "Source form must show skipped duplicate count");
+assert(sourceForm.includes("failedItems"), "Source form must show failed item count");
+const ingestRoute = await read("app/api/admin/ingest/route.ts");
+assert(ingestRoute.includes("skippedDuplicates"), "Ingestion API must count duplicate items");
+assert(ingestRoute.includes("failedItems"), "Ingestion API must return failed item count");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
