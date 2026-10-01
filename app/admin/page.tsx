@@ -26,12 +26,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
 
-  const [draftKpi, rssKpi, aiKpi, publishedTodayKpi, activityTodayKpi] = await Promise.all([
+  const [draftKpi, rssKpi, aiKpi, publishedTodayKpi, activityTodayKpi, unreadKpi] = await Promise.all([
     supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft").not("source_id", "is", null),
     supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "draft").not("ai_enriched_at", "is", null),
     supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", todayIso),
     supabase.from("article_audit_logs").select("id", { count: "exact", head: true }).gte("created_at", todayIso),
+    supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
   ]);
 
   const kpis = [
@@ -40,6 +41,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     { label: "AI ช่วยแล้ว", value: aiKpi.count ?? 0, href: "/admin/queue?ai=yes", note: "ร่างที่ผ่าน AI" },
     { label: "เผยแพร่วันนี้", value: publishedTodayKpi.count ?? 0, href: "/admin?status=published", note: "นับตั้งแต่ 00:00" },
     { label: "กิจกรรมวันนี้", value: activityTodayKpi.count ?? 0, href: "/admin/activity?days=1", note: "Audit ทั้งระบบ" },
+    { label: "แจ้งเตือนใหม่", value: unreadKpi.count ?? 0, href: "/admin/notifications", note: "RSS / ระบบ" },
   ];
 
   return (
