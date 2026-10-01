@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
-import { searchNews } from "@/lib/news/data";
+import { searchPublicNews } from "@/lib/news/data";
+import { PublicDataNotice } from "@/components/public-data-notice";
 
 export const metadata: Metadata = {
   title: "ค้นหา | InfoHub",
@@ -17,13 +18,15 @@ type SearchPageProps = { searchParams: Promise<{ q?: string }> };
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const query = params.q?.trim() ?? "";
-  const results = await searchNews(query);
+  const resultsResult = await searchPublicNews(query);
+  const results = resultsResult.data;
 
   return (
     <main className="auth-page">
       <div className={`auth-shell ${styles.shell}`}>
         <Link className="auth-brand" href="/" aria-label="InfoHub หน้าแรก"><span className="brand-mark" aria-hidden="true">🐱</span><span>InfoHub</span></Link>
         <section className="auth-card" aria-labelledby="search-title">
+          {resultsResult.degraded ? <PublicDataNotice /> : null}
           <div className="auth-intro"><p className="eyebrow">SEARCH</p><h1 id="search-title">ค้นหา</h1><p>{query ? <>ผลการค้นหาสำหรับ “{query}” · พบ {results.length} รายการ</> : "ค้นหาจากข่าวและข้อมูลในฐานข้อมูล InfoHub"}</p></div>
           <form className={`search ${styles.form}`} action="/search" method="get" role="search">
             <label htmlFor="search-page-query" className="sr-only">คำค้นหา</label><input id="search-page-query" name="q" type="search" defaultValue={query} placeholder="ค้นหาข่าวสาร ความรู้ หรือข้อมูล..." /><button type="submit">ค้นหา</button>
