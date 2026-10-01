@@ -8,6 +8,7 @@ export default function SourceForm({ id, feedUrl, isActive }: { id: string; feed
   const [active, setActive] = useState(isActive);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [aiImport, setAiImport] = useState(false);
 
   async function save() {
     setBusy(true); setMessage("");
@@ -25,18 +26,18 @@ export default function SourceForm({ id, feedUrl, isActive }: { id: string; feed
     setBusy(true); setMessage("");
     const response = await fetch("/api/admin/ingest", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sourceId: id }),
+      body: JSON.stringify({ sourceId: id, enrich: aiImport }),
     });
     const result = await response.json().catch(() => ({}));
     setBusy(false);
-    setMessage(response.ok ? `นำเข้าแล้ว ${result.itemsCreated ?? 0} ข่าว จาก ${result.itemsSeen ?? 0} รายการ` : result.error || "นำเข้าไม่สำเร็จ");
+    setMessage(response.ok ? `นำเข้าแล้ว ${result.itemsCreated ?? 0} ข่าว จาก ${result.itemsSeen ?? 0} รายการ${aiImport ? ` · AI ช่วยร่าง ${result.aiEnriched ?? 0} ข่าว` : ""}` : result.error || "นำเข้าไม่สำเร็จ");
     if (response.ok) router.refresh();
   }
 
   return <div className="source-form">
     <label>RSS / Atom Feed URL<input type="url" placeholder="https://example.com/feed.xml" value={url} onChange={e => setUrl(e.target.value)} /></label>
     <label className="source-active"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> เปิดใช้งานแหล่งข่าว</label>
-    <div className="admin-actions"><button className="state-action" disabled={busy} onClick={save}>บันทึก</button><button className="primary-button" disabled={busy || !url} onClick={ingest}>นำเข้าข่าวตอนนี้</button></div>
+    <div className="admin-actions"><button className="state-action" disabled={busy} onClick={save}>บันทึก</button><button className="primary-button" disabled={busy || !url} onClick={ingest}>นำเข้าข่าวตอนนี้</button></div><label className="source-active"><input type="checkbox" checked={aiImport} onChange={e => setAiImport(e.target.checked)} /> ให้ AI ช่วยจัดร่างทันทีหลังนำเข้า</label><p className="field-hint">AI จะเปลี่ยนเฉพาะหัวข้อ คำโปรย หมวดหมู่ แท็ก และเวลาอ่าน และข่าวยังคงเป็นฉบับร่างเสมอ</p>
     {message && <p className="field-hint">{message}</p>}
   </div>;
 }
