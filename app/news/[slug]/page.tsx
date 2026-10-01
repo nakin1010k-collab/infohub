@@ -31,6 +31,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
         <Link className="auth-brand" href="/" aria-label="InfoHub หน้าแรก"><span className="brand-mark" aria-hidden="true">🐱</span><span>InfoHub</span></Link>
         <article className="auth-card" aria-labelledby="article-title"><ArticleViewTracker slug={article.slug} />
           <div className="auth-intro"><div className="news-meta"><span className="tag">{article.category}</span><span>{formatPublishedAt(article.publishedAt)}</span><span>อ่าน {article.readingMinutes} นาที</span></div><h1 id="article-title">{article.title}</h1><p>{article.excerpt}</p></div>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"NewsArticle","headline":article.title,"description":article.excerpt,"datePublished":article.publishedAt,"dateModified":article.publishedAt,"mainEntityOfPage":article.canonicalUrl,"url":article.canonicalUrl,"keywords":article.tags})}} />
           <div className={styles.articleBody}>
             {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             <div className={styles.notice} role="note">เนื้อหานี้มาจากฐานข้อมูล InfoHub และอยู่ในสถานะเผยแพร่</div>
