@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import QueueActions from "./queue-actions";
+import { checkEditorialQuality } from "@/lib/news/quality";
 
 export default async function EditorialQueuePage({ searchParams }: { searchParams: Promise<{ origin?: string; ai?: string; sort?: string }> }) {
   const params = await searchParams;
@@ -18,7 +19,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
 
   let request = supabase
     .from("articles")
-    .select("id, slug, title, excerpt, status, source_id, ai_enriched_at, created_at, updated_at, published_at")
+    .select("id, slug, title, excerpt, content, canonical_url, status, source_id, ai_enriched_at, created_at, updated_at, published_at, article_categories(category_id), article_tags(tag_id)")
     .eq("status", "draft")
     .order("updated_at", { ascending: sort === "newest" });
 
@@ -129,12 +130,14 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
                   <div className="news-meta">
                     <span className="tag">ฉบับร่าง</span>
                     <span className="tag">{article.source_id ? "RSS" : "เขียนเอง"}</span>
+                    {(() => { const quality = checkEditorialQuality({ title: article.title, excerpt: article.excerpt, content: article.content, canonicalUrl: article.canonical_url, categoryCount: article.article_categories?.length ?? 0, tagCount: article.article_tags?.length ?? 0 }); return <span className="tag">{quality.ready ? "✓ พร้อมเผยแพร่" : `ต้องตรวจ ${quality.missing.length} จุด`}</span>; })()}
                     {article.ai_enriched_at ? <span className="tag">✨ AI ช่วยแล้ว</span> : null}
                     <span>แก้ไขล่าสุด {new Date(article.updated_at).toLocaleString("th-TH")}</span>
                   </div>
                   <h2>{article.title}</h2>
                   <p>{article.excerpt || "ยังไม่มีคำโปรย"}</p>
                   <p className="field-hint">สร้างเมื่อ {new Date(article.created_at).toLocaleString("th-TH")}</p>
+                  {(() => { const quality = checkEditorialQuality({ title: article.title, excerpt: article.excerpt, content: article.content, canonicalUrl: article.canonical_url, categoryCount: article.article_categories?.length ?? 0, tagCount: article.article_tags?.length ?? 0 }); return quality.ready ? null : <p className="field-hint">ขาด: {quality.missing.join(" · ")}</p>; })()}
                   <QueueActions id={article.id} />
                 </article>
               ))}
