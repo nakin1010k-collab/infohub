@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SourceForm({ id, feedUrl, isActive }: { id: string; feedUrl: string | null; isActive: boolean }) {
+export default function SourceForm({ id, feedUrl, isActive, retryStatus }: { id: string; feedUrl: string | null; isActive: boolean; retryStatus?: "failed" | "partial" | null }) {
   const router = useRouter();
   const [url, setUrl] = useState(feedUrl ?? "");
   const [active, setActive] = useState(isActive);
@@ -19,13 +19,13 @@ export default function SourceForm({ id, feedUrl, isActive }: { id: string; feed
     if (response.ok) router.refresh();
   }
 
-  async function ingest() {
+  async function ingest(retry = false) {
     setBusy(true); setMessage(""); setProgress("กำลังดึง RSS และตรวจรายการข่าว…");
     try {
       const response = await fetch("/api/admin/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sourceId: id, enrich: aiImport }),
+        body: JSON.stringify({ sourceId: id, enrich: aiImport, retry }),
       });
       const result = await response.json().catch(() => ({}));
       if (response.ok) {
@@ -46,7 +46,7 @@ export default function SourceForm({ id, feedUrl, isActive }: { id: string; feed
   return <div className="source-form">
     <label>RSS / Atom Feed URL<input type="url" placeholder="https://example.com/feed.xml" value={url} onChange={e => setUrl(e.target.value)} /></label>
     <label className="source-active"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> เปิดใช้งานแหล่งข่าว</label>
-    <div className="admin-actions"><button className="state-action" disabled={busy} onClick={save}>บันทึก</button><button className="primary-button" disabled={busy || !url} onClick={ingest}>{busy ? "กำลังนำเข้า…" : "นำเข้าข่าวตอนนี้"}</button></div>
+    <div className="admin-actions"><button className="state-action" disabled={busy} onClick={save}>บันทึก</button><button className="primary-button" disabled={busy || !url} onClick={() => ingest(false)}>{busy ? "กำลังนำเข้า…" : "นำเข้าข่าวตอนนี้"}</button>{retryStatus ? <button className="state-action" disabled={busy || !url} onClick={() => ingest(true)}>↻ ลองนำเข้าใหม่ ({retryStatus === "partial" ? "บางส่วน" : "ล้มเหลว"})</button> : null}</div>
     {progress && <p className="field-hint" role="status" aria-live="polite">{progress}</p>}
     <label className="source-active"><input type="checkbox" checked={aiImport} onChange={e => setAiImport(e.target.checked)} /> ใช้ AI ช่วยร่างเพิ่มเติม (ไม่จำเป็น)</label>
     <p className="field-hint">การนำเข้าและจัดหมวด/แท็กพื้นฐานทำงานได้โดยไม่ต้องมี OpenAI API และข่าวจะยังเป็นฉบับร่างเสมอ</p>
