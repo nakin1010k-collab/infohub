@@ -46,7 +46,7 @@ const resetPassword = await read("app/reset-password/page.tsx");
 assert.match(news, /export const metadata: Metadata/);
 assert.match(news, /getAllTags\(\)/);
 assert.match(news, /article\.tags\.map/);
-assert.match(news, /\/search\?q=\$\{encodeURIComponent\(tag\)\}/);
+assert.match(news, /\/news\?tag=\$\{encodeURIComponent\(tag\.slug\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
 
 assert.match(search, /export const metadata: Metadata/);
