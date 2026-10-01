@@ -106,18 +106,6 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
                     <h3>{run.source?.[0]?.name ?? "แหล่งข่าวไม่ระบุ"} · นำเข้า {run.items_seen} รายการ · สร้าง {run.items_created} บทความ</h3>
                     <p><Link className="state-action" href={`/admin/queue/runs/${run.id}`}>ดูรายละเอียดรอบนี้</Link></p>
                     {run.error_message ? <p className="field-hint">ข้อผิดพลาด: {run.error_message}</p> : <p className="field-hint">ไม่มีข้อผิดพลาดที่บันทึกไว้</p>}
-                    {Array.isArray(run.failure_details) && run.failure_details.length ? (
-                      <details className="field-hint"><summary>รายละเอียดรายการที่ล้มเหลว ({run.failure_details.length})</summary>
-                        <ul>
-                          {run.failure_details.map((failure: { url?: string; title?: string; reason?: string }, index: number) => (
-                            <li key={failure.url ?? index}>
-                              <strong>{failure.title || "รายการ RSS"}</strong> — {failure.reason || "ไม่ทราบสาเหตุ"}{" "}
-                              {failure.url ? <a href={failure.url} target="_blank" rel="noreferrer">เปิดต้นทาง</a> : null}
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    ) : null}
                   </article>
                 ))}
               </div>
