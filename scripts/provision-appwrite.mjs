@@ -12,7 +12,7 @@ if (!apiKey) {
 const tables = [
   ["profiles", [["user_id","string",{size:128,required:true}],["display_name","string",{size:256,required:true}],["role","string",{size:32,required:true}]]],
   ["categories", [["name","string",{size:256,required:true}],["slug","string",{size:256,required:true}],["is_active","boolean",{required:false,default:true}],["sort_order","integer",{required:false,default:0}]]],
-  ["articles", [["title","string",{size:512,required:true}],["slug","string",{size:256,required:true}],["excerpt","text",{required:true}],["content","longtext",{required:true}],["status","string",{size:32,required:true}],["category_id","string",{size:128,required:false}],["source_id","string",{size:128,required:false}],["canonical_url","string",{size:2048,required:false}],["reading_minutes","integer",{required:false,default:1}],["published_at","datetime",{required:false}],["image_url","string",{size:2048,required:false}],["created_by","string",{size:128,required:false}],["ai_enriched_at","datetime",{required:false}]]],
+  ["articles", [["title","string",{size:512,required:true}],["slug","string",{size:256,required:true}],["excerpt","text",{required:true}],["content","longtext",{required:true}],["status","string",{size:32,required:true}],["category_id","string",{size:128,required:false}],["source_id","string",{size:128,required:false}],["canonical_url","string",{size:2048,required:false}],["canonical_url_hash","string",{size:64,required:false}],["reading_minutes","integer",{required:false,default:1}],["published_at","datetime",{required:false}],["image_url","string",{size:2048,required:false}],["created_by","string",{size:128,required:false}],["ai_enriched_at","datetime",{required:false}]]],
   ["article_categories", [["article_id","string",{size:128,required:true}],["category_id","string",{size:128,required:true}]]],
   ["tags", [["name","string",{size:256,required:true}],["slug","string",{size:256,required:true}]]],
   ["article_tags", [["article_id","string",{size:128,required:true}],["tag_id","string",{size:128,required:true}]]],
@@ -25,7 +25,7 @@ const tables = [
 const indexes = {
   profiles: [["user_id_unique","unique",["user_id"]]],
   categories: [["slug_unique","unique",["slug"]],["active_order","key",["is_active","sort_order"]]],
-  articles: [["slug_unique","unique",["slug"]],["status_published","key",["status","published_at"]],["canonical_url_unique","unique",["canonical_url"]]],
+  articles: [["slug_unique","unique",["slug"]],["status_published","key",["status","published_at"]],["canonical_url_hash_unique","unique",["canonical_url_hash"]]],
   article_categories: [["article_category_unique","unique",["article_id","category_id"]]],
   tags: [["slug_unique","unique",["slug"]]],
   article_tags: [["article_tag_unique","unique",["article_id","tag_id"]]],
