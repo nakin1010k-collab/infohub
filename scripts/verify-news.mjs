@@ -99,7 +99,7 @@ assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undef
 assert.match(uiStates, /onAction=\{onRetry\}/);
 
 assert.match(login, /isSafeInternalPath/);
-assert.match(login, /!value\.startsWith\("//")/);
+assert.match(login, /!value\.startsWith\("\/\/"\)/);
 assert.match(register, /name="terms" required/);
 assert.match(register, /auth\.signUp/);
 assert.match(forgotPassword, /resetPasswordForEmail/);
