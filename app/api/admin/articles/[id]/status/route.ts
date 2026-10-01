@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createAppwriteRow, getAppwriteRow, listAllAppwriteRows, updateAppwriteRow, appwriteQueries } from "@/lib/appwrite/database";
 import { requireEditor } from "@/lib/appwrite/auth";
 import { checkEditorialQuality } from "@/lib/news/quality";
-import { recordArticleAudit } from "@/lib/news/audit";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; const auth = await requireEditor();
@@ -22,7 +21,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     await updateAppwriteRow("articles", id, { status: body.status, published_at: publishedAt });
     const action = body.status === "published" ? "published" : previousStatus === "published" ? "unpublished" : body.status === "archived" ? "archived" : "updated";
-    await recordArticleAudit(id, auth.user.$id, action, { previousStatus, status: body.status });
+    await createAppwriteRow("audit_logs", { article_id:id, actor_id:auth.user.$id, action, metadata:JSON.stringify({ previousStatus, status:body.status }), created_at:new Date().toISOString() });
     return NextResponse.json({ ok:true });
   } catch(error) { return NextResponse.json({ error:error instanceof Error?error.message:"อัปเดตสถานะไม่สำเร็จ" }, {status:400}); }
 }
