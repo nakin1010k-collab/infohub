@@ -115,27 +115,27 @@ assert.match(middleware, /nextPath/);
 
 console.log("News/Search/auth hardening smoke tests passed.");
 
-const queuePage = read("app/admin/queue/page.tsx");
+const queuePage = await read("app/admin/queue/page.tsx");
 assert(queuePage.includes('eq("status", "draft")'), "Editorial queue must load draft articles");
 assert(queuePage.includes("/admin/queue"), "Editorial queue route must be wired");
-const queueActions = read("app/admin/queue/queue-actions.tsx");
+const queueActions = await read("app/admin/queue/queue-actions.tsx");
 assert(queueActions.includes("/api/admin/ai/enrich"), "Editorial queue must expose AI enrichment");
 assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expose publish action");
 
-const queue = read("app/admin/queue/page.tsx");
+const queue = await read("app/admin/queue/page.tsx");
 assert(queue.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queue.includes("queue-summary"), "Editorial queue must show summary counts");
 assert(queue.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
 assert(queue.includes("sort === \"newest\""), "Editorial queue must honor sort order");
 
-const auditMigration = read("supabase/migrations/20261001000700_article_audit_logs.sql");
+const auditMigration = await read("supabase/migrations/20261001000700_article_audit_logs.sql");
 assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
-const auditHelper = read("lib/news/audit.ts");
+const auditHelper = await read("lib/news/audit.ts");
 assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
-const articleEditor = read("app/admin/[id]/page.tsx");
+const articleEditor = await read("app/admin/[id]/page.tsx");
 assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
 
-const activityPage = read("app/admin/activity/page.tsx");
+const activityPage = await read("app/admin/activity/page.tsx");
 assert(activityPage.includes("EDITORIAL ACTIVITY"), "Editorial activity page must exist");
 assert(activityPage.includes('name="action"'), "Editorial activity must filter by action");
 assert(activityPage.includes('name="days"'), "Editorial activity must filter by time");
