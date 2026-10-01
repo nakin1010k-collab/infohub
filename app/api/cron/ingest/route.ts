@@ -27,7 +27,7 @@ export async function GET(request:Request){
     }catch(e){failed++;details.push({url:item.url,title:item.title.slice(0,180),outcome:"failed",reason:(e instanceof Error?e.message:"Unknown error").slice(0,300)});}
    }
    const status=failed?(created?"partial":"failed"):"success";
-   await supabase.from("ingestion_runs").update({status,items_seen:items.length,items_created:created,error_message:failed?`Scheduled import failed for ${failed} item(s)`:null,item_details:details.slice(0,500),failure_details:details.filter((x)=>x.outcome==="failed").slice(0,50),finished_at:new Date().toISOString()}).eq("id",run.id);
+   await supabase.from("ingestion_runs").update({status,items_seen:items.length,items_created:created,items_skipped:duplicates,items_failed:failed,error_message:failed?`Scheduled import failed for ${failed} item(s)`:null,item_details:details.slice(0,500),failure_details:details.filter((x)=>x.outcome==="failed").slice(0,50),finished_at:new Date().toISOString()}).eq("id",run.id);
    if(failed)await supabase.rpc("notify_ingestion_failure",{p_actor_id:null,p_source_name:source.name,p_run_id:run.id,p_message:`Scheduled import failed for ${failed} item(s)`});
    if(status!=="failed")await supabase.from("sources").update({last_ingested_at:new Date().toISOString()}).eq("id",source.id);
    results.push({source:source.name,status,itemsSeen:items.length,itemsCreated:created,duplicates,failed});
