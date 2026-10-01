@@ -20,7 +20,7 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
     .from("articles")
     .select("id, slug, title, excerpt, status, source_id, ai_enriched_at, created_at, updated_at, published_at")
     .eq("status", "draft")
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: sort === "newest" });
 
   if (origin === "rss") request = request.not("source_id", "is", null);
   if (origin === "manual") request = request.is("source_id", null);
@@ -67,6 +67,10 @@ export default async function EditorialQueuePage({ searchParams }: { searchParam
             <select name="ai" defaultValue={ai} aria-label="กรอง AI">
               <option value="all">AI ทุกสถานะ</option>
               <option value="yes">AI ช่วยแล้ว</option>
+            </select>
+            <select name="sort" defaultValue={sort} aria-label="เรียงลำดับ">
+              <option value="newest">ใหม่ล่าสุด</option>
+              <option value="oldest">เก่าสุด</option>
             </select>
             <button className="state-action" type="submit">กรอง</button>
             {(origin !== "all" || ai !== "all" || sort !== "newest") && <Link className="state-action" href="/admin/queue">ล้าง</Link>}
