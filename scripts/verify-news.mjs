@@ -239,7 +239,7 @@ assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activit
 
 
 const publicNews = await read("app/news/page.tsx");
-assert(publicNews.includes("getNewsArticlesPage"), "Public news must use paginated query");
+assert(publicNews.includes("getPublicNewsArticlesPage"), "Public news must use the public paginated query wrapper");
 assert(publicNews.includes("newsPage.totalPages"), "Public news must expose pagination");
 assert(publicNews.includes("/news?tag="), "Public news must support tag filtering");
 const newsData = await read("lib/news/data.ts");
