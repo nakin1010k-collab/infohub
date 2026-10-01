@@ -26,22 +26,28 @@ function requireTable(name: string) {
 }
 
 function queryEqual(field: string, value: string | boolean) {
-  const serialized = JSON.stringify([value]);
-  return `Query.equal("${field}",${serialized})`;
+  return `equal("${field}",${JSON.stringify([value])})`;
 }
 function querySearch(field: string, value: string) {
-  return `Query.search("${field}",${JSON.stringify(value)})`;
+  return `search("${field}",${JSON.stringify(value)})`;
 }
-function queryOrderDesc(field: string) { return `Query.orderDesc("${field}")`; }
-function queryOrderAsc(field: string) { return `Query.orderAsc("${field}")`; }
-function queryLimit(limit: number) { return `Query.limit(${limit})`; }
-function queryOffset(offset: number) { return `Query.offset(${offset})`; }
+function queryOrderDesc(field: string) { return `orderDesc("${field}")`; }
+function queryOrderAsc(field: string) { return `orderAsc("${field}")`; }
+function queryLimit(limit: number) { return `limit(${limit})`; }
+function queryOffset(offset: number) { return `offset(${offset})`; }
 
 export async function listAppwriteRows(table: string, queries: string[] = [], limit = 100) {
   const { databaseId, id } = requireTable(table);
   const params = new URLSearchParams();
-  for (const query of [...queries, queryLimit(Math.min(100, Math.max(1, limit)))]) params.append("queries[]", query);
-  const response = await appwriteRequest(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows?${params}`, { method: "GET" }, undefined, process.env.APPWRITE_API_KEY);
+  for (const query of [...queries, queryLimit(Math.min(100, Math.max(1, limit)))]) {
+    params.append("queries[]", query);
+  }
+  const response = await appwriteRequest(
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows?${params}`,
+    { method: "GET" },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
   if (!response.ok) throw new Error(`Appwrite table read failed (${table}): ${response.status}`);
   const payload = await response.json() as { rows?: Row[] };
   return payload.rows ?? [];
@@ -62,7 +68,12 @@ export async function listAllAppwriteRows(table: string, queries: string[] = [],
 
 export async function getAppwriteRow(table: string, rowId: string) {
   const { databaseId, id } = requireTable(table);
-  const response = await appwriteRequest(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, { method: "GET" }, undefined, process.env.APPWRITE_API_KEY);
+  const response = await appwriteRequest(
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`,
+    { method: "GET" },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Appwrite row read failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
@@ -70,29 +81,39 @@ export async function getAppwriteRow(table: string, rowId: string) {
 
 export async function createAppwriteRow(table: string, data: Row) {
   const { databaseId, id } = requireTable(table);
-  const response = await appwriteRequest(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows`, {
-    method: "POST",
-    body: JSON.stringify({ rowId: crypto.randomUUID(), data }),
-  }, undefined, process.env.APPWRITE_API_KEY);
+  const response = await appwriteRequest(
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows`,
+    {
+      method: "POST",
+      body: JSON.stringify({ rowId: crypto.randomUUID(), data }),
+    },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
   if (!response.ok) throw new Error(`Appwrite row create failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
 }
 
 export async function updateAppwriteRow(table: string, rowId: string, data: Row) {
   const { databaseId, id } = requireTable(table);
-  const response = await appwriteRequest(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, {
-    method: "PATCH",
-    body: JSON.stringify({ data }),
-  }, undefined, process.env.APPWRITE_API_KEY);
+  const response = await appwriteRequest(
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`,
+    { method: "PATCH", body: JSON.stringify({ data }) },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
   if (!response.ok) throw new Error(`Appwrite row update failed (${table}): ${response.status}`);
   return response.json() as Promise<Row>;
 }
 
 export async function deleteAppwriteRow(table: string, rowId: string) {
   const { databaseId, id } = requireTable(table);
-  const response = await appwriteRequest(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`, {
-    method: "DELETE",
-  }, undefined, process.env.APPWRITE_API_KEY);
+  const response = await appwriteRequest(
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(id)}/rows/${encodeURIComponent(rowId)}`,
+    { method: "DELETE" },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
   if (!response.ok) throw new Error(`Appwrite row delete failed (${table}): ${response.status}`);
 }
 
