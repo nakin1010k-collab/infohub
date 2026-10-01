@@ -50,7 +50,7 @@ const statusPage = await read("app/status/page.tsx");
 const publicNotice = await read("components/public-data-notice.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getAllTags\(\)/);
+assert.match(news, /getPublicTags\(\)/);
 assert.match(news, /article\.tags\.map/);
 assert.match(news, /\/news\?tag=\$\{encodeURIComponent\(tag\.slug\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
