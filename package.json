@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:news": "node scripts/verify-news.mjs"
+    "test:news": "node scripts/verify-news.mjs",
+    "setup:appwrite": "node scripts/provision-appwrite.mjs"
   },
   "dependencies": {
     "next": "15.5.26",

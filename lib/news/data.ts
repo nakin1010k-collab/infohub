@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { appwriteQueries, listAllAppwriteRows } from "@/lib/appwrite/database";
 
 export type NewsArticle = {
   slug: string; title: string; excerpt: string; content: string;
@@ -6,195 +6,115 @@ export type NewsArticle = {
   readingMinutes: number; publishedAt: string; canonicalUrl: string; imageUrl: string | null;
 };
 
-type ArticleRow = {
-  id: string; slug: string; title: string; excerpt: string | null; content: string | null;
-  canonical_url: string; image_url: string | null; published_at: string | null; reading_minutes: number | null;
-  article_categories?: { category: { name: string; slug: string }[] | null }[];
-  article_tags?: { tag: { name: string }[] | null }[];
-};
+type Row = Record<string, unknown> & { $id?: string };
 
-function mapArticle(article: ArticleRow): NewsArticle {
-  const category = article.article_categories?.[0]?.category?.[0];
-  const tags = (article.article_tags ?? []).map((link) => link.tag?.[0]?.name)
-    .filter((name): name is string => Boolean(name));
-  return {
-    slug: article.slug, title: article.title, excerpt: article.excerpt ?? "",
-    content: article.content ?? "", category: category?.name ?? "ข่าวเด่น",
-    categorySlug: category?.slug ?? "news", tags,
-    readingMinutes: article.reading_minutes ?? 1,
-    publishedAt: article.published_at ?? article.slug, canonicalUrl: article.canonical_url, imageUrl: article.image_url,
-  };
+function rowId(row: Row) { return String(row.$id ?? row.id ?? ""); }
+
+async function loadPublishedArticles() {
+  const articles = await listAllAppwriteRows("articles", [appwriteQueries.queryEqual("status", "published"), appwriteQueries.queryOrderDesc("published_at")]);
+  const categories = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true)]);
+  const links = await listAllAppwriteRows("article_categories");
+  const tags = await listAllAppwriteRows("tags", [appwriteQueries.queryOrderAsc("name")]);
+  const tagLinks = await listAllAppwriteRows("article_tags");
+
+  const categoryMap = new Map(categories.map((x) => [rowId(x), x]));
+  const tagMap = new Map(tags.map((x) => [rowId(x), x]));
+  const categoryByArticle = new Map<string, Row>();
+  for (const link of links) {
+    const articleId = String(link.article_id ?? "");
+    if (articleId && !categoryByArticle.has(articleId)) {
+      const category = categoryMap.get(String(link.category_id ?? ""));
+      if (category) categoryByArticle.set(articleId, category);
+    }
+  }
+  const tagsByArticle = new Map<string, string[]>();
+  for (const link of tagLinks) {
+    const articleId = String(link.article_id ?? "");
+    const tag = tagMap.get(String(link.tag_id ?? ""));
+    if (!articleId || !tag) continue;
+    const list = tagsByArticle.get(articleId) ?? [];
+    list.push(String(tag.name ?? ""));
+    tagsByArticle.set(articleId, list.filter(Boolean));
+  }
+  return articles.map((article) => {
+    const category = categoryByArticle.get(rowId(article));
+    return {
+      slug: String(article.slug ?? ""), title: String(article.title ?? ""), excerpt: String(article.excerpt ?? ""),
+      content: String(article.content ?? ""), category: String(category?.name ?? "ข่าวเด่น"),
+      categorySlug: String(category?.slug ?? "news"), tags: tagsByArticle.get(rowId(article)) ?? [],
+      readingMinutes: Number(article.reading_minutes ?? 1), publishedAt: String(article.published_at ?? ""),
+      canonicalUrl: String(article.canonical_url ?? ""), imageUrl: article.image_url ? String(article.image_url) : null,
+    } satisfies NewsArticle;
+  });
 }
 
-const ARTICLE_SELECT = "id, slug, title, excerpt, content, canonical_url, image_url, published_at, reading_minutes, article_categories(category:categories(name, slug)), article_tags(tag:tags(name))";
-
 export async function getNewsArticles(categorySlug?: string) {
-  const supabase = await createClient();
-  let query = supabase.from("articles").select(ARTICLE_SELECT).eq("status", "published").order("published_at", { ascending: false }).limit(50);
-
-  if (categorySlug && categorySlug !== "all") {
-    const { data: category, error } = await supabase.from("categories").select("id")
-      .eq("slug", categorySlug).eq("is_active", true).maybeSingle();
-    if (error) throw error;
-    if (!category) return [];
-    const { data: links, error: linksError } = await supabase.from("article_categories")
-      .select("article_id").eq("category_id", category.id);
-    if (linksError) throw linksError;
-    const ids = (links ?? []).map((link) => link.article_id);
-    if (!ids.length) return [];
-    query = query.in("id", ids);
-  }
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return ((data ?? []) as ArticleRow[]).map(mapArticle);
+  let items = await loadPublishedArticles();
+  if (categorySlug && categorySlug !== "all") items = items.filter((article) => article.categorySlug === categorySlug);
+  return items.slice(0, 50);
 }
 
 export async function getNewsArticle(slug: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("articles").select(ARTICLE_SELECT)
-    .eq("status", "published").eq("slug", slug).maybeSingle();
-  if (error) throw error;
-  return data ? mapArticle(data as ArticleRow) : null;
+  return (await loadPublishedArticles()).find((article) => article.slug === slug) ?? null;
 }
 
 export async function getRelatedNews(slug: string, limit = 3) {
   const article = await getNewsArticle(slug);
   if (!article) return [];
-  const supabase = await createClient();
-  const { data: category, error: categoryError } = await supabase.from("categories")
-    .select("id").eq("slug", article.categorySlug).maybeSingle();
-  if (categoryError) throw categoryError;
-  if (!category) return [];
-
-  const { data: links, error: linksError } = await supabase.from("article_categories")
-    .select("article_id").eq("category_id", category.id).limit(limit + 1);
-  if (linksError) throw linksError;
-  const ids = (links ?? []).map((link) => link.article_id).filter(Boolean);
-  if (!ids.length) return [];
-
-  const { data, error } = await supabase.from("articles").select(ARTICLE_SELECT)
-    .eq("status", "published").neq("slug", slug).in("id", ids)
-    .order("published_at", { ascending: false }).limit(limit);
-  if (error) throw error;
-  return ((data ?? []) as ArticleRow[]).map(mapArticle);
+  return (await loadPublishedArticles()).filter((x) => x.slug !== slug && x.categorySlug === article.categorySlug).slice(0, limit);
 }
 
 export async function getAllTags() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("tags").select("name,slug").order("name", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+  const rows = await listAllAppwriteRows("tags", [appwriteQueries.queryOrderAsc("name")]);
+  return rows.map((row) => ({ name: String(row.name ?? ""), slug: String(row.slug ?? "") }));
 }
 
 export async function searchNews(query: string) {
-  const supabase = await createClient();
-  const normalized = query.trim().slice(0, 120);
-  let request = supabase.from("articles").select(ARTICLE_SELECT)
-    .eq("status", "published").order("published_at", { ascending: false }).limit(50);
-  if (normalized) {
-    const escaped = normalized.replace(/[\\%_]/g, "\\$&");
-    request = request.or("title.ilike.%" + escaped + "%,excerpt.ilike.%" + escaped + "%,content.ilike.%" + escaped + "%").limit(50);
-  }
-  const { data, error } = await request;
-  if (error) throw error;
-  return ((data ?? []) as ArticleRow[]).map(mapArticle);
+  const normalized = query.trim().slice(0, 120).toLocaleLowerCase();
+  const items = await loadPublishedArticles();
+  if (!normalized) return items.slice(0, 50);
+  return items.filter((article) => [article.title, article.excerpt, article.content].some((value) => value.toLocaleLowerCase().includes(normalized))).slice(0, 50);
 }
-
 
 export type NewsPage = { items: NewsArticle[]; total: number; page: number; pageSize: number; totalPages: number };
 
 export async function getNewsArticlesPage(options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {}): Promise<NewsPage> {
   const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10));
   const page = Math.max(1, options.page ?? 1);
-  const supabase = await createClient();
-  let query = supabase.from("articles").select(ARTICLE_SELECT, { count: "exact" })
-    .eq("status", "published").order("published_at", { ascending: false });
-
-  if (options.categorySlug && options.categorySlug !== "all") {
-    const { data: category, error } = await supabase.from("categories").select("id").eq("slug", options.categorySlug).eq("is_active", true).maybeSingle();
-    if (error) throw error;
-    if (!category) return { items: [], total: 0, page, pageSize, totalPages: 0 };
-    const { data: links, error: linksError } = await supabase.from("article_categories").select("article_id").eq("category_id", category.id);
-    if (linksError) throw linksError;
-    const ids = (links ?? []).map((link) => link.article_id);
-    if (!ids.length) return { items: [], total: 0, page, pageSize, totalPages: 0 };
-    query = query.in("id", ids);
-  }
-
-  if (options.tag) {
-    const { data: tag, error: tagError } = await supabase.from("tags").select("id").eq("slug", options.tag).maybeSingle();
-    if (tagError) throw tagError;
-    if (!tag) return { items: [], total: 0, page, pageSize, totalPages: 0 };
-    const { data: links, error: linksError } = await supabase.from("article_tags").select("article_id").eq("tag_id", tag.id);
-    if (linksError) throw linksError;
-    const ids = (links ?? []).map((link) => link.article_id);
-    if (!ids.length) return { items: [], total: 0, page, pageSize, totalPages: 0 };
-    query = query.in("id", ids);
-  }
-
+  let items = await loadPublishedArticles();
+  if (options.categorySlug && options.categorySlug !== "all") items = items.filter((x) => x.categorySlug === options.categorySlug);
+  if (options.tag) items = items.filter((x) => x.tags.some((tag) => tag.toLowerCase() === options.tag?.toLowerCase()));
+  const total = items.length;
   const from = (page - 1) * pageSize;
-  const { data, error, count } = await query.range(from, from + pageSize - 1);
-  if (error) throw error;
-  const total = count ?? 0;
-  return { items: ((data ?? []) as ArticleRow[]).map(mapArticle), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  return { items: items.slice(from, from + pageSize), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
 }
 
 export async function getPublicCategories() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("categories").select("name,slug").eq("is_active", true).order("sort_order");
-  if (error) throw error;
-  return data ?? [];
+  const rows = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true), appwriteQueries.queryOrderAsc("sort_order")]);
+  return rows.map((row) => ({ name: String(row.name ?? ""), slug: String(row.slug ?? "") }));
 }
 
 export async function getTagBySlug(slug: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("tags").select("name,slug").eq("slug", slug).maybeSingle();
-  if (error) throw error;
-  return data;
+  const rows = await listAllAppwriteRows("tags", [appwriteQueries.queryEqual("slug", slug)]);
+  const row = rows[0];
+  return row ? { name: String(row.name ?? ""), slug: String(row.slug ?? "") } : null;
 }
 
-
-export type PublicDataResult<T> = {
-  data: T;
-  degraded: boolean;
-};
+export type PublicDataResult<T> = { data: T; degraded: boolean };
 
 export async function getPublicNewsArticles(categorySlug?: string): Promise<PublicDataResult<NewsArticle[]>> {
-  try {
-    return { data: await getNewsArticles(categorySlug), degraded: false };
-  } catch {
-    return { data: [], degraded: true };
-  }
+  try { return { data: await getNewsArticles(categorySlug), degraded: false }; } catch { return { data: [], degraded: true }; }
 }
-
 export async function searchPublicNews(query: string): Promise<PublicDataResult<NewsArticle[]>> {
-  try {
-    return { data: await searchNews(query), degraded: false };
-  } catch {
-    return { data: [], degraded: true };
+  try { return { data: await searchNews(query), degraded: false }; } catch { return { data: [], degraded: true }; }
+}
+export async function getPublicNewsArticlesPage(options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {}): Promise<PublicDataResult<NewsPage>> {
+  try { return { data: await getNewsArticlesPage(options), degraded: false }; }
+  catch {
+    const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10)); const page = Math.max(1, options.page ?? 1);
+    return { data: { items: [], total: 0, page, pageSize, totalPages: 0 }, degraded: true };
   }
 }
-
-export async function getPublicNewsArticlesPage(
-  options: { categorySlug?: string; tag?: string; page?: number; pageSize?: number } = {},
-): Promise<PublicDataResult<NewsPage>> {
-  try {
-    return { data: await getNewsArticlesPage(options), degraded: false };
-  } catch {
-    const pageSize = Math.min(50, Math.max(1, options.pageSize ?? 10));
-    const page = Math.max(1, options.page ?? 1);
-    return {
-      data: { items: [], total: 0, page, pageSize, totalPages: 0 },
-      degraded: true,
-    };
-  }
-}
-
 export async function getPublicTags(): Promise<PublicDataResult<{ name: string; slug: string }[]>> {
-  try {
-    return { data: await getAllTags(), degraded: false };
-  } catch {
-    return { data: [], degraded: true };
-  }
+  try { return { data: await getAllTags(), degraded: false }; } catch { return { data: [], degraded: true }; }
 }

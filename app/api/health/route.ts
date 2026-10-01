@@ -1,24 +1,65 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { appwriteRequest, getAppwriteError } from "@/lib/appwrite/request";
+
+const databaseId = process.env.APPWRITE_DATABASE_ID || "infohub";
+const articlesTableId = process.env.APPWRITE_ARTICLES_TABLE_ID || "articles";
 
 export async function GET() {
   const started = Date.now();
-  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+  const configured = Boolean(process.env.APPWRITE_API_KEY);
 
   if (!configured) {
-    return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "unconfigured", timestamp: new Date().toISOString() }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, service: "infohub", application: "ok", database: "unconfigured", timestamp: new Date().toISOString() },
+      { status: 503 },
+    );
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.from("categories").select("id").limit(1);
-    if (error) {
-      console.error("[health] database check failed", error);
-      return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "error", timestamp: new Date().toISOString() }, { status: 503 });
+    const query = encodeURIComponent(JSON.stringify({ method: "limit", values: [1] }));
+    const response = await appwriteRequest(
+      `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(articlesTableId)}/rows?queries[]=${query}`,
+      { method: "GET" },
+      undefined,
+      process.env.APPWRITE_API_KEY,
+    );
+
+    if (!response.ok) {
+      const error = await getAppwriteError(response);
+      console.error("[health] Appwrite database check failed", error);
+      return NextResponse.json(
+        {
+          ok: false,
+          service: "infohub",
+          application: "ok",
+          database: "error",
+          diagnostic: { status: response.status, code: error.code, type: error.type || undefined, message: error.message || undefined },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 503 },
+      );
     }
-    return NextResponse.json({ ok: true, service: "infohub", application: "ok", database: "ok", latencyMs: Date.now() - started, timestamp: new Date().toISOString() });
+
+    return NextResponse.json({
+      ok: true,
+      service: "infohub",
+      application: "ok",
+      database: "ok",
+      latencyMs: Date.now() - started,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error("[health] database check threw", error);
-    return NextResponse.json({ ok: false, service: "infohub", application: "ok", database: "error", timestamp: new Date().toISOString() }, { status: 503 });
+    console.error("[health] Appwrite check failed", error);
+    return NextResponse.json(
+      {
+        ok: false,
+        service: "infohub",
+        application: "ok",
+        database: "error",
+        diagnostic: { type: "network_error", message: error instanceof Error ? error.message : "Unknown error" },
+        timestamp: new Date().toISOString(),
+      },
+      { status: 503 },
+    );
   }
 }

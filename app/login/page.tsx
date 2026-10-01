@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient, SupabaseBrowserConfigError } from "@/lib/supabase/client";
 
 function isSafeInternalPath(value: string | null): value is string {
   return Boolean(value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\"));
@@ -18,30 +17,23 @@ export default function LoginPage() {
     event.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       const form = new FormData(event.currentTarget);
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: String(form.get("email") ?? ""),
-        password: String(form.get("password") ?? ""),
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: String(form.get("email") ?? ""), password: String(form.get("password") ?? "") }),
       });
-
-      if (signInError) {
-        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง");
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(body.error ?? "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง");
         return;
       }
-
       const next = new URLSearchParams(window.location.search).get("next");
-      const destination = isSafeInternalPath(next) ? next : "/";
-      router.push(destination);
+      router.push(isSafeInternalPath(next) ? next : "/");
       router.refresh();
-    } catch (error) {
-      if (error instanceof SupabaseBrowserConfigError) {
-        setError("ระบบสมาชิกยังไม่ได้ตั้งค่าในเว็บนี้ กรุณาตรวจสอบ NEXT_PUBLIC_SUPABASE_URL และ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ใน production");
-      } else {
-        setError("ระบบสมาชิกไม่ตอบสนองในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือตรวจสอบสถานะระบบ");
-      }
+    } catch {
+      setError("ระบบสมาชิกยังไม่พร้อมใช้งาน กรุณาลองอีกครั้งภายหลัง");
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient, SupabaseBrowserConfigError } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -21,47 +20,20 @@ export default function RegisterPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     validatePasswords(event.currentTarget);
-    if (!event.currentTarget.checkValidity()) {
-      event.currentTarget.reportValidity();
-      return;
-    }
-
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
+    if (!event.currentTarget.checkValidity()) { event.currentTarget.reportValidity(); return; }
+    setError(""); setSuccess(""); setLoading(true);
     try {
       const form = new FormData(event.currentTarget);
-      const supabase = createClient();
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: String(form.get("email") ?? ""),
-        password: String(form.get("password") ?? ""),
-        options: {
-          data: { display_name: String(form.get("name") ?? "") },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
-        },
+      const response = await fetch("/api/auth/register", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: String(form.get("name") ?? ""), email: String(form.get("email") ?? ""), password: String(form.get("password") ?? "") }),
       });
-
-      if (signUpError) {
-        setError("ไม่สามารถสร้างบัญชีได้ กรุณาตรวจสอบข้อมูลแล้วลองอีกครั้ง");
-        return;
-      }
-
-      if (data.session) {
-        router.push("/");
-        router.refresh();
-      } else {
-        setSuccess("สร้างบัญชีแล้ว กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชีก่อนเข้าสู่ระบบ");
-      }
-    } catch (error) {
-      if (error instanceof SupabaseBrowserConfigError) {
-        setError("ระบบสมาชิกยังไม่ได้ตั้งค่าในเว็บนี้ กรุณาตรวจสอบ NEXT_PUBLIC_SUPABASE_URL และ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ใน production");
-      } else {
-        setError("ระบบสมาชิกไม่ตอบสนองในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือตรวจสอบสถานะระบบ");
-      }
-    } finally {
-      setLoading(false);
-    }
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) { setError(body.error ?? "ไม่สามารถสร้างบัญชีได้ กรุณาตรวจสอบข้อมูลแล้วลองอีกครั้ง"); return; }
+      if (body.requiresLogin) { setSuccess("สร้างบัญชีแล้ว กรุณาเข้าสู่ระบบเพื่อใช้งาน InfoHub"); return; }
+      router.push("/"); router.refresh();
+    } catch { setError("ระบบสมาชิกยังไม่พร้อมใช้งาน กรุณาลองอีกครั้งภายหลัง"); }
+    finally { setLoading(false); }
   }
 
   function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {

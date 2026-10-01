@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "#news", label: "ข่าวสาร" },
@@ -15,18 +14,10 @@ export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    if (!supabaseUrl || !supabaseKey) return;
-
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user)));
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(Boolean(session));
-    });
-
-    return () => listener.subscription.unsubscribe();
+    fetch("/api/auth/session")
+      .then((response) => response.ok && response.json())
+      .then((body) => setSignedIn(Boolean(body?.authenticated)))
+      .catch(() => {});
   }, []);
 
   return (

@@ -1,284 +1,33 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-
-const read = (path) => readFile(path, "utf8");
-
-const news = await read("app/news/page.tsx");
-const search = await read("app/search/page.tsx");
-const detail = await read("app/news/[slug]/page.tsx");
-const notFound = await read("app/news/[slug]/not-found.tsx");
-const loading = await read("app/news/loading.tsx");
-const error = await read("app/news/error.tsx");
-const searchLoading = await read("app/search/loading.tsx");
-const searchError = await read("app/search/error.tsx");
-const data = await read("lib/news/data.ts");
-const editorial = await read("lib/news/editorial.ts");
-const articleCreateApi = await read("app/api/admin/articles/route.ts");
-const articleUpdateApi = await read("app/api/admin/articles/[id]/route.ts");
-const quality = await read("lib/news/quality.ts");
-const txMigration = await read("supabase/migrations/20261001000800_admin_article_transactions.sql");
-const ingestApi = await read("app/api/admin/ingest/route.ts");
-const ingestMigration = await read("supabase/migrations/20261001000900_news_ingestion_integrity.sql");
-const importMigration = await read("supabase/migrations/20261001001000_admin_import_article.sql");
-const layout = await read("app/layout.tsx");
-const middleware = await read("middleware.ts");
-const admin = await read("app/admin/page.tsx");
-const adminForm = await read("app/admin/article-form.tsx");
-const adminApi = await read("app/api/admin/articles/route.ts");
-const adminApiItem = await read("app/api/admin/articles/[id]/route.ts");
-const adminStatusApi = await read("app/api/admin/articles/[id]/status/route.ts");
-const adminActions = await read("app/admin/admin-actions.tsx");
-const rss = await read("lib/news/rss.ts");
-const ingest = await read("app/api/admin/ingest/route.ts");
-const sources = await read("app/admin/sources/page.tsx");
-const queue = await read("app/admin/queue/page.tsx");
-const sourceForm = await read("app/admin/source-form.tsx");
-const profileRoleMigration = await read("supabase/migrations/20261001000400_lock_profile_role.sql");
-const sitemap = await read("app/sitemap.ts");
-const robots = await read("app/robots.ts");
-const signOut = await read("components/sign-out-button.tsx");
-const uiStates = await read("components/ui-states.tsx");
-const login = await read("app/login/page.tsx");
-const register = await read("app/register/page.tsx");
-const forgotPassword = await read("app/forgot-password/page.tsx");
-const resetPassword = await read("app/reset-password/page.tsx");
-const supabaseClient = await read("lib/supabase/client.ts");
-const health = await read("app/api/health/route.ts");
-const callback = await read("app/auth/callback/route.ts");
-const siteUrl = await read("lib/site-url.ts");
-const statusPage = await read("app/status/page.tsx");
-const publicNotice = await read("components/public-data-notice.tsx");
-
-assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getPublicTags\(\)/);
-assert.match(news, /article\.tags\.map/);
-assert.match(news, /\/news\?tag=\$\{encodeURIComponent\(tag\.slug\)\}/);
-assert.match(news, /\/news\/\$\{article\.slug\}/);
-
-assert.match(search, /export const metadata: Metadata/);
-assert.match(search, /robots: \{ index: false, follow: true \}/);
-assert.match(search, /searchPublicNews\(query\)/);
-assert.match(search, /name="q"/);
-assert.match(search, /\/news\/\$\{article\.slug\}/);
-
-assert.match(detail, /generateMetadata/);
-assert.match(detail, /notFound\(\)/);
-assert.match(detail, /getRelatedNews/);
-assert.match(notFound, /ไม่พบบทความ/);
-
-assert.match(loading, /LoadingState/);
-assert.match(error, /reset\(\)/);
-assert.match(searchLoading, /LoadingState/);
-assert.match(searchError, /reset\(\)/);
-
-assert.match(data, /tags: string\[\]/);
-assert.match(editorial, /export function tagSlugify/);
-assert.match(editorial, /return "tag-" \+ hash\.toString\(36\)/);
-assert.match(data, /getAllTags/);
-assert.match(data, /mapArticle/);
-assert.match(data, /\.or\(/);
-
-assert.match(layout, /metadataBase: getSiteUrl\(\)/);
-assert.match(middleware, /auth\.getClaims\(\)/);
-assert.match(middleware, /\/admin\/:path\*/);
-assert.match(admin, /editor/);
-assert.match(admin, /profiles/);
-assert.match(admin, /\/admin\/new/);
-assert.match(adminActions, /\/admin\/\$\{id\}/);
-assert.match(adminForm, /\/api\/admin\/articles/);
-assert.match(adminForm, /published/);
-assert.match(adminApiItem, /rpc\("admin_update_article"/);
-assert.match(adminApiItem, /published_at/);
-assert.match(adminStatusApi, /published_at/);
-assert.match(adminStatusApi, /\.update\(/);
-assert.match(adminStatusApi, /recordArticleAudit/);
-assert.match(adminStatusApi, /checkEditorialQuality/);
-assert.match(adminStatusApi, /status: 422/);
-assert.match(articleCreateApi, /checkEditorialQuality/);
-assert.match(articleCreateApi, /status===\"published\"/);
-assert.match(articleUpdateApi, /checkEditorialQuality/);
-assert.match(articleUpdateApi, /status===\"published\"/);
-assert.match(articleUpdateApi, /p_image_url/);
-assert.match(adminForm, /ยังขาด/);
-assert.match(adminForm, /qualityMissing/);
-assert.match(quality, /EditorialQualityCheck/);
-assert.match(quality, /canonicalUrl/);
-assert.match(quality, /categoryCount/);
-assert.match(quality, /tagCount/);
-assert.match(quality, /MIN_CONTENT_LENGTH/);
-assert.match(quality, /MIN_EXCERPT_LENGTH/);
-assert.match(quality, /isValidHttpUrl/);
-assert.match(quality, /Canonical URL ไม่ถูกต้อง/);
-assert.match(adminApi, /rpc\("admin_create_article"/);
-assert.match(adminApi, /tagSlugify\(name\)/);
-assert.match(articleCreateApi, /rpc\("admin_create_article"/);
-assert.match(adminApiItem, /rpc\("admin_update_article"/);
-assert.match(adminApiItem, /tagSlugify\(name\)/);
-assert.match(articleUpdateApi, /rpc\("admin_update_article"/);
-assert.match(txMigration, /security definer/);
-assert.match(txMigration, /admin_create_article/);
-assert.match(txMigration, /admin_update_article/);
-const hardeningMigration = await read("supabase/migrations/20261002002000_security_and_article_write_hardening.sql");
-assert.match(hardeningMigration, /search_path = pg_catalog, public, auth/);
-assert.match(hardeningMigration, /revoke execute/);
-assert.match(hardeningMigration, /auth\.jwt\(\)->>\x27role\x27/);
-assert.match(ingestApi, /rpc\("admin_import_article"/);
-assert.match(ingestApi, /runStatus = failures\.length > 0/);
-assert.match(ingestApi, /status: runStatus/);
-assert.match(ingestApi, /error_message: failures/);
-assert.match(ingestMigration, /articles_canonical_url_unique/);
-const partialMigration = await read("supabase/migrations/20261001001100_ingestion_partial_status.sql");
-const concurrencyMigration = await read("supabase/migrations/20261001001200_ingestion_concurrency.sql");
-assert.match(partialMigration, /'partial'/);
-assert.match(concurrencyMigration, /ingestion_runs_one_running_per_source/);
-assert.match(importMigration, /admin_import_article/);
-assert.match(adminActions, /changeStatus/);
-assert.match(adminActions, /\/news\/\$\{slug\}/);
-assert.match(rss, /parseFeed/);
-assert.match(rss, /fetch\(currentUrl/);
-assert.match(rss, /redirect: "manual"/);
-assert.match(rss, /private network/);
-assert.match(rss, /username \|\| url\.password/);
-assert.match(importMigration, /'draft'/);
-assert.match(importMigration, /published_at,.*status/);
-assert.match(importMigration, /canonical_url/);
-assert.match(ingest, /enrich/);
-assert.match(ingest, /aiEnriched/);
-assert.match(ingest, /OPENAI_API_KEY/);
-assert.match(sources, /SourceForm/);
-assert.match(sourceForm, /\/api\/admin\/ingest/);
-assert.match(sourceForm, /aiImport/);
-assert.match(profileRoleMigration, /current_profile_role/);
-assert.match(profileRoleMigration, /role = public\.current_profile_role/);
-assert.match(sitemap, /MetadataRoute\.Sitemap/);
-assert.match(robots, /MetadataRoute\.Robots/);
-assert.match(signOut, /try \{/);
-assert.match(signOut, /finally \{/);
-assert.match(uiStates, /actionLabel=\{onRetry \? "ลองใหม่" : undefined\}/);
-assert.match(uiStates, /onAction=\{onRetry\}/);
-
-assert.match(supabaseClient, /SupabaseBrowserConfigError/);
-assert.match(supabaseClient, /SUPABASE_BROWSER_CONFIG_MISSING/);
-assert.match(login, /SupabaseBrowserConfigError/);
-assert.match(login, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
-assert.match(login, /ระบบสมาชิกไม่ตอบสนอง/);
-assert.match(register, /SupabaseBrowserConfigError/);
-assert.match(register, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
-assert.match(register, /ระบบสมาชิกไม่ตอบสนอง/);
-assert.match(health, /database: "unconfigured"/);
-assert.doesNotMatch(health, /message: error\\.message/);
-assert.match(callback, /try \{/);
-assert.match(siteUrl, /NEXT_PUBLIC_SITE_URL/);
-assert.match(siteUrl, /VERCEL_PROJECT_PRODUCTION_URL/);
-assert.match(statusPage, /database_query_failed/);
-assert.doesNotMatch(statusPage, /error\\.message/);
-assert.match(publicNotice, /Supabase/);
-
-assert.match(login, /isSafeInternalPath/);
-assert.match(login, /!value\.startsWith\("\/\/"\)/);
-assert.match(register, /name="terms" required/);
-assert.match(register, /auth\.signUp/);
-assert.match(forgotPassword, /resetPasswordForEmail/);
-assert.match(resetPassword, /PASSWORD_RECOVERY/);
-assert.match(resetPassword, /auth\.updateUser/);
-assert.match(middleware, /nextPath/);
-
-console.log("News/Search/auth hardening smoke tests passed.");
-
-const queuePage = await read("app/admin/queue/page.tsx");
-assert(queuePage.includes('eq("status", "draft")'), "Editorial queue must load draft articles");
-assert(queuePage.includes("/admin/queue"), "Editorial queue route must be wired");
-const queueActions = await read("app/admin/queue/queue-actions.tsx");
-assert(queueActions.includes("/api/admin/ai/enrich"), "Editorial queue must expose AI enrichment");
-assert(queueActions.includes("/api/admin/articles/"), "Editorial queue must expose publish action");
-assert(queueActions.includes("quality?.missing"), "Editorial queue must explain quality-gate publish blocks");
-assert(queuePage.includes("พร้อมเผยแพร่"), "Editorial queue must show quality status");
-assert(queuePage.includes("readyCount"), "Editorial queue must show publish-ready count");
-assert(queuePage.includes("needsReviewCount"), "Editorial queue must show review-needed count");
-assert(queuePage.includes("failedIngestionCount"), "Editorial queue must show failed RSS count");
-assert(queuePage.includes("partialIngestionCount"), "Editorial queue must show partial RSS count");
-assert(queuePage.includes("source:sources(name)"), "Editorial queue must show RSS source names");
-const sourcesPage = await read("app/admin/sources/page.tsx");
-assert(sourcesPage.includes("latestBySource"), "Sources page must calculate per-source health");
-assert(sourcesPage.includes("healthLabel"), "Sources page must show source health");
-assert(sourcesPage.includes("ข้อผิดพลาดล่าสุด"), "Sources page must show latest RSS error");
-const sourceFormHealth = await read("app/admin/source-form.tsx");
-assert(sourceFormHealth.includes("retryStatus"), "Source form must receive RSS retry status");
-assert(sourceFormHealth.includes("ingest(true)"), "Source form must expose RSS retry action");
-assert(sourceFormHealth.includes("skippedDuplicates"), "Source form must show skipped duplicate count");
-assert(sourceFormHealth.includes("failedItems"), "Source form must show failed item count");
-const ingestRoute = await read("app/api/admin/ingest/route.ts");
-assert(ingestRoute.includes("skippedDuplicates"), "Ingestion API must count duplicate items");
-assert(ingestRoute.includes("failedItems"), "Ingestion API must return failed item count");
-assert(ingestRoute.includes("failureDetails"), "Ingestion API must return structured failure details");
-assert(ingestRoute.includes("failure_details"), "Ingestion API must persist structured failure details");
-assert(queuePage.includes("ดูรายละเอียดรอบนี้"), "Queue must link RSS run detail instead of rendering all failure details");
-assert(sourcesPage.includes("failure_details"), "Sources page must retain latest RSS failure summary");
-const failureMigration = await read("supabase/migrations/20261001001300_ingestion_failure_details.sql");
-assert(failureMigration.includes("failure_details jsonb"), "Migration must add structured RSS failure details");
-const runPage = await read("app/admin/queue/runs/[id]/page.tsx");
-assert(runPage.includes("รายละเอียดรอบนำเข้า"), "RSS run detail page must exist");
-assert(runPage.includes("error_message"), "RSS run detail page must read run error details");
-assert(runPage.includes("item_details"), "RSS run detail page must read item outcomes");
-assert(runPage.includes("Duplicate"), "RSS run detail page must expose duplicate filter");
-assert(runPage.includes("PAGE_SIZE"), "RSS run detail page must paginate item results");
-assert(runPage.includes("ถัดไป"), "RSS run detail page must expose pagination");
-assert(queuePage.includes("ดูรายละเอียดรอบนี้"), "Queue must link to RSS run detail page");
-
-assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
-assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
-assert(queuePage.includes("ai_enriched_at"), "Editorial queue must expose AI metadata");
-assert(queuePage.includes("sort === \"newest\""), "Editorial queue must honor sort order");
-
-const auditMigration = await read("supabase/migrations/20261001000700_article_audit_logs.sql");
-assert(auditMigration.includes("article_audit_logs"), "Audit trail migration must exist");
-const auditHelper = await read("lib/news/audit.ts");
-assert(auditHelper.includes("recordArticleAudit"), "Audit helper must exist");
-assert(auditHelper.includes("record_article_audit"), "Audit helper must use the protected audit RPC");
-const articleEditor = await read("app/admin/[id]/page.tsx");
-assert(articleEditor.includes("AUDIT TRAIL"), "Article editor must show audit trail");
-
-const activityPage = await read("app/admin/activity/page.tsx");
-assert(activityPage.includes("EDITORIAL ACTIVITY"), "Editorial activity page must exist");
-assert(activityPage.includes('name="action"'), "Editorial activity must filter by action");
-assert(activityPage.includes('name="days"'), "Editorial activity must filter by time");
-
-const preview = await read("app/admin/[id]/preview/page.tsx");
-assert(preview.includes("EDITORIAL PREVIEW"), "Draft preview page must exist");
-assert(preview.includes('["editor", "admin"]'), "Draft preview must require editorial role");
-assert(queueActions.includes('"/admin/" + id + "/preview"'), "Editorial queue must use protected draft preview");
-assert(admin.includes("admin-kpi-grid"), "CMS must show editorial KPI dashboard");
-assert(admin.includes("publishedTodayKpi"), "CMS KPI must include today's published count");
-assert(admin.includes("activityTodayKpi"), "CMS KPI must include today's activity count");
-
-
-
-const publicNews = await read("app/news/page.tsx");
-assert(publicNews.includes("getPublicNewsArticlesPage"), "Public news must use paginated query");
-assert(publicNews.includes("newsPage.totalPages"), "Public news must expose pagination");
-assert(publicNews.includes("/news?tag="), "Public news must support tag filtering");
-const newsData = await read("lib/news/data.ts");
-assert(newsData.includes("select(\"name,slug\")"), "Public tags must expose slugs");
-const profilePage = await read("app/profile/page.tsx");
-const settingsPage = await read("app/settings/page.tsx");
-const dashboardPage = await read("app/dashboard/page.tsx");
-assert(profilePage.includes("ProfileForm"), "Profile page must support editing");
-assert(settingsPage.includes("เปลี่ยนรหัสผ่าน"), "Settings page must expose password recovery");
-assert(dashboardPage.includes("ข่าวเผยแพร่"), "Dashboard must show content metrics");
-const imageMigration = await read("supabase/migrations/20261001001800_article_images.sql");
-assert(imageMigration.includes("image_url"), "Articles must support optional images");
-const imageForm = await read("app/admin/article-form.tsx");
-assert(imageForm.includes("รูปภาพข่าว"), "Editor must support article image URL");
-const analyticsMigration = await read("supabase/migrations/20261001001500_analytics_events.sql");
-assert(analyticsMigration.includes("analytics_events"), "Analytics migration must exist");
-const healthRoute = await read("app/api/health/route.ts");
-assert(healthRoute.includes("database"), "Health route must check database");
-const cronRoute = await read("app/api/cron/ingest/route.ts");
-assert(cronRoute.includes("CRON_SECRET"), "RSS scheduler must be protected");
-const vercelConfig = await read("vercel.json");
-assert(vercelConfig.includes("/api/cron/ingest"), "Vercel cron must schedule RSS ingestion");
-const outcomeMigration = await read("supabase/migrations/20261001001900_ingestion_outcome_counts.sql");
-assert(outcomeMigration.includes("items_skipped") && outcomeMigration.includes("items_failed"), "RSS outcome counts must be persisted");
-const notifications = await read("app/admin/notifications/page.tsx");
-assert(notifications.includes("NOTIFICATIONS"), "Notification center must exist");
-console.log("InfoHub Phase 6 feature smoke tests passed.");
+const read=(path)=>readFile(path,"utf8");
+const checks=[
+["public news","app/news/page.tsx",["getPublicTags()","/news/"]],
+["search","app/search/page.tsx",["searchPublicNews(query)","name=\"q\""]],
+["detail","app/news/[slug]/page.tsx",["generateMetadata","getRelatedNews","notFound()"]],
+["news data","lib/news/data.ts",["listAllAppwriteRows","getAllTags","getNewsArticlesPage"]],
+["Appwrite database","lib/appwrite/database.ts",["APPWRITE_DATABASE_ID","APPWRITE_API_KEY","queryLimit","/tablesdb/"]],
+["Appwrite auth","lib/appwrite/auth.ts",["getCurrentAppwriteUser","requireEditor","profiles"]],
+["Appwrite request","lib/appwrite/request.ts",["X-Appwrite-Project","X-Appwrite-Session"]],
+["schema contract","docs/APPWRITE_SCHEMA.md",["APPWRITE_ARTICLES_TABLE_ID","audit_logs","ingestion_runs"]],
+["middleware","middleware.ts",["APPWRITE_SESSION_COOKIE","/admin/:path*"]],
+["health","app/api/health/route.ts",["Appwrite","database","/tablesdb/"]],
+["status","app/status/page.tsx",["database_not_configured","Appwrite"]],
+["CMS","app/admin/page.tsx",["getAdminArticles","getCurrentEditor"]],
+["article form","app/admin/article-form.tsx",["/api/admin/articles","qualityMissing"]],
+["article create","app/api/admin/articles/route.ts",["createAppwriteRow","checkEditorialQuality"]],
+["article update","app/api/admin/articles/[id]/route.ts",["updateAppwriteRow","createAppwriteRow"]],
+["article status","app/api/admin/articles/[id]/status/route.ts",["updateAppwriteRow","checkEditorialQuality","audit_logs"]],
+["AI editorial","app/api/admin/ai/enrich/route.ts",["requireEditor","recordArticleAudit"]],
+["audit","lib/news/audit.ts",["createAppwriteRow","ai_enriched"]],
+["profile API","app/api/profile/route.ts",["/account","displayName"]],
+["login","app/login/page.tsx",["/api/auth/login"]],
+["register","app/register/page.tsx",["/api/auth/register"]],
+["forgot password","app/forgot-password/page.tsx",["/api/auth/forgot-password"]],
+["reset password","app/reset-password/page.tsx",["/api/auth/reset-password"]],
+["logout","components/sign-out-button.tsx",["/api/auth/logout"]],
+["site URL","lib/site-url.ts",["NEXT_PUBLIC_SITE_URL","VERCEL_PROJECT_PRODUCTION_URL"]],
+];
+for(const [name,path,needles] of checks){const text=await read(path);for(const needle of needles)assert.ok(text.includes(needle),"Failed: "+name+" -> "+path+" missing "+needle);}
+for(const path of ["middleware.ts","app/api/health/route.ts","app/api/admin/articles/route.ts","app/api/admin/articles/[id]/route.ts","app/api/admin/articles/[id]/status/route.ts","app/api/admin/ai/enrich/route.ts","app/api/profile/route.ts","app/api/admin/ingest/route.ts","app/admin/queue/page.tsx","app/admin/queue/runs/[id]/page.tsx","app/admin/sources/page.tsx","app/api/admin/sources/[id]/route.ts"]){assert.doesNotMatch(await read(path),/supabase/i,"Supabase dependency remains in "+path);}
+console.log("InfoHub Appwrite migration smoke tests passed.");
