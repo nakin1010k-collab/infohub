@@ -14,7 +14,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const body = await request.json().catch(() => ({})) as { status?: "draft" | "published" | "archived" };
   if (!body.status) return NextResponse.json({ error: "ต้องระบุสถานะ" }, { status: 400 });
 
-  const { data: article } = await supabase.from("articles").select("published_at").eq("id", id).maybeSingle();
+  const { data: article } = await supabase.from("articles").select("published_at,status").eq("id", id).maybeSingle();
   if (!article) return NextResponse.json({ error: "ไม่พบข่าวนี้" }, { status: 404 });
 
   const { error } = await supabase.from("articles").update({
@@ -23,5 +23,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }).eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  const previousStatus = article.status as "draft" | "published" | "archived";
+  const action = body.status === "published"
+    ? "published"
+    : previousStatus === "published" && body.status !== "published"
+      ? "unpublished"
+      : body.status === "archived"
+        ? "archived"
+        : "updated";
+  await recordArticleAudit(supabase, id, user.id, action, { previousStatus, status: body.status });
   return NextResponse.json({ ok: true });
 }
