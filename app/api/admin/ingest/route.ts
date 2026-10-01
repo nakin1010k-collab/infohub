@@ -137,7 +137,7 @@ export async function POST(request: Request) {
         canonical_url: item.url,
         source_id: source.id,
         author_name: item.authorName,
-        published_at: item.publishedAt,
+        published_at: null,
         status: "draft",
         reading_minutes: Math.max(1, Math.ceil((item.excerpt || item.title).length / 600)),
         ai_enriched_at: null,
