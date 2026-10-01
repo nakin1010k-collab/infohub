@@ -3,6 +3,7 @@ import { recordArticleAudit } from "@/lib/news/audit";
 import { tagSlugify } from "@/lib/news/editorial";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
+import { checkEditorialQuality } from "@/lib/news/quality";
 type Payload={title?:string;slug?:string;excerpt?:string;content?:string;status?:"draft"|"published"|"archived";categoryId?:string;tags?:string;readingMinutes?:number|string};
 const slugify=(v:string)=>v.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 const parseTags=(v?:string)=>Array.from(new Set((v??"").split(",").map(x=>x.trim()).filter(Boolean))).slice(0,12);
@@ -15,6 +16,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const minutes=Number(b.readingMinutes)||Math.max(1,Math.ceil(content.length/600));const publishedAt=status==="published"?(existing.published_at??new Date().toISOString()):null;const canonicalUrl=new URL(`/news/${slug}`,getSiteUrl()).toString();
  const previousStatus=existing.status as "draft"|"published"|"archived";
  const tagPayload = parseTags(b.tags).map((name) => ({ name, slug: tagSlugify(name) })).filter((tag) => tag.slug);
+ if(status==="published"){const quality=checkEditorialQuality({title,excerpt:b.excerpt?.trim()||null,content,canonicalUrl,categoryCount:categoryId?1:0,tagCount:tagPayload.length});if(!quality.ready)return NextResponse.json({error:"ยังเผยแพร่ไม่ได้",quality},{status:422});}
  const { error } = await supabase.rpc("admin_update_article", {
   p_actor_id: user.id,
   p_article_id: id,
