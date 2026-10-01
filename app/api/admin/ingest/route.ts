@@ -209,6 +209,8 @@ export async function POST(request: Request) {
       status: runStatus,
       items_seen: items.length,
       items_created: created,
+      items_skipped: skippedDuplicates,
+      items_failed: failures.length,
       error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
       failure_details: failureDetails.slice(0, 50),
       item_details: itemDetails.slice(0, 500),
