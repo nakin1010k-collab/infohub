@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAppwriteRow, listAllAppwriteRows, appwriteQueries } from "@/lib/appwrite/database";
+import { requireEditor } from "@/lib/appwrite/auth";
 import { recordArticleAudit } from "@/lib/news/audit";
 
 type Suggestion = { title: string; excerpt: string; categorySlug: string; tags: string[]; readingMinutes: number };
@@ -12,19 +13,12 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const articleId = typeof body.articleId === "string" ? body.articleId : "";
   if (!articleId) return NextResponse.json({ error: "ต้องระบุ articleId" }, { status: 400 });
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "ต้องเข้าสู่ระบบ" }, { status: 401 });
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (profile?.role !== "editor" && profile?.role !== "admin") return NextResponse.json({ error: "ไม่มีสิทธิ์ใช้งาน AI Editorial" }, { status: 403 });
-  const [{ data: article, error: articleError }, { data: categories, error: categoriesError }] = await Promise.all([
-    supabase.from("articles").select("id,title,excerpt,content,canonical_url,author_name,reading_minutes").eq("id", articleId).maybeSingle(),
-    supabase.from("categories").select("name,slug").eq("is_active", true).order("sort_order"),
-  ]);
-  if (articleError) return NextResponse.json({ error: articleError.message }, { status: 500 });
-  if (categoriesError) return NextResponse.json({ error: categoriesError.message }, { status: 500 });
+  const auth = await requireEditor();
+  if (!auth.ok) return NextResponse.json({ error: auth.reason === "unauthorized" ? "ต้องเข้าสู่ระบบ" : "ไม่มีสิทธิ์ใช้งาน AI Editorial" }, { status: auth.reason === "unauthorized" ? 401 : 403 });
+  const article = await getAppwriteRow("articles", articleId);
+  const categories = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true), appwriteQueries.queryOrderAsc("sort_order")]);
   if (!article) return NextResponse.json({ error: "ไม่พบบทความ" }, { status: 404 });
-  const allowedCategories = (categories ?? []).map((c) => c.slug);
+  const allowedCategories = categories.map((c) => String(c.slug ?? "")).filter(Boolean);
   const sourceText = [article.title, article.excerpt, article.content].filter(Boolean).join("\n\n").slice(0, 12000);
   if (!sourceText.trim()) return NextResponse.json({ error: "บทความยังไม่มีข้อความให้ AI วิเคราะห์" }, { status: 400 });
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-5-mini";
@@ -46,6 +40,6 @@ export async function POST(request: Request) {
   const tags = Array.isArray(parsed.tags) ? parsed.tags.filter((tag): tag is string => typeof tag === "string").map((tag) => tag.trim().slice(0, 40)).filter(Boolean).slice(0, 6) : [];
   const minutes = Number(parsed.readingMinutes);
   const suggestion: Suggestion = { title: cleanText(parsed.title, 180) || article.title, excerpt: cleanText(parsed.excerpt, 500) || article.excerpt || "", categorySlug: allowedCategories.includes(categorySlug) ? categorySlug : (allowedCategories[0] || "news"), tags, readingMinutes: Math.min(30, Math.max(1, Number.isFinite(minutes) ? Math.round(minutes) : (article.reading_minutes || 1))) };
-  await recordArticleAudit(supabase, articleId, user.id, "ai_enriched", { model, mode: "suggestion" });
+  await recordArticleAudit(articleId, auth.user.$id, "ai_enriched", { model, mode: "suggestion" });
   return NextResponse.json({ suggestion, model });
 }
