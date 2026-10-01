@@ -15,12 +15,16 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+    if (error) {
+      return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
+    }
+
+    return NextResponse.redirect(new URL(destination, requestUrl.origin));
+  } catch {
     return NextResponse.redirect(new URL("/login?error=auth_callback", requestUrl.origin));
   }
-
-  return NextResponse.redirect(new URL(destination, requestUrl.origin));
 }
