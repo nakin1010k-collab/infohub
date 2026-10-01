@@ -6,7 +6,7 @@ Create one Appwrite TablesDB database and these tables. Keep the table IDs in Ve
 |---|---|
 | profiles | user_id string, display_name string, role string |
 | categories | name string, slug string, is_active boolean, sort_order integer |
-| articles | title string, slug string, excerpt text, content longtext, status string, category_id string, source_id string, canonical_url string, reading_minutes integer, published_at datetime, image_url string, created_by string, ai_enriched_at datetime |
+| articles | title string, slug string, excerpt text, content longtext, status string, category_id string, source_id string, canonical_url string, canonical_url_hash string, reading_minutes integer, published_at datetime, image_url string, created_by string, ai_enriched_at datetime |
 | article_categories | article_id string, category_id string |
 | tags | name string, slug string |
 | article_tags | article_id string, tag_id string |
@@ -27,7 +27,7 @@ The script uses `NEXT_PUBLIC_APPWRITE_ENDPOINT`, `NEXT_PUBLIC_APPWRITE_PROJECT_I
 
 The API key is read only from the process environment and is never written to the repository. Keep it server-side.
 
-The script creates the database, tables, columns, and indexes required by the repository's common equality/order queries. New tables are created with no table-level permissions because InfoHub performs CMS/database access through the server API key; public reads are exposed by the application's server repository.
+The script creates the database, tables, columns, and indexes required by the repository's common equality/order queries. Long URL fields remain 2048 characters; canonical URL uniqueness is indexed through a SHA-256 hash because Appwrite limits indexed string length. New tables are created with no table-level permissions because InfoHub performs CMS/database access through the server API key; public reads are exposed by the application's server repository.
 
 ## IDs
 
