@@ -30,7 +30,7 @@ const ARTICLE_SELECT = "id, slug, title, excerpt, content, canonical_url, image_
 
 export async function getNewsArticles(categorySlug?: string) {
   const supabase = await createClient();
-  let query = supabase.from("articles").select(ARTICLE_SELECT).eq("status", "published").order("published_at", { ascending: false });
+  let query = supabase.from("articles").select(ARTICLE_SELECT).eq("status", "published").order("published_at", { ascending: false }).limit(50);
 
   if (categorySlug && categorySlug !== "all") {
     const { data: category, error } = await supabase.from("categories").select("id")
