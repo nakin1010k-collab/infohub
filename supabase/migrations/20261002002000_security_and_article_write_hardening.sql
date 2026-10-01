@@ -250,3 +250,10 @@ revoke all on function public.admin_create_article(uuid,text,text,text,text,text
 revoke all on function public.admin_update_article(uuid,uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text,text) from public, anon;
 grant execute on function public.admin_create_article(uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text) to authenticated;
 grant execute on function public.admin_update_article(uuid,uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text,text) to authenticated;
+
+-- Tighten the legacy overloads still present from earlier migrations.
+alter function public.admin_create_article(uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz) set search_path = pg_catalog, public, auth;
+alter function public.admin_update_article(uuid,uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text) set search_path = pg_catalog, public, auth;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.admin_create_article(uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz) from authenticated;
+revoke execute on function public.admin_update_article(uuid,uuid,text,text,text,text,text,uuid,jsonb,integer,text,timestamptz,text) from authenticated;
