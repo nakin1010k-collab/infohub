@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "@/components/news-preview.module.css";
-import { getAllTags, getNewsArticlesPage } from "@/lib/news/data";
+import { getPublicTags, getPublicNewsArticlesPage } from "@/lib/news/data";
+import { PublicDataNotice } from "@/components/public-data-notice";
 
 export const metadata: Metadata = {
   title: "ข่าวทั้งหมด | InfoHub",
@@ -27,10 +28,13 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const tag = params.tag?.trim() || "";
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const activeCategory = categoryOptions.some((option) => option.slug === category) ? category : "all";
-  const [tags, newsPage] = await Promise.all([
-    getAllTags(),
-    getNewsArticlesPage({ categorySlug: activeCategory, tag, page, pageSize: 10 }),
+  const [tagsResult, newsResult] = await Promise.all([
+    getPublicTags(),
+    getPublicNewsArticlesPage({ categorySlug: activeCategory, tag, page, pageSize: 10 }),
   ]);
+  const tags = tagsResult.data;
+  const newsPage = newsResult.data;
+  const degraded = tagsResult.degraded || newsResult.degraded;
   const filteredArticles = newsPage.items;
 
   return (
@@ -38,6 +42,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       <div className={`auth-shell ${styles.shell}`}>
         <Link className="auth-brand" href="/" aria-label="InfoHub หน้าแรก"><span className="brand-mark" aria-hidden="true">🐱</span><span>InfoHub</span></Link>
         <section className="auth-card" aria-labelledby="news-title">
+          {degraded ? <PublicDataNotice /> : null}
           <div className="auth-intro">
             <p className="eyebrow">NEWS</p>
             <h1 id="news-title">ข่าวทั้งหมด</h1>
