@@ -30,7 +30,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <div className="auth-intro">
             <div className="admin-heading-row">
               <div><p className="eyebrow">EDITORIAL CMS</p><h1 id="admin-title">จัดการข่าว</h1><p>สวัสดี {profile.display_name || user.email} · สิทธิ์ {profile.role}</p></div>
-              <Link className="primary-button" href="/admin/new">+ สร้างข่าวใหม่</Link>
+              <div className="admin-heading-actions"><Link className="state-action" href="/admin/sources">แหล่งข่าว</Link><Link className="primary-button" href="/admin/new">+ สร้างข่าวใหม่</Link></div>
             </div>
           </div>
 
