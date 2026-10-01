@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, SupabaseBrowserConfigError } from "@/lib/supabase/client";
 
 function isSafeInternalPath(value: string | null): value is string {
   return Boolean(value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\"));
@@ -36,8 +36,12 @@ export default function LoginPage() {
       const destination = isSafeInternalPath(next) ? next : "/";
       router.push(destination);
       router.refresh();
-    } catch {
-      setError("ยังเชื่อมต่อระบบสมาชิกไม่ได้ กรุณาตรวจสอบการตั้งค่า Supabase");
+    } catch (error) {
+      if (error instanceof SupabaseBrowserConfigError) {
+        setError("ระบบสมาชิกยังไม่ได้ตั้งค่าในเว็บนี้ กรุณาตรวจสอบ NEXT_PUBLIC_SUPABASE_URL และ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ใน production");
+      } else {
+        setError("ระบบสมาชิกไม่ตอบสนองในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือตรวจสอบสถานะระบบ");
+      }
     } finally {
       setLoading(false);
     }
