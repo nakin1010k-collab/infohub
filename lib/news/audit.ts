@@ -16,11 +16,11 @@ export async function recordArticleAudit(
   action: ArticleAuditAction,
   metadata: Record<string, unknown> = {},
 ) {
-  const { error } = await supabase.from("article_audit_logs").insert({
-    article_id: articleId,
-    actor_id: actorId,
-    action,
-    metadata,
+  const { error } = await supabase.rpc("record_article_audit", {
+    p_article_id: articleId,
+    p_actor_id: actorId,
+    p_action: action,
+    p_metadata: metadata,
   });
   return error;
 }
