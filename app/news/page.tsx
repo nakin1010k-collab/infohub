@@ -48,7 +48,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           </nav>
           {tag ? <p className="field-hint">กำลังกรองแท็ก: #{tag} · พบ {newsPage.total} รายการ</p> : null}
           <div className={styles.tagList} aria-label="แท็กที่ใช้ในข่าว">
-            {tags.map((tag) => <Link className={styles.tagLink} href={`/news?tag=${encodeURIComponent(tag)}`} key={tag}>#{tag}</Link>)}
+            {tags.map((tag) => <Link className={styles.tagLink} href={`/news?tag=${encodeURIComponent(tag.slug)}`} key={tag.slug}>#{tag.name}</Link>)}
           </div>
           <div className={styles.list} aria-label="รายการข่าว">
             {filteredArticles.length > 0 ? filteredArticles.map((article) => (
