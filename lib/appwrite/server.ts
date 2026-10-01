@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/session";
 import { appwriteRequest, extractAppwriteSession, getAppwriteConfig } from "@/lib/appwrite/request";
 
-export { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession, getAppwriteConfig };
+export { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession, getAppwriteConfig, getAppwriteError };
 
 export async function getAppwriteSession() {
   return (await cookies()).get(APPWRITE_SESSION_COOKIE)?.value ?? null;
