@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/session";
-import { appwriteRequest, extractAppwriteSession, getAppwriteConfig } from "@/lib/appwrite/request";
+import { appwriteRequest, extractAppwriteSession, getAppwriteConfig, getAppwriteError } from "@/lib/appwrite/request";
 
 export { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession, getAppwriteConfig, getAppwriteError };
 
