@@ -67,16 +67,18 @@ async function aiEnrich(supabase: Awaited<ReturnType<typeof createClient>>, arti
   const raw = payload?.choices?.[0]?.message?.content;
   if (typeof raw !== "string") return false;
 
-  let parsed: any;
+  let parsed: unknown;
   try { parsed = JSON.parse(raw); } catch { return false; }
+  if (!parsed || typeof parsed !== "object") return false;
+  const result = parsed as Record<string, unknown>;
 
-  const category = categories.find((c) => c.slug === parsed.categorySlug) ?? categories[0];
-  const tags = Array.isArray(parsed.tags)
+  const category = categories.find((c) => c.slug === result.categorySlug) ?? categories[0];
+  const tags = Array.isArray(result.tags)
     ? parsed.tags.filter((x: unknown): x is string => typeof x === "string").map((x: string) => x.trim().slice(0, 40)).filter(Boolean).slice(0, 6)
     : [];
-  const minutes = Number(parsed.readingMinutes);
-  const title = typeof parsed.title === "string" && parsed.title.trim() ? parsed.title.trim().slice(0, 180) : article.title;
-  const excerpt = typeof parsed.excerpt === "string" ? parsed.excerpt.trim().slice(0, 500) : article.excerpt;
+  const minutes = Number(result.readingMinutes);
+  const title = typeof result.title === "string" && parsed.title.trim() ? parsed.title.trim().slice(0, 180) : article.title;
+  const excerpt = typeof result.excerpt === "string" ? parsed.excerpt.trim().slice(0, 500) : article.excerpt;
 
   const { error } = await supabase.from("articles").update({
     title,
