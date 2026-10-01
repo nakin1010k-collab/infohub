@@ -1,26 +1,12 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAppwriteRow } from "@/lib/appwrite/database";
 
-export type ArticleAuditAction =
-  | "created"
-  | "updated"
-  | "ai_enriched"
-  | "published"
-  | "unpublished"
-  | "archived"
-  | "imported";
+export type ArticleAuditAction = "created"|"updated"|"ai_enriched"|"published"|"unpublished"|"archived"|"imported";
 
-export async function recordArticleAudit(
-  supabase: SupabaseClient,
-  articleId: string,
-  actorId: string,
-  action: ArticleAuditAction,
-  metadata: Record<string, unknown> = {},
-) {
-  const { error } = await supabase.rpc("record_article_audit", {
-    p_article_id: articleId,
-    p_actor_id: actorId,
-    p_action: action,
-    p_metadata: metadata,
-  });
-  return error;
+export async function recordArticleAudit(articleId: string, actorId: string, action: ArticleAuditAction, metadata: Record<string, unknown> = {}) {
+  try {
+    await createAppwriteRow("audit_logs", { article_id: articleId, actor_id: actorId, action, metadata: JSON.stringify(metadata) });
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error : new Error("audit write failed");
+  }
 }
