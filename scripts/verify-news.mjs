@@ -44,14 +44,14 @@ const forgotPassword = await read("app/forgot-password/page.tsx");
 const resetPassword = await read("app/reset-password/page.tsx");
 
 assert.match(news, /export const metadata: Metadata/);
-assert.match(news, /getAllTags\(\)/);
+assert.match(news, /getPublicTags\(\)/);
 assert.match(news, /article\.tags\.map/);
 assert.match(news, /\/news\?tag=\$\{encodeURIComponent\(tag\.slug\)\}/);
 assert.match(news, /\/news\/\$\{article\.slug\}/);
 
 assert.match(search, /export const metadata: Metadata/);
 assert.match(search, /robots: \{ index: false, follow: true \}/);
-assert.match(search, /searchNews\(query\)/);
+assert.match(search, /searchPublicNews\(query\)/);
 assert.match(search, /name="q"/);
 assert.match(search, /\/news\/\$\{article\.slug\}/);
 
