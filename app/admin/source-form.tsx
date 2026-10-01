@@ -30,7 +30,7 @@ export default function SourceForm({ id, feedUrl, isActive, retryStatus }: { id:
       const result = await response.json().catch(() => ({}));
       if (response.ok) {
         const statusText = result.status === "partial" ? "นำเข้าได้บางส่วน" : "นำเข้าสำเร็จ";
-        setMessage(`${statusText}: สร้าง ${result.itemsCreated ?? 0} ข่าว จาก ${result.itemsSeen ?? 0} รายการ · จัดหมวด/แท็ก ${result.ruleEnriched ?? 0} ข่าว${aiImport ? ` · AI ช่วยร่าง ${result.aiEnriched ?? 0} ข่าว` : ""}${result.errors?.length ? ` · พบข้อผิดพลาด ${result.errors.length} รายการ` : ""}`);
+        setMessage(`${statusText}: สร้างใหม่ ${result.itemsCreated ?? 0} ข่าว · ข้ามข่าวซ้ำ ${result.skippedDuplicates ?? 0} · ล้มเหลว ${result.failedItems ?? result.errors?.length ?? 0} · ตรวจทั้งหมด ${result.itemsSeen ?? 0} รายการ · จัดหมวด/แท็ก ${result.ruleEnriched ?? 0} ข่าว${aiImport ? ` · AI ช่วยร่าง ${result.aiEnriched ?? 0} ข่าว` : ""}`);
         router.refresh();
       } else {
         setMessage(response.status === 409 ? "แหล่งข่าวนี้กำลังนำเข้าอยู่ กรุณารอรอบปัจจุบันให้เสร็จก่อน" : result.error || "นำเข้าไม่สำเร็จ");
