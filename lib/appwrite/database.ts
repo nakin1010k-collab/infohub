@@ -11,6 +11,9 @@ function tableId(name: string) {
     article_tags: process.env.APPWRITE_ARTICLE_TAGS_TABLE_ID,
     profiles: process.env.APPWRITE_PROFILES_TABLE_ID,
     audit_logs: process.env.APPWRITE_AUDIT_LOGS_TABLE_ID,
+    sources: process.env.APPWRITE_SOURCES_TABLE_ID,
+    ingestion_runs: process.env.APPWRITE_INGESTION_RUNS_TABLE_ID,
+    notifications: process.env.APPWRITE_NOTIFICATIONS_TABLE_ID,
   };
   return map[name];
 }
