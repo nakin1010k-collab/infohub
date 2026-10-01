@@ -1,6 +1,8 @@
 import { appwriteRequest, getAppwriteConfig } from "@/lib/appwrite/server";
 
-type Row = Record<string, unknown> & { $id?: string };\n\nconst databaseId = () => process.env.APPWRITE_DATABASE_ID || "infohub";
+type Row = Record<string, unknown> & { $id?: string };
+
+const databaseId = () => process.env.APPWRITE_DATABASE_ID || "infohub";
 
 function tableId(name: string) {
   const map: Record<string, string | undefined> = {
@@ -19,22 +21,30 @@ function tableId(name: string) {
 }
 
 function requireTable(name: string) {
-  const databaseId = process.env.APPWRITE_DATABASE_ID;
+  const dbId = databaseId();
   const id = tableId(name);
-  if (!databaseId || !id) throw new Error(`Appwrite table configuration missing: ${name}`);
-  return { databaseId: databaseId(), id };
+  if (!dbId || !id) throw new Error(`Appwrite table configuration missing: ${name}`);
+  return { databaseId: dbId, id };
 }
 
 function queryEqual(field: string, value: string | boolean) {
-  return `equal("${field}",${JSON.stringify([value])})`;
+  return JSON.stringify({ method: "equal", column: field, values: [value] });
 }
 function querySearch(field: string, value: string) {
-  return `search("${field}",${JSON.stringify(value)})`;
+  return JSON.stringify({ method: "search", column: field, values: [value] });
 }
-function queryOrderDesc(field: string) { return `orderDesc("${field}")`; }
-function queryOrderAsc(field: string) { return `orderAsc("${field}")`; }
-function queryLimit(limit: number) { return `limit(${limit})`; }
-function queryOffset(offset: number) { return `offset(${offset})`; }
+function queryOrderDesc(field: string) {
+  return JSON.stringify({ method: "orderDesc", column: field });
+}
+function queryOrderAsc(field: string) {
+  return JSON.stringify({ method: "orderAsc", column: field });
+}
+function queryLimit(limit: number) {
+  return JSON.stringify({ method: "limit", values: [limit] });
+}
+function queryOffset(offset: number) {
+  return JSON.stringify({ method: "offset", values: [offset] });
+}
 
 export async function listAppwriteRows(table: string, queries: string[] = [], limit = 100) {
   const { databaseId, id } = requireTable(table);
