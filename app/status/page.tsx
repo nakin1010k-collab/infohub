@@ -3,27 +3,30 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-async function getStatus() {
-  const checks = {
-    supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
-    supabaseKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
-  };
+type Status = {
+  supabaseUrl: boolean;
+  supabaseKey: boolean;
+  database: boolean;
+  reason: "missing_env" | "database_query_failed" | "database_ok";
+};
 
-  if (!checks.supabaseUrl || !checks.supabaseKey) {
-    return { ...checks, database: false, message: "Supabase environment variables are not configured." };
+async function getStatus(): Promise<Status> {
+  const supabaseUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseKey = Boolean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+
+  if (!supabaseUrl || !supabaseKey) {
+    return { supabaseUrl, supabaseKey, database: false, reason: "missing_env" };
   }
 
   try {
     const supabase = await createClient();
     const { error } = await supabase.from("categories").select("id").limit(1);
-    if (error) return { ...checks, database: false, message: error.message };
-    return { ...checks, database: true, message: "Database connection is healthy." };
-  } catch (error) {
-    return {
-      ...checks,
-      database: false,
-      message: error instanceof Error ? error.message : "Database health check failed.",
-    };
+    if (error) {
+      return { supabaseUrl, supabaseKey, database: false, reason: "database_query_failed" };
+    }
+    return { supabaseUrl, supabaseKey, database: true, reason: "database_ok" };
+  } catch {
+    return { supabaseUrl, supabaseKey, database: false, reason: "database_query_failed" };
   }
 }
 
@@ -54,8 +57,8 @@ export default async function StatusPage() {
           {!healthy ? (
             <div className="ui-state" role="alert" style={{ marginTop: "20px" }}>
               <div>
-                <strong>Diagnostic message</strong>
-                <p>{status.message}</p>
+                <strong>Diagnostic code</strong>
+                <p>{status.reason}</p>
               </div>
             </div>
           ) : null}
