@@ -6,7 +6,10 @@ export type AppwriteProfile = { $id?: string; id?: string; display_name?: string
 export async function getCurrentAppwriteUser() {
   const user = await getAppwriteAccount();
   if (!user) return null;
-  const rows = await listAllAppwriteRows("profiles", [appwriteQueries.queryEqual("user_id", user.$id)], 10);
+  const rows = [
+    ...(await listAllAppwriteRows("profiles", [appwriteQueries.queryEqual("user_id", user.$id)], 10)),
+    ...(await listAllAppwriteRows("profiles", [appwriteQueries.queryEqual("id", user.$id)], 10)),
+  ];
   const profile = (rows[0] ?? null) as AppwriteProfile | null;
   return { user, profile };
 }
