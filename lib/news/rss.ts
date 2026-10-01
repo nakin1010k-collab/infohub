@@ -26,6 +26,7 @@ function stripHtml(value: string) {
 function assertSafeFeedUrl(feedUrl: string) {
   const url = new URL(feedUrl);
   if (url.protocol !== "https:") throw new Error("Feed URL ต้องใช้ HTTPS");
+  if (url.username || url.password) throw new Error("Feed URL ห้ามฝัง username/password");
   const hostname = url.hostname.toLowerCase();
   const ipVersion = isIP(hostname);
   const privateIpv4 = ipVersion === 4 && (
