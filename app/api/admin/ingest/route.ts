@@ -141,12 +141,14 @@ export async function POST(request: Request) {
 
     const failures: string[] = [];
     const failureDetails: Array<{ url: string; title: string; reason: string }> = [];
+    const itemDetails: Array<{ url: string; title: string; outcome: "created" | "duplicate" | "failed"; reason?: string }> = [];
     for (const item of items.slice(0, 50)) {
       try {
         const { data: existing, error: lookupError } = await supabase.from("articles").select("id").eq("canonical_url", item.url).maybeSingle();
         if (lookupError) throw lookupError;
         if (existing) {
           skippedDuplicates++;
+          itemDetails.push({ url: item.url, title: item.title.slice(0, 180), outcome: "duplicate" });
           continue;
         }
 
@@ -170,12 +172,14 @@ export async function POST(request: Request) {
         if (error || !inserted) {
           if (error?.code === "23505") {
             skippedDuplicates++;
+            itemDetails.push({ url: item.url, title: item.title.slice(0, 180), outcome: "duplicate" });
             continue;
           }
           throw error ?? new Error("article import returned no id");
         }
 
         created++;
+        itemDetails.push({ url: item.url, title: item.title.slice(0, 180), outcome: "created" });
         if (await enrichWithRules(supabase, inserted)) {
           ruleEnriched++;
           await recordArticleAudit(supabase, inserted, user.id, "updated", { mode: "zero_cost_rules" });
@@ -195,6 +199,7 @@ export async function POST(request: Request) {
           title: item.title.slice(0, 180),
           reason,
         });
+        itemDetails.push({ url: item.url, title: item.title.slice(0, 180), outcome: "failed", reason });
       }
     }
 
@@ -205,13 +210,14 @@ export async function POST(request: Request) {
       items_created: created,
       error_message: failures.length ? failures.slice(0, 5).join(" | ").slice(0, 500) : null,
       failure_details: failureDetails.slice(0, 50),
+      item_details: itemDetails.slice(0, 50),
       finished_at: new Date().toISOString(),
     }).eq("id", run.id);
     if (runStatus !== "failed") {
       await supabase.from("sources").update({ last_ingested_at: new Date().toISOString() }).eq("id", source.id);
     }
 
-    return NextResponse.json({ ok: true, source: source.name, status: runStatus, retry: Boolean(body.retry), itemsSeen: items.length, itemsCreated: created, skippedDuplicates, failedItems: failures.length, failureDetails: failureDetails.slice(0, 50), ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
+    return NextResponse.json({ ok: true, source: source.name, status: runStatus, retry: Boolean(body.retry), itemsSeen: items.length, itemsCreated: created, skippedDuplicates, failedItems: failures.length, failureDetails: failureDetails.slice(0, 50), itemDetails: itemDetails.slice(0, 50), ruleEnriched, aiEnriched, errors: failures.slice(0, 5) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown ingestion error";
     await supabase.from("ingestion_runs").update({ status: "failed", error_message: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", run.id);
