@@ -189,6 +189,10 @@ const sourcesPage = await read("app/admin/sources/page.tsx");
 assert(sourcesPage.includes("failure_details"), "Sources page must display structured RSS failure details");
 const failureMigration = await read("supabase/migrations/20261001001300_ingestion_failure_details.sql");
 assert(failureMigration.includes("failure_details jsonb"), "Migration must add structured RSS failure details");
+const runPage = await read("app/admin/queue/runs/[id]/page.tsx");
+assert(runPage.includes("รายละเอียดรอบนำเข้า"), "RSS run detail page must exist");
+assert(runPage.includes("failure_details"), "RSS run detail page must read failure details");
+assert(queuePage.includes("ดูรายละเอียดรอบนี้"), "Queue must link to RSS run detail page");
 
 assert(queuePage.includes('name="sort"'), "Editorial queue must support sorting");
 assert(queuePage.includes("queue-summary"), "Editorial queue must show summary counts");
