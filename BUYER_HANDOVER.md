@@ -107,7 +107,7 @@ Seed/demo articles and the `InfoHub Demo` source are development/preview content
 ## Known limitations
 
 - Public production deployment must be verified before describing the demo as production-live.
-- Live Auth, CMS, RSS, and cron end-to-end operation require the target Appwrite/Vercel configuration.
+- Live Auth, CMS, RSS, and cron end-to-end operation require the target Appwrite/Vercel configuration and a buyer-owned test account/source.
 - The repository does not include a commercial license agreement or IP assignment document.
 - Legal pages are templates/drafts, not legal advice.
 - Dependency patching should be verified by CI before final commercial handover.
