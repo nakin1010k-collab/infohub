@@ -29,5 +29,8 @@
     "eslint-config-next": "15.5.27",
     "typescript": "5.9.2"
   },
-  "description": "InfoHub news, knowledge, and data hub"
+  "description": "InfoHub news, knowledge, and data hub",
+  "overrides": {
+    "postcss": "8.5.28"
+  }
 }
