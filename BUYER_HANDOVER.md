@@ -20,7 +20,7 @@ InfoHub is a Next.js + Appwrite editorial platform foundation. It is not sold as
 - Draft-first import workflow
 - RSS retry/failure tracking and ingestion history
 - Article view analytics
-- Vercel deployment configuration and scheduled RSS job
+- Vercel deployment configuration and scheduled RSS job (Appwrite-backed)
 - Optional OpenAI editorial-assistance integration
 - Demo/preview seed content
 - CI verification workflow
