@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { APPWRITE_SESSION_COOKIE, appwriteRequest, extractAppwriteSession, getAppwriteError } from "@/lib/appwrite/server";
+import { createAppwriteRow } from "@/lib/appwrite/database";
 
 function friendlyRegisterError(type: string, message: string) {
   if (type === "user_already_exists" || type === "user_already_exists_with_same_email") return "อีเมลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทน";
@@ -25,6 +26,13 @@ export async function POST(request: Request) {
       const error = await getAppwriteError(userResponse);
       console.error("Appwrite register failed", error);
       return NextResponse.json({ error: friendlyRegisterError(error.type, error.message) }, { status: userResponse.status >= 500 ? 503 : 400 });
+    }
+
+    try {
+      await createAppwriteRow("profiles", { user_id: String((await userResponse.json() as { $id?: string }).$id ?? ""), display_name: name, role: "user" });
+    } catch (profileError) {
+      console.error("Appwrite profile bootstrap failed", profileError);
+      return NextResponse.json({ error: "สร้างบัญชีสำเร็จแต่ตั้งค่าโปรไฟล์ไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ" }, { status: 503 });
     }
 
     const sessionResponse = await appwriteRequest("/account/sessions/email", { method: "POST", body: JSON.stringify({ email, password }) });
