@@ -17,7 +17,7 @@ const checks=[
 ["article form","app/admin/article-form.tsx",["/api/admin/articles","qualityMissing"]],
 ["article create","app/api/admin/articles/route.ts",["runAppwriteTransaction","created_at","checkEditorialQuality"]],
 ["article update","app/api/admin/articles/[id]/route.ts",["runAppwriteTransaction","created_at","update"]],
-["article status","app/api/admin/articles/[id]/status/route.ts",["updateAppwriteRow","checkEditorialQuality","audit_logs"]],
+["article status","app/api/admin/articles/[id]/status/route.ts",["runAppwriteTransaction","checkEditorialQuality","audit_logs"]],
 ["AI editorial","app/api/admin/ai/enrich/route.ts",["requireEditor","recordArticleAudit"]],
 ["audit","lib/news/audit.ts",["createAppwriteRow","created_at","ai_enriched"]],
 ["profile API","app/api/profile/route.ts",["/account","displayName"]],
