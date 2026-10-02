@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import {
-  appwriteQueries, createAppwriteRow, getAppwriteRow, listAllAppwriteRows, updateAppwriteRow,
+  appwriteQueries, createAppwriteRow, listAllAppwriteRows, updateAppwriteRow,
 } from "@/lib/appwrite/database";
 import { recordArticleAudit } from "@/lib/news/audit";
 import { fetchFeed } from "@/lib/news/rss";
