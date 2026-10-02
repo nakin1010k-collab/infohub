@@ -127,5 +127,62 @@ export async function deleteAppwriteRow(table: string, rowId: string) {
   if (!response.ok) throw new Error(`Appwrite row delete failed (${table}): ${response.status}`);
 }
 
+export type AppwriteTransactionOperation = {
+  action: "create" | "update" | "delete";
+  databaseId: string;
+  tableId: string;
+  rowId: string;
+  data?: Row;
+};
+
+export async function createAppwriteTransaction(ttl = 60) {
+  const response = await appwriteRequest(
+    "/tablesdb/transactions",
+    { method: "POST", body: JSON.stringify({ ttl }) },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
+  if (!response.ok) throw new Error(`Appwrite transaction create failed: ${response.status}`);
+  return response.json() as Promise<{ $id: string; status: string }>;
+}
+
+export async function stageAppwriteTransactionOperations(
+  transactionId: string,
+  operations: AppwriteTransactionOperation[],
+) {
+  const response = await appwriteRequest(
+    `/tablesdb/transactions/${encodeURIComponent(transactionId)}/operations`,
+    { method: "POST", body: JSON.stringify({ operations }) },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
+  if (!response.ok) throw new Error(`Appwrite transaction stage failed: ${response.status}`);
+  return response.json();
+}
+
+export async function finishAppwriteTransaction(transactionId: string, commit: boolean) {
+  const response = await appwriteRequest(
+    `/tablesdb/transactions/${encodeURIComponent(transactionId)}`,
+    { method: "PATCH", body: JSON.stringify({ commit }) },
+    undefined,
+    process.env.APPWRITE_API_KEY,
+  );
+  if (!response.ok) throw new Error(`Appwrite transaction ${commit ? "commit" : "rollback"} failed: ${response.status}`);
+  return response.json();
+}
+
+export async function runAppwriteTransaction(
+  operations: AppwriteTransactionOperation[],
+) {
+  const transaction = await createAppwriteTransaction();
+  try {
+    await stageAppwriteTransactionOperations(transaction.$id, operations);
+    return await finishAppwriteTransaction(transaction.$id, true);
+  } catch (error) {
+    try { await finishAppwriteTransaction(transaction.$id, false); } catch {}
+    throw error;
+  }
+}
+
 export const appwriteQueries = { queryEqual, querySearch, queryOrderDesc, queryOrderAsc, queryLimit, queryOffset };
 export { getAppwriteConfig };
