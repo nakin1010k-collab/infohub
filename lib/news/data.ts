@@ -11,8 +11,13 @@ type Row = Record<string, unknown> & { $id?: string };
 function rowId(row: Row) { return String(row.$id ?? row.id ?? ""); }
 
 async function loadPublishedArticles() {
-  const articles = await listAllAppwriteRows("articles", [appwriteQueries.queryEqual("status", "published"), appwriteQueries.queryOrderDesc("published_at")]);
-  const categories = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true)]);
+  // Keep public reads independent of Appwrite index/query differences. Read rows, then filter/sort in JS.
+  const articles = (await listAllAppwriteRows("articles"))
+    .filter((row) => String(row.status ?? "") === "published")
+    .sort((a, b) => String(b.published_at ?? "").localeCompare(String(a.published_at ?? "")));
+  const categories = (await listAllAppwriteRows("categories"))
+    .filter((row) => row.is_active === true || String(row.is_active).toLowerCase() === "true")
+    .sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0));
   const links = await listAllAppwriteRows("article_categories");
   const tags = await listAllAppwriteRows("tags");
   const tagLinks = await listAllAppwriteRows("article_tags");
@@ -92,13 +97,15 @@ export async function getNewsArticlesPage(options: { categorySlug?: string; tag?
 }
 
 export async function getPublicCategories() {
-  const rows = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true), appwriteQueries.queryOrderAsc("sort_order")]);
+  const rows = (await listAllAppwriteRows("categories"))
+    .filter((row) => row.is_active === true || String(row.is_active).toLowerCase() === "true")
+    .sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0));
   return rows.map((row) => ({ name: String(row.name ?? ""), slug: String(row.slug ?? "") }));
 }
 
 export async function getTagBySlug(slug: string) {
-  const rows = await listAllAppwriteRows("tags", [appwriteQueries.queryEqual("slug", slug)]);
-  const row = rows[0];
+  const rows = await listAllAppwriteRows("tags");
+  const row = rows.find((item) => String(item.slug ?? "") === slug);
   return row ? { name: String(row.name ?? ""), slug: String(row.slug ?? "") } : null;
 }
 
