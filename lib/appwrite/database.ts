@@ -28,16 +28,16 @@ function requireTable(name: string) {
 }
 
 function queryEqual(field: string, value: string | boolean) {
-  return JSON.stringify({ method: "equal", column: field, values: [value] });
+  return JSON.stringify({ method: "equal", attribute: field, values: [value] });
 }
 function querySearch(field: string, value: string) {
-  return JSON.stringify({ method: "search", column: field, values: [value] });
+  return JSON.stringify({ method: "search", attribute: field, values: [value] });
 }
 function queryOrderDesc(field: string) {
-  return JSON.stringify({ method: "orderDesc", column: field });
+  return JSON.stringify({ method: "orderDesc", attribute: field });
 }
 function queryOrderAsc(field: string) {
-  return JSON.stringify({ method: "orderAsc", column: field });
+  return JSON.stringify({ method: "orderAsc", attribute: field });
 }
 function queryLimit(limit: number) {
   return JSON.stringify({ method: "limit", values: [limit] });
