@@ -110,7 +110,7 @@ Before closing a sale, verify:
 4. Auth and protected routes work with a buyer-owned test account.
 5. CMS create/edit/publish/archive works.
 6. RSS/Atom ingestion works.
-7. Cron configuration is verified.
+7. Cron configuration is verified against the Appwrite backend.
 8. Demo content is clearly labeled or replaced.
 9. Buyer receives the repository and handover document.
 10. Commercial license/IP transfer terms are documented separately.
