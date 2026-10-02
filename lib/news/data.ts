@@ -14,7 +14,7 @@ async function loadPublishedArticles() {
   const articles = await listAllAppwriteRows("articles", [appwriteQueries.queryEqual("status", "published"), appwriteQueries.queryOrderDesc("published_at")]);
   const categories = await listAllAppwriteRows("categories", [appwriteQueries.queryEqual("is_active", true)]);
   const links = await listAllAppwriteRows("article_categories");
-  const tags = await listAllAppwriteRows("tags", [appwriteQueries.queryOrderAsc("name")]);
+  const tags = await listAllAppwriteRows("tags");
   const tagLinks = await listAllAppwriteRows("article_tags");
 
   const categoryMap = new Map(categories.map((x) => [rowId(x), x]));
@@ -65,8 +65,10 @@ export async function getRelatedNews(slug: string, limit = 3) {
 }
 
 export async function getAllTags() {
-  const rows = await listAllAppwriteRows("tags", [appwriteQueries.queryOrderAsc("name")]);
-  return rows.map((row) => ({ name: String(row.name ?? ""), slug: String(row.slug ?? "") }));
+  const rows = await listAllAppwriteRows("tags");
+  return rows
+    .map((row) => ({ name: String(row.name ?? ""), slug: String(row.slug ?? "") }))
+    .sort((a, b) => a.name.localeCompare(b.name, "th"));
 }
 
 export async function searchNews(query: string) {
