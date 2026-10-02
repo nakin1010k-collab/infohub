@@ -28,11 +28,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: friendlyRegisterError(error.type, error.message) }, { status: userResponse.status >= 500 ? 503 : 400 });
     }
 
+    const createdUser = await userResponse.json() as { $id?: string };
+    const userId = String(createdUser.$id ?? "");
+    if (!userId) return NextResponse.json({ error: "สร้างบัญชีสำเร็จแต่ไม่พบรหัสผู้ใช้ กรุณาติดต่อผู้ดูแลระบบ" }, { status: 503 });
+
     try {
-      await createAppwriteRow("profiles", { user_id: String((await userResponse.json() as { $id?: string }).$id ?? ""), display_name: name, role: "user" });
+      await createAppwriteRow("profiles", { user_id: userId, display_name: name, role: "user" });
     } catch (profileError) {
       console.error("Appwrite profile bootstrap failed", profileError);
-      return NextResponse.json({ error: "สร้างบัญชีสำเร็จแต่ตั้งค่าโปรไฟล์ไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ" }, { status: 503 });
+      if (process.env.APPWRITE_API_KEY) {
+        try {
+          await appwriteRequest(
+            `/users/${encodeURIComponent(userId)}`,
+            { method: "DELETE" },
+            undefined,
+            process.env.APPWRITE_API_KEY,
+          );
+        } catch (cleanupError) {
+          console.error("Appwrite registration cleanup failed", cleanupError);
+        }
+      }
+      return NextResponse.json({ error: "ไม่สามารถตั้งค่าโปรไฟล์หลังสมัครสมาชิกได้ กรุณาลองใหม่อีกครั้ง" }, { status: 503 });
     }
 
     const sessionResponse = await appwriteRequest("/account/sessions/email", { method: "POST", body: JSON.stringify({ email, password }) });
