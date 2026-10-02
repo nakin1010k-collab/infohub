@@ -20,6 +20,7 @@ const tables = [
   ["ingestion_runs", [["source_id","string",{size:128,required:true}],["status","string",{size:32,required:true}],["error_message","longtext",{required:false}],["started_at","datetime",{required:true}],["finished_at","datetime",{required:false}],["items_seen","integer",{required:false,default:0}],["items_created","integer",{required:false,default:0}],["items_skipped","integer",{required:false,default:0}],["items_failed","integer",{required:false,default:0}],["failure_details","longtext",{required:false}],["item_details","longtext",{required:false}]]],
   ["audit_logs", [["article_id","string",{size:128,required:true}],["actor_id","string",{size:128,required:true}],["action","string",{size:64,required:true}],["metadata","longtext",{required:true}],["created_at","datetime",{required:true}]]],
   ["notifications", [["type","string",{size:64,required:true}],["title","string",{size:512,required:true}],["message","text",{required:true}],["read_at","datetime",{required:false}],["created_at","datetime",{required:true}]]],
+  ["analytics_events", [["event_name","string",{size:64,required:true}],["article_id","string",{size:128,required:true}],["path","string",{size:2048,required:true}],["created_at","datetime",{required:true}]]],
 ];
 
 const indexes = {
@@ -33,6 +34,7 @@ const indexes = {
   ingestion_runs: [["source_started","key",["source_id","started_at"]]],
   audit_logs: [["article_created","key",["article_id","created_at"]]],
   notifications: [["created_at","key",["created_at"]]],
+  analytics_events: [["article_view","key",["event_name","article_id","created_at"]]],
 };
 
 async function request(path, options = {}) {
