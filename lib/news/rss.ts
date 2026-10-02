@@ -16,7 +16,7 @@ function decodeXml(value: string) {
 }
 
 function textOf(block: string, tag: string) {
-  const match = block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "i"));
+  const match = block.match(new RegExp(`<${tag}(?:\s[^>]*)?>([\s\S]*?)</${tag}>`, "i"));
   return match ? decodeXml(match[1]).trim() : "";
 }
 
@@ -56,7 +56,7 @@ function absoluteUrl(value: string, base: string) {
 }
 
 export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
-  const rssBlocks = [...xml.matchAll(/<(?:item|entry)(?:\\s[^>]*)?>[\\s\\S]*?<\/(?:item|entry)>/gi)].map(m => m[0]);
+  const rssBlocks = [...xml.matchAll(/<(?:item|entry)(?:\s[^>]*)?>[\s\S]*?<\/(?:item|entry)>/gi)].map(m => m[0]);
   return rssBlocks.map(block => {
     const atomLink = block.match(/<link[^>]+href=["']([^"']+)["'][^>]*>/i)?.[1] ?? "";
     const url = absoluteUrl(textOf(block, "link") || atomLink || textOf(block, "guid"), feedUrl);
