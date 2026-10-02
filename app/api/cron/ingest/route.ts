@@ -150,7 +150,8 @@ export async function GET(request: Request) {
               }
               operations.push({
                 action: "create" as const,
-                databaseId: articleTagsTable,
+                databaseId,
+                tableId: articleTagsTable,
                 rowId: crypto.randomUUID(),
                 data: { article_id: articleId, tag_id: tagId },
               });
