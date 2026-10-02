@@ -28,7 +28,7 @@ const indexes = {
   categories: [["slug_unique","unique",["slug"]],["active_order","key",["is_active","sort_order"]]],
   articles: [["slug_unique","unique",["slug"]],["status_published","key",["status","published_at"]],["canonical_url_hash_unique","unique",["canonical_url_hash"]]],
   article_categories: [["article_category_unique","unique",["article_id","category_id"]]],
-  tags: [["slug_unique","unique",["slug"]]],
+  tags: [["slug_unique","unique",["slug"]],["name_order","key",["name"]]],
   article_tags: [["article_tag_unique","unique",["article_id","tag_id"]]],
   sources: [["feed_url_hash_unique","unique",["feed_url_hash"]],["active_sources","key",["is_active"]]],
   ingestion_runs: [["source_started","key",["source_id","started_at"]]],
