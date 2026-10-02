@@ -66,7 +66,7 @@ Never commit real secret values.
 5. Set `NEXT_PUBLIC_SITE_URL` to the buyer's HTTPS public domain.
 6. Deploy to the buyer-owned Vercel team.
 7. Configure server-only Appwrite credentials and `CRON_SECRET`.
-8. Configure editor/admin roles using the existing server-side authorization model.
+8. Run `npm run bootstrap:appwrite-user -- <userId> editor` or `admin` to bootstrap the buyer's editorial role. Keep the API key server-side.
 9. Add permitted RSS/Atom sources.
 10. Replace or clearly label demo content before public launch.
 11. Review the Privacy Policy and Terms templates.
