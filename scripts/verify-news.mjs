@@ -26,7 +26,10 @@ const checks=[
 ["forgot password","app/forgot-password/page.tsx",["/api/auth/forgot-password"]],
 ["reset password","app/reset-password/page.tsx",["/api/auth/reset-password"]],
 ["logout","components/sign-out-button.tsx",["/api/auth/logout"]],
-["scheduled ingestion","app/api/cron/ingest/route.ts",["backend: \"appwrite\"","CRON_ACTOR_ID","ingestion_runs"]],\n["registration profile","app/api/auth/register/route.ts",["createAppwriteRow","profiles","role"]],\n["role bootstrap","scripts/bootstrap-appwrite-user.mjs",["editor","admin","profiles"]],\n["transaction helper","lib/appwrite/database.ts",["createAppwriteTransaction","stageAppwriteTransactionOperations","finishAppwriteTransaction"]],
+["scheduled ingestion","app/api/cron/ingest/route.ts",["backend: \"appwrite\"","CRON_ACTOR_ID","ingestion_runs"]],
+["registration profile","app/api/auth/register/route.ts",["createAppwriteRow","profiles","role"]],
+["role bootstrap","scripts/bootstrap-appwrite-user.mjs",["editor","admin","profiles"]],
+["transaction helper","lib/appwrite/database.ts",["createAppwriteTransaction","stageAppwriteTransactionOperations","finishAppwriteTransaction"]],
 ];
 for(const [name,path,needles] of checks){const text=await read(path);for(const needle of needles)assert.ok(text.includes(needle),"Failed: "+name+" -> "+path+" missing "+needle);}
 for(const path of ["middleware.ts","app/api/health/route.ts","app/api/admin/articles/route.ts","app/api/admin/articles/[id]/route.ts","app/api/admin/articles/[id]/status/route.ts","app/api/admin/ai/enrich/route.ts","app/api/profile/route.ts","app/api/admin/ingest/route.ts","app/admin/queue/page.tsx","app/admin/queue/runs/[id]/page.tsx","app/admin/sources/page.tsx","app/api/admin/sources/[id]/route.ts"]){assert.doesNotMatch(await read(path),/supabase/i,"Supabase dependency remains in "+path);}
