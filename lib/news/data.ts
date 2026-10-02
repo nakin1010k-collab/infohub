@@ -1,4 +1,4 @@
-import { appwriteQueries, listAllAppwriteRows } from "@/lib/appwrite/database";
+import { listAllAppwriteRows } from "@/lib/appwrite/database";
 
 export type NewsArticle = {
   slug: string; title: string; excerpt: string; content: string;
