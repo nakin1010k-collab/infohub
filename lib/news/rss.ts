@@ -16,7 +16,7 @@ function decodeXml(value: string) {
 }
 
 function textOf(block: string, tag: string) {
-  const match = block.match(new RegExp(`<${tag}(?:\s[^>]*)?>([\s\S]*?)</${tag}>`, "i"));
+  const match = block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "i"));
   return match ? decodeXml(match[1]).trim() : "";
 }
 
@@ -60,12 +60,13 @@ export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
     ...xml.matchAll(/<item\b[^>]*>[\s\S]*?<\/item\s*>/gi),
     ...xml.matchAll(/<entry\b[^>]*>[\s\S]*?<\/entry\s*>/gi),
   ].map(m => m[0]);
+
   return rssBlocks.map(block => {
     const atomLink = block.match(/<link[^>]+href=["']([^"']+)["'][^>]*>/i)?.[1] ?? "";
     const url = absoluteUrl(textOf(block, "link") || atomLink || textOf(block, "guid"), feedUrl);
     const rawDescription = textOf(block, "description") || textOf(block, "summary") || textOf(block, "content");
     const publishedRaw = textOf(block, "pubDate") || textOf(block, "published") || textOf(block, "updated");
-    const imageMatch = block.match(/<enclosure[^>]+url=[\"']([^\"']+)[\"']/i) || block.match(/<media:(?:content|thumbnail)[^>]+url=[\"']([^\"']+)[\"']/i);
+    const imageMatch = block.match(/<enclosure[^>]+url=["']([^"']+)["']/i) || block.match(/<media:(?:content|thumbnail)[^>]+url=["']([^"']+)["']/i);
     const imageUrl = absoluteUrl(imageMatch?.[1] ?? "", feedUrl);
     const parsedDate = publishedRaw ? new Date(publishedRaw) : null;
     return {
@@ -83,7 +84,10 @@ export async function fetchFeed(feedUrl: string) {
   let currentUrl = assertSafeFeedUrl(feedUrl);
   for (let redirects = 0; redirects <= 5; redirects++) {
     const response = await fetch(currentUrl, {
-      headers: { Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8" },
+      headers: {
+        Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (compatible; InfoHub RSS Reader/1.0; +https://infohub-ten.vercel.app/)",
+      },
       cache: "no-store",
       redirect: "manual",
       signal: AbortSignal.timeout(15000),
@@ -95,7 +99,7 @@ export async function fetchFeed(feedUrl: string) {
       continue;
     }
     if (!response.ok) throw new Error(`Feed responded with HTTP ${response.status}`);
-    const xml = await response.text();
+    const xml = (await response.text()).replace(/^\uFEFF/, "").trim();
     if (xml.length > 2_000_000) throw new Error("Feed is too large");
     return parseFeed(xml, currentUrl);
   }
