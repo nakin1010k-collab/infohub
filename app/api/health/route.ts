@@ -28,8 +28,8 @@ async function checkNewsReads() {
   const results: Record<string, unknown> = {};
   for (const table of Object.keys(tables)) {
     try {
-      const rows = await listAllAppwriteRows(table);
-      results[table] = { ok: true, rows: rows.length };
+      const rows = await listAppwriteRows(table, [], 1);
+      results[table] = { ok: true, hasRows: rows.length > 0 };
     } catch (error) {
       results[table] = {
         ok: false,
