@@ -40,7 +40,7 @@ https://github.com/nakin1010k-collab/infohub/blob/main/BUYER_HANDOVER.md
 - Duplicate detection and ingestion history
 - Lightweight article-view analytics
 - Sitemap / robots / metadata / structured SEO foundations
-- Vercel Cron configuration
+- Vercel Cron configuration with Appwrite-backed scheduled ingestion
 - Optional OpenAI editorial assistance
 - Appwrite provisioning script
 - CI verification and local verification scripts
