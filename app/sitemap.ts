@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+
+export const dynamic = "force-dynamic";
 import { getSiteUrl } from "@/lib/site-url";
 import { listAllAppwriteRows, appwriteQueries } from "@/lib/appwrite/database";
 
