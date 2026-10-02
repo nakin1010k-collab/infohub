@@ -56,7 +56,10 @@ function absoluteUrl(value: string, base: string) {
 }
 
 export function parseFeed(xml: string, feedUrl: string): FeedItem[] {
-  const rssBlocks = [\n    ...xml.matchAll(/<item\\b[^>]*>[\\s\\S]*?<\\/item\\s*>/gi),\n    ...xml.matchAll(/<entry\\b[^>]*>[\\s\\S]*?<\\/entry\\s*>/gi),\n  ].map(m => m[0]);
+  const rssBlocks = [
+    ...xml.matchAll(/<item\b[^>]*>[\s\S]*?<\/item\s*>/gi),
+    ...xml.matchAll(/<entry\b[^>]*>[\s\S]*?<\/entry\s*>/gi),
+  ].map(m => m[0]);
   return rssBlocks.map(block => {
     const atomLink = block.match(/<link[^>]+href=["']([^"']+)["'][^>]*>/i)?.[1] ?? "";
     const url = absoluteUrl(textOf(block, "link") || atomLink || textOf(block, "guid"), feedUrl);
