@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import {
   appwriteQueries, createAppwriteRow, listAllAppwriteRows, runAppwriteTransaction, updateAppwriteRow,
+  type AppwriteTransactionOperation,
 } from "@/lib/appwrite/database";
 import { fetchFeed } from "@/lib/news/rss";
 import { enrichWithoutAI } from "@/lib/news/editorial";
@@ -111,13 +112,12 @@ export async function GET(request: Request) {
 
           const databaseId = process.env.APPWRITE_DATABASE_ID || "infohub";
           const articlesTable = process.env.APPWRITE_ARTICLES_TABLE_ID || "articles";
-          const categoriesTable = process.env.APPWRITE_CATEGORIES_TABLE_ID || "categories";
           const tagsTable = process.env.APPWRITE_TAGS_TABLE_ID || "tags";
           const articleCategoriesTable = process.env.APPWRITE_ARTICLE_CATEGORIES_TABLE_ID || "article_categories";
           const articleTagsTable = process.env.APPWRITE_ARTICLE_TAGS_TABLE_ID || "article_tags";
           const auditTable = process.env.APPWRITE_AUDIT_LOGS_TABLE_ID || "audit_logs";
 
-          const operations = [{
+          const operations: AppwriteTransactionOperation[] = [{
             action: "create" as const,
             databaseId,
             tableId: articlesTable,
