@@ -82,7 +82,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     operations.push({
       action: "update", databaseId, tableId: table("articles"), rowId: id,
       data: {
-        title, slug, excerpt, content, status, reading_minutes: minutes,
+        title, slug, excerpt, content, status, category_id: categoryId, reading_minutes: minutes,
         canonical_url: canonicalUrl, canonical_url_hash: canonicalUrlHash,
         published_at: publishedAt, image_url: imageUrl,
       },
