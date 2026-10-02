@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import {
-  appwriteQueries, createAppwriteRow, listAllAppwriteRows, updateAppwriteRow,
+  appwriteQueries, createAppwriteRow, listAllAppwriteRows, runAppwriteTransaction, updateAppwriteRow,
 } from "@/lib/appwrite/database";
-import { recordArticleAudit } from "@/lib/news/audit";
 import { fetchFeed } from "@/lib/news/rss";
 import { enrichWithoutAI } from "@/lib/news/editorial";
 
@@ -87,7 +86,8 @@ export async function GET(request: Request) {
             continue;
           }
 
-          const article = await createAppwriteRow("articles", {
+          const articleId = crypto.randomUUID();
+          const articleData = {
             slug: `${slugify(item.title) || "imported"}-${crypto.randomUUID().slice(0, 8)}`,
             title: item.title.slice(0, 180),
             excerpt: item.excerpt?.slice(0, 500) || item.title.slice(0, 500),
@@ -100,39 +100,87 @@ export async function GET(request: Request) {
             source_id: sourceId,
             created_by: CRON_ACTOR_ID,
             published_at: null,
-          });
+          };
 
           const enriched = enrichWithoutAI({
-            title: String(article.title),
-            excerpt: article.excerpt ? String(article.excerpt) : null,
-            content: String(article.content),
-            readingMinutes: Number(article.reading_minutes),
+            title: articleData.title,
+            excerpt: articleData.excerpt,
+            content: articleData.content,
+            readingMinutes: articleData.reading_minutes,
           }, categoryModels);
 
+          const databaseId = process.env.APPWRITE_DATABASE_ID || "infohub";
+          const articlesTable = process.env.APPWRITE_ARTICLES_TABLE_ID || "articles";
+          const categoriesTable = process.env.APPWRITE_CATEGORIES_TABLE_ID || "categories";
+          const tagsTable = process.env.APPWRITE_TAGS_TABLE_ID || "tags";
+          const articleCategoriesTable = process.env.APPWRITE_ARTICLE_CATEGORIES_TABLE_ID || "article_categories";
+          const articleTagsTable = process.env.APPWRITE_ARTICLE_TAGS_TABLE_ID || "article_tags";
+          const auditTable = process.env.APPWRITE_AUDIT_LOGS_TABLE_ID || "audit_logs";
+
+          const operations = [{
+            action: "create" as const,
+            databaseId,
+            tableId: articlesTable,
+            rowId: articleId,
+            data: articleData,
+          }];
+
           if (enriched.category) {
-            await createAppwriteRow("article_categories", {
-              article_id: article.$id,
-              category_id: enriched.category.id,
+            operations.push({
+              action: "create" as const,
+              databaseId,
+              tableId: articleCategoriesTable,
+              rowId: crypto.randomUUID(),
+              data: { article_id: articleId, category_id: enriched.category.id },
             });
+
             for (const tag of enriched.tags) {
               const existingTag = (await listAllAppwriteRows("tags", [
                 appwriteQueries.queryEqual("slug", tag.slug),
-              ], 5))[0] ?? await createAppwriteRow("tags", { name: tag.name, slug: tag.slug });
-              await createAppwriteRow("article_tags", {
-                article_id: article.$id,
-                tag_id: existingTag.$id,
+              ], 5))[0];
+              const tagId = existingTag?.$id || crypto.randomUUID();
+              if (!existingTag) {
+                operations.push({
+                  action: "create" as const,
+                  databaseId,
+                  tableId: tagsTable,
+                  rowId: tagId,
+                  data: { name: tag.name, slug: tag.slug },
+                });
+              }
+              operations.push({
+                action: "create" as const,
+                databaseId: articleTagsTable,
+                rowId: crypto.randomUUID(),
+                data: { article_id: articleId, tag_id: tagId },
               });
             }
-            await updateAppwriteRow("articles", String(article.$id), {
-              category_id: enriched.category.id,
-              reading_minutes: enriched.readingMinutes,
+
+            operations.push({
+              action: "update" as const,
+              databaseId,
+              tableId: articlesTable,
+              rowId: articleId,
+              data: { category_id: enriched.category.id, reading_minutes: enriched.readingMinutes },
             });
-            ruleEnriched++;
           }
 
-          await recordArticleAudit(String(article.$id), CRON_ACTOR_ID, "imported", {
-            sourceId, sourceName, mode: "scheduled",
+          operations.push({
+            action: "create" as const,
+            databaseId,
+            tableId: auditTable,
+            rowId: crypto.randomUUID(),
+            data: {
+              article_id: articleId,
+              actor_id: CRON_ACTOR_ID,
+              action: "imported",
+              metadata: JSON.stringify({ sourceId, sourceName, mode: "scheduled" }),
+              created_at: new Date().toISOString(),
+            },
           });
+
+          await runAppwriteTransaction(operations);
+          if (enriched.category) ruleEnriched++;
           created++;
           itemDetails.push({ url: item.url, title: item.title?.slice(0, 180), outcome: "created" });
         } catch (error) {
